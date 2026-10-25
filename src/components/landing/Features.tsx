@@ -56,7 +56,7 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="py-16 md:py-24 relative">
+    <section id="features" className="py-16 md:py-24 relative overflow-hidden overflow-x-clip w-full max-w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">

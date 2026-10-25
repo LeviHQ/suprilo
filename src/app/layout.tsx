@@ -76,8 +76,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${headingFont.variable} ${bodyFont.variable}`}>
-      <body className="bg-brand-warm text-brand-dark min-h-screen flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink">
+    <html lang="en" className={`${headingFont.variable} ${bodyFont.variable} overflow-x-clip max-w-full`}>
+      <body className="bg-brand-warm text-brand-dark min-h-screen flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink overflow-x-clip max-w-full">
         {children}
       </body>
     </html>

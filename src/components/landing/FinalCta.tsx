@@ -10,16 +10,16 @@ interface FinalCtaProps {
 
 export function FinalCta({ onOpenCtaModal }: FinalCtaProps) {
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden overflow-x-clip w-full max-w-full">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl bg-gradient-to-br from-[#1E1B38] via-[#2D1B36] to-[#1F172E] text-white p-8 sm:p-12 md:p-16 text-center overflow-hidden shadow-2xl border border-white/10">
           {/* Subtle colorful decorative gradients */}
           <div
-            className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-brand-pink/20 rounded-full blur-3xl pointer-events-none"
+            className="absolute top-0 right-0 max-w-[50%] w-80 h-80 bg-brand-pink/20 rounded-full blur-3xl pointer-events-none"
             aria-hidden="true"
           />
           <div
-            className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-brand-purple/20 rounded-full blur-3xl pointer-events-none"
+            className="absolute bottom-0 left-0 max-w-[50%] w-80 h-80 bg-brand-purple/20 rounded-full blur-3xl pointer-events-none"
             aria-hidden="true"
           />
 

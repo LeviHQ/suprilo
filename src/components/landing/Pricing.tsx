@@ -88,10 +88,10 @@ interface PricingProps {
 
 export function Pricing({ onSelectPlan }: PricingProps) {
   return (
-    <section id="pricing" className="py-20 md:py-28 relative scroll-mt-16">
+    <section id="pricing" className="py-20 md:py-28 relative scroll-mt-16 overflow-hidden overflow-x-clip w-full max-w-full">
       {/* Background glow accents */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-brand-pink/5 via-brand-orange/5 to-brand-purple/5 blur-3xl pointer-events-none -z-10 rounded-full"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[700px] h-[400px] bg-gradient-to-tr from-brand-pink/5 via-brand-orange/5 to-brand-purple/5 blur-3xl pointer-events-none -z-10 rounded-full"
         aria-hidden="true"
       />
 

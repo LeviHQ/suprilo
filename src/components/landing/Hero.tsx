@@ -12,10 +12,10 @@ interface HeroProps {
 
 export function Hero({ onOpenCtaModal }: HeroProps) {
   return (
-    <section className="relative overflow-hidden pt-8 pb-16 md:pt-14 md:pb-24">
+    <section className="relative overflow-hidden overflow-x-clip pt-8 pb-16 md:pt-14 md:pb-24 w-full max-w-full">
       {/* Decorative background glows */}
       <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[360px] bg-gradient-to-tr from-brand-pink/10 via-brand-orange/10 to-brand-purple/10 blur-3xl pointer-events-none -z-10 rounded-full"
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[360px] bg-gradient-to-tr from-brand-pink/10 via-brand-orange/10 to-brand-purple/10 blur-3xl pointer-events-none -z-10 rounded-full"
         aria-hidden="true"
       />
 

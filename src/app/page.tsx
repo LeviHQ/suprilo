@@ -36,9 +36,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-full max-w-full overflow-x-clip">
       <Navbar onOpenCtaModal={openCtaModal} />
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-clip">
         <Hero onOpenCtaModal={openCtaModal} />
         <HowItWorks />
         <Features />

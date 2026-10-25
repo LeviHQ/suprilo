@@ -34,7 +34,7 @@ export function ScratchCardDemo() {
     <div className="relative w-full max-w-md mx-auto group">
       {/* Decorative background glow rings matching brand colors */}
       <div
-        className="absolute -inset-2 bg-gradient-to-r from-brand-orange via-brand-pink to-brand-purple rounded-3xl opacity-30 blur-xl group-hover:opacity-40 transition-opacity duration-500"
+        className="absolute inset-0 bg-gradient-to-r from-brand-orange via-brand-pink to-brand-purple rounded-3xl opacity-30 blur-xl group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
         aria-hidden="true"
       />
 

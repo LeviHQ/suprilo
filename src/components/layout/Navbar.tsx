@@ -43,7 +43,7 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full transition-all duration-200 ${
+      className={`sticky top-0 z-40 w-full max-w-full overflow-x-clip transition-all duration-200 ${
         scrolled
           ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-brand-warm-border"
           : "bg-transparent"
