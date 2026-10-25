@@ -5,11 +5,7 @@ import Link from "next/link";
 import { Sparkles, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-interface FinalCtaProps {
-  onOpenCtaModal: () => void;
-}
-
-export function FinalCta({ onOpenCtaModal }: FinalCtaProps) {
+export function FinalCta() {
   return (
     <section className="py-20 relative overflow-hidden overflow-x-clip w-full max-w-full">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,11 +35,7 @@ export function FinalCta({ onOpenCtaModal }: FinalCtaProps) {
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/create"
-                onClick={() => onOpenCtaModal?.()}
-                className="w-full sm:w-auto"
-              >
+              <Link href="/create" className="w-full sm:w-auto">
                 <Button
                   variant="primary"
                   size="lg"

@@ -6,11 +6,7 @@ import { Sparkles, Heart, ArrowRight } from "lucide-react";
 import { ScratchCard } from "@/components/scratch/ScratchCard";
 import { Button } from "@/components/ui/Button";
 
-interface ScratchCardDemoProps {
-  onOpenCtaModal?: () => void;
-}
-
-export function ScratchCardDemo({ onOpenCtaModal }: ScratchCardDemoProps) {
+export function ScratchCardDemo() {
   const [isRevealed, setIsRevealed] = React.useState(false);
 
   const hiddenContent = (
@@ -69,11 +65,7 @@ export function ScratchCardDemo({ onOpenCtaModal }: ScratchCardDemoProps) {
 
         {/* Action CTA below card */}
         <div className="pt-1">
-          <Link
-            href="/create"
-            onClick={() => onOpenCtaModal?.()}
-            className="block w-full"
-          >
+          <Link href="/create" className="block w-full">
             <Button
               variant={isRevealed ? "primary" : "secondary"}
               size="md"

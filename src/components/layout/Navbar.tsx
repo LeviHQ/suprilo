@@ -6,11 +6,7 @@ import Link from "next/link";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-interface NavbarProps {
-  onOpenCtaModal: () => void;
-}
-
-export function Navbar({ onOpenCtaModal }: NavbarProps) {
+export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
 
@@ -85,7 +81,7 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
 
           {/* Desktop Primary CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/create" onClick={() => onOpenCtaModal?.()}>
+            <Link href="/create">
               <Button
                 variant="primary"
                 size="md"
@@ -135,10 +131,7 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
             <div className="pt-2 px-1">
               <Link
                 href="/create"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenCtaModal?.();
-                }}
+                onClick={() => setMobileMenuOpen(false)}
                 className="block w-full"
               >
                 <Button

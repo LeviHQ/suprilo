@@ -10,21 +10,11 @@ import { TestimonialsMarquee } from "@/components/landing/TestimonialsMarquee";
 import { Pricing } from "@/components/landing/Pricing";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { Footer } from "@/components/layout/Footer";
-import { ComingSoonModal } from "@/components/ui/Modal";
 import { PricingModal } from "@/components/ui/PricingModal";
 
 export default function Home() {
-  const [modalOpen, setModalOpen] = React.useState(false);
   const [pricingModalOpen, setPricingModalOpen] = React.useState(false);
   const [selectedPlan, setSelectedPlan] = React.useState<string | null>(null);
-
-  const openCtaModal = React.useCallback(() => {
-    setModalOpen(true);
-  }, []);
-
-  const closeCtaModal = React.useCallback(() => {
-    setModalOpen(false);
-  }, []);
 
   const handleSelectPlan = React.useCallback((planName: string) => {
     setSelectedPlan(planName);
@@ -37,18 +27,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen w-full max-w-full overflow-x-clip">
-      <Navbar onOpenCtaModal={openCtaModal} />
+      <Navbar />
       <main className="flex-1 w-full max-w-full overflow-x-clip">
-        <Hero onOpenCtaModal={openCtaModal} />
+        <Hero />
         <HowItWorks />
         <Features />
         <UseCases />
         <Pricing onSelectPlan={handleSelectPlan} />
         <TestimonialsMarquee />
-        <FinalCta onOpenCtaModal={openCtaModal} />
+        <FinalCta />
       </main>
       <Footer />
-      <ComingSoonModal isOpen={modalOpen} onClose={closeCtaModal} />
       <PricingModal
         isOpen={pricingModalOpen}
         onClose={closePricingModal}

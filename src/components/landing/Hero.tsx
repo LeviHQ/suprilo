@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ScratchCardDemo } from "./ScratchCardDemo";
 
-interface HeroProps {
-  onOpenCtaModal?: () => void;
-}
-
-export function Hero({ onOpenCtaModal }: HeroProps) {
+export function Hero() {
   return (
     <section className="relative overflow-hidden overflow-x-clip pt-8 pb-16 md:pt-14 md:pb-24 w-full max-w-full">
       {/* Decorative background glows */}
@@ -48,11 +44,7 @@ export function Hero({ onOpenCtaModal }: HeroProps) {
 
             {/* Call to Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <Link
-                href="/create"
-                onClick={() => onOpenCtaModal?.()}
-                className="w-full sm:w-auto"
-              >
+              <Link href="/create" className="w-full sm:w-auto">
                 <Button
                   variant="primary"
                   size="lg"
