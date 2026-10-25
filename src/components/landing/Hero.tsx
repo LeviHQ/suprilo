@@ -1,13 +1,26 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Sparkles, ArrowRight, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ScratchCardDemo } from "./ScratchCardDemo";
+import { useAuth } from "@/context/AuthContext";
 
 export function Hero() {
+  const router = useRouter();
+  const { user, signInWithGoogle } = useAuth();
+
+  const handleCreateClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      signInWithGoogle("/create");
+    } else {
+      router.push("/create");
+    }
+  };
+
   return (
     <section className="relative overflow-hidden overflow-x-clip pt-8 pb-16 md:pt-14 md:pb-24 w-full max-w-full">
       {/* Decorative background glows */}
@@ -44,16 +57,15 @@ export function Hero() {
 
             {/* Call to Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <Link href="/create" className="w-full sm:w-auto">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-full sm:w-auto gap-2 shadow-lg hover:shadow-brand-pink/30 hover:-translate-y-0.5 transition-transform"
-                >
-                  <span>Create a Surprise Card</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleCreateClick}
+                className="w-full sm:w-auto gap-2 shadow-lg hover:shadow-brand-pink/30 hover:-translate-y-0.5 transition-transform"
+              >
+                <span>Create a Surprise Card</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
 
               <a
                 href="#how-it-works"

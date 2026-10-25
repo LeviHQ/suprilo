@@ -1,13 +1,25 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Sparkles, Heart, ArrowRight } from "lucide-react";
 import { ScratchCard } from "@/components/scratch/ScratchCard";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/context/AuthContext";
 
 export function ScratchCardDemo() {
+  const router = useRouter();
+  const { user, signInWithGoogle } = useAuth();
   const [isRevealed, setIsRevealed] = React.useState(false);
+
+  const handleCreateClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      signInWithGoogle("/create");
+    } else {
+      router.push("/create");
+    }
+  };
 
   const hiddenContent = (
     <div className="flex flex-col justify-between h-full">
@@ -65,16 +77,15 @@ export function ScratchCardDemo() {
 
         {/* Action CTA below card */}
         <div className="pt-1">
-          <Link href="/create" className="block w-full">
-            <Button
-              variant={isRevealed ? "primary" : "secondary"}
-              size="md"
-              className="w-full justify-center gap-2 shadow-sm hover:shadow-md transition-all font-semibold"
-            >
-              <span>Create Your Own Surprise</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          <Button
+            variant={isRevealed ? "primary" : "secondary"}
+            size="md"
+            onClick={handleCreateClick}
+            className="w-full justify-center gap-2 shadow-sm hover:shadow-md transition-all font-semibold"
+          >
+            <span>Create Your Own Surprise</span>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </div>

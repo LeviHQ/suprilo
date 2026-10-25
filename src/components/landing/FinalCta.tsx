@@ -1,11 +1,24 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Sparkles, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/context/AuthContext";
 
 export function FinalCta() {
+  const router = useRouter();
+  const { user, signInWithGoogle } = useAuth();
+
+  const handleCreateClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      signInWithGoogle("/create");
+    } else {
+      router.push("/create");
+    }
+  };
+
   return (
     <section className="py-20 relative overflow-hidden overflow-x-clip w-full max-w-full">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,16 +48,15 @@ export function FinalCta() {
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/create" className="w-full sm:w-auto">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-brand-pink to-brand-orange hover:from-brand-pink-hover hover:to-brand-orange text-white shadow-xl hover:shadow-brand-pink/30 hover:scale-[1.02] transition-all"
-                >
-                  <span>Create Your First Card</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleCreateClick}
+                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-brand-pink to-brand-orange hover:from-brand-pink-hover hover:to-brand-orange text-white shadow-xl hover:shadow-brand-pink/30 hover:scale-[1.02] transition-all"
+              >
+                <span>Create Your First Card</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
             </div>
 
             <p className="text-xs text-white/50 pt-2 flex items-center justify-center gap-1.5">

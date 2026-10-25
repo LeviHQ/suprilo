@@ -70,6 +70,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -78,7 +80,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${headingFont.variable} ${bodyFont.variable} overflow-x-clip max-w-full`}>
       <body className="bg-brand-warm text-brand-dark min-h-screen flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink overflow-x-clip max-w-full">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
