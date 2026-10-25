@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Sparkles, ArrowRight, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ScratchCardDemo } from "./ScratchCardDemo";
 
 interface HeroProps {
-  onOpenCtaModal: () => void;
+  onOpenCtaModal?: () => void;
 }
 
 export function Hero({ onOpenCtaModal }: HeroProps) {
@@ -47,15 +48,20 @@ export function Hero({ onOpenCtaModal }: HeroProps) {
 
             {/* Call to Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={onOpenCtaModal}
-                className="w-full sm:w-auto gap-2 shadow-lg hover:shadow-brand-pink/30 hover:-translate-y-0.5 transition-transform"
+              <Link
+                href="/create"
+                onClick={() => onOpenCtaModal?.()}
+                className="w-full sm:w-auto"
               >
-                <span>Create a Surprise Card</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full sm:w-auto gap-2 shadow-lg hover:shadow-brand-pink/30 hover:-translate-y-0.5 transition-transform"
+                >
+                  <span>Create a Surprise Card</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
 
               <a
                 href="#how-it-works"

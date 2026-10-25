@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Sparkles, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -38,15 +39,20 @@ export function FinalCta({ onOpenCtaModal }: FinalCtaProps) {
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={onOpenCtaModal}
-                className="w-full sm:w-auto gap-2 bg-gradient-to-r from-brand-pink to-brand-orange hover:from-brand-pink-hover hover:to-brand-orange text-white shadow-xl hover:shadow-brand-pink/30 hover:scale-[1.02] transition-all"
+              <Link
+                href="/create"
+                onClick={() => onOpenCtaModal?.()}
+                className="w-full sm:w-auto"
               >
-                <span>Create Your First Card</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full sm:w-auto gap-2 bg-gradient-to-r from-brand-pink to-brand-orange hover:from-brand-pink-hover hover:to-brand-orange text-white shadow-xl hover:shadow-brand-pink/30 hover:scale-[1.02] transition-all"
+                >
+                  <span>Create Your First Card</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
 
             <p className="text-xs text-white/50 pt-2 flex items-center justify-center gap-1.5">

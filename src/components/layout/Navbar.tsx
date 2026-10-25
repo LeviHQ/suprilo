@@ -39,6 +39,7 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
     { name: "Use Cases", href: "#use-cases" },
     { name: "Pricing", href: "#pricing" },
     { name: "Preview Demo", href: "#preview" },
+    { name: "Studio", href: "/create" },
   ];
 
   return (
@@ -84,15 +85,16 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
 
           {/* Desktop Primary CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={onOpenCtaModal}
-              className="gap-2 shadow-md hover:shadow-brand-pink/25"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Create Your First Card</span>
-            </Button>
+            <Link href="/create" onClick={() => onOpenCtaModal?.()}>
+              <Button
+                variant="primary"
+                size="md"
+                className="gap-2 shadow-md hover:shadow-brand-pink/25"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Create Your First Card</span>
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu toggle button */}
@@ -131,18 +133,23 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
               ))}
             </nav>
             <div className="pt-2 px-1">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full justify-center shadow-md"
+              <Link
+                href="/create"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  onOpenCtaModal();
+                  onOpenCtaModal?.();
                 }}
+                className="block w-full"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>Create Your First Card</span>
-              </Button>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full justify-center shadow-md"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Create Your First Card</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
