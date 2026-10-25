@@ -18,24 +18,55 @@ const firebaseConfig = {
 export function isFirebaseConfigured(): boolean {
   return Boolean(
     firebaseConfig.apiKey &&
+      firebaseConfig.apiKey.trim() !== "" &&
       firebaseConfig.authDomain &&
       firebaseConfig.projectId
   );
 }
 
-// Singleton Firebase initialization (prevents multiple initializations during Next.js hot reload)
-let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+// Singleton Firebase initialization (safe for Next.js build / SSR prerendering)
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let googleProvider: GoogleAuthProvider | null = null;
+
+if (isFirebaseConfigured()) {
+  try {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({
+      prompt: "select_account",
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Firebase Auth initialization skipped:", error);
+    }
+  }
 }
 
-const auth: Auth = getAuth(app);
+export function getFirebaseAuth(): Auth | null {
+  if (auth) return auth;
+  if (!isFirebaseConfigured()) return null;
+  try {
+    if (!app) {
+      app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    }
+    auth = getAuth(app);
+    return auth;
+  } catch {
+    return null;
+  }
+}
 
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: "select_account",
-});
+export function getGoogleProvider(): GoogleAuthProvider | null {
+  if (googleProvider) return googleProvider;
+  if (!isFirebaseConfigured()) return null;
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({
+    prompt: "select_account",
+  });
+  return googleProvider;
+}
 
 export { app, auth, googleProvider };
+

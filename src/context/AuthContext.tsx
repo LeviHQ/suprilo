@@ -10,7 +10,11 @@ import {
   getRedirectResult,
   signOut,
 } from "firebase/auth";
-import { auth, googleProvider, isFirebaseConfigured } from "@/lib/firebase";
+import {
+  isFirebaseConfigured,
+  getFirebaseAuth,
+  getGoogleProvider,
+} from "@/lib/firebase";
 
 interface AuthContextType {
   user: User | null;
@@ -40,13 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Process redirect result on mount (for mobile fallback)
   React.useEffect(() => {
     let isMounted = true;
+    const currentAuth = getFirebaseAuth();
 
-    if (!isFirebaseConfigured()) {
+    if (!currentAuth || !isFirebaseConfigured()) {
       setLoading(false);
       return;
     }
 
-    getRedirectResult(auth)
+    getRedirectResult(currentAuth)
       .then((result) => {
         if (!isMounted) return;
         if (result?.user) {
@@ -66,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
     // Track authentication state changes
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(currentAuth, (currentUser) => {
       if (!isMounted) return;
       setUser(currentUser);
       setLoading(false);
@@ -85,8 +90,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (returnUrl?: string): Promise<User | null> => {
       if (isSigningIn) return null;
 
-      if (!isFirebaseConfigured()) {
-        const msg = "Firebase is not configured. Please check your environment settings.";
+      const currentAuth = getFirebaseAuth();
+      const currentProvider = getGoogleProvider();
+
+      if (!currentAuth || !currentProvider || !isFirebaseConfigured()) {
+        const msg = "Firebase is not configured. Please add your Firebase environment variables in Vercel settings.";
         setError(msg);
         return null;
       }
@@ -101,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const result = await signInWithPopup(auth, googleProvider);
+        const result = await signInWithPopup(currentAuth, currentProvider);
         const signedInUser = result.user;
         setUser(signedInUser);
 
@@ -130,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // If popup is blocked by mobile browser, fallback to redirect
         if (code === "auth/popup-blocked") {
           try {
-            await signInWithRedirect(auth, googleProvider);
+            await signInWithRedirect(currentAuth, currentProvider);
             return null;
           } catch {
             setError("Sign-in popup was blocked by your browser. Please allow popups and try again.");
@@ -150,8 +158,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * Sign Out
    */
   const signOutUser = React.useCallback(async () => {
+    const currentAuth = getFirebaseAuth();
+    if (!currentAuth) {
+      setUser(null);
+      return;
+    }
     try {
-      await signOut(auth);
+      await signOut(currentAuth);
       setUser(null);
       setError(null);
       try {
