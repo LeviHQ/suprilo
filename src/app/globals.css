@@ -96,13 +96,13 @@
 }
 
 .animate-marquee-ltr {
-  animation: marquee-ltr 34s linear infinite !important;
+  animation: marquee-ltr 65s linear infinite !important;
   will-change: transform;
   contain: layout paint;
 }
 
 .animate-marquee-rtl {
-  animation: marquee-rtl 38s linear infinite !important;
+  animation: marquee-rtl 72s linear infinite !important;
   will-change: transform;
   contain: layout paint;
 }
