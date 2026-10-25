@@ -6,6 +6,7 @@ import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Features } from "@/components/landing/Features";
 import { UseCases } from "@/components/landing/UseCases";
+import { TestimonialsMarquee } from "@/components/landing/TestimonialsMarquee";
 import { Pricing } from "@/components/landing/Pricing";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { Footer } from "@/components/layout/Footer";
@@ -42,6 +43,7 @@ export default function Home() {
         <HowItWorks />
         <Features />
         <UseCases />
+        <TestimonialsMarquee />
         <Pricing onSelectPlan={handleSelectPlan} />
         <FinalCta onOpenCtaModal={openCtaModal} />
       </main>
