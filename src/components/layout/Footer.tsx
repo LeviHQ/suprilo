@@ -53,6 +53,12 @@ export function Footer() {
               Use Cases
             </a>
             <a
+              href="#pricing"
+              className="hover:text-brand-pink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded"
+            >
+              Pricing
+            </a>
+            <a
               href="#preview"
               className="hover:text-brand-pink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded"
             >

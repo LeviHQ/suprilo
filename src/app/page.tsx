@@ -6,12 +6,16 @@ import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Features } from "@/components/landing/Features";
 import { UseCases } from "@/components/landing/UseCases";
+import { Pricing } from "@/components/landing/Pricing";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { Footer } from "@/components/layout/Footer";
 import { ComingSoonModal } from "@/components/ui/Modal";
+import { PricingModal } from "@/components/ui/PricingModal";
 
 export default function Home() {
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = React.useState(false);
+  const [selectedPlan, setSelectedPlan] = React.useState<string | null>(null);
 
   const openCtaModal = React.useCallback(() => {
     setModalOpen(true);
@@ -19,6 +23,15 @@ export default function Home() {
 
   const closeCtaModal = React.useCallback(() => {
     setModalOpen(false);
+  }, []);
+
+  const handleSelectPlan = React.useCallback((planName: string) => {
+    setSelectedPlan(planName);
+    setPricingModalOpen(true);
+  }, []);
+
+  const closePricingModal = React.useCallback(() => {
+    setPricingModalOpen(false);
   }, []);
 
   return (
@@ -29,10 +42,16 @@ export default function Home() {
         <HowItWorks />
         <Features />
         <UseCases />
+        <Pricing onSelectPlan={handleSelectPlan} />
         <FinalCta onOpenCtaModal={openCtaModal} />
       </main>
       <Footer />
       <ComingSoonModal isOpen={modalOpen} onClose={closeCtaModal} />
+      <PricingModal
+        isOpen={pricingModalOpen}
+        onClose={closePricingModal}
+        selectedPlan={selectedPlan}
+      />
     </div>
   );
 }

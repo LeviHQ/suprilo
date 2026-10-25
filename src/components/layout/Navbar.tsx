@@ -37,6 +37,7 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
     { name: "How It Works", href: "#how-it-works" },
     { name: "Features", href: "#features" },
     { name: "Use Cases", href: "#use-cases" },
+    { name: "Pricing", href: "#pricing" },
     { name: "Preview Demo", href: "#preview" },
   ];
 
