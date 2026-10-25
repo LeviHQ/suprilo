@@ -58,3 +58,40 @@
     linear-gradient(to right, rgba(23, 21, 42, 0.03) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(23, 21, 42, 0.03) 1px, transparent 1px);
 }
+
+/* Continuous Marquee Animations with GPU acceleration */
+@keyframes marquee-ltr {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+@keyframes marquee-rtl {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-ltr {
+  animation: marquee-ltr 34s linear infinite !important;
+  will-change: transform;
+}
+
+.animate-marquee-rtl {
+  animation: marquee-rtl 38s linear infinite !important;
+  will-change: transform;
+}
+
+/* Pause on hover on desktop pointer devices only */
+@media (hover: hover) and (pointer: fine) {
+  .marquee-pause-hover:hover .animate-marquee-ltr,
+  .marquee-pause-hover:hover .animate-marquee-rtl {
+    animation-play-state: paused !important;
+  }
+}

@@ -206,26 +206,26 @@ interface TestimonialCardProps {
 
 function TestimonialCard({ item }: TestimonialCardProps) {
   return (
-    <div className="w-[260px] sm:w-[280px] shrink-0 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-brand-warm-border shadow-card hover:shadow-card-hover hover:border-brand-pink/30 transition-all duration-200 flex flex-col justify-between select-none">
+    <div className="w-[230px] sm:w-[260px] md:w-[280px] shrink-0 bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border border-brand-warm-border shadow-card hover:shadow-card-hover hover:border-brand-pink/30 transition-all duration-200 flex flex-col justify-between select-none">
       {/* Card Header: Avatar, Name, Occasion Badge */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <div
-            className={`w-9 h-9 rounded-full ${item.avatarBg} ${item.avatarText} flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white select-none`}
+            className={`w-8 h-8 sm:w-9 h-9 rounded-full ${item.avatarBg} ${item.avatarText} flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white select-none shrink-0`}
             aria-hidden="true"
           >
             {item.avatarEmoji ? (
-              <span className="text-base leading-none">{item.avatarEmoji}</span>
+              <span className="text-sm sm:text-base leading-none">{item.avatarEmoji}</span>
             ) : (
               item.avatarChar
             )}
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-brand-dark leading-tight">
+          <div className="min-w-0">
+            <h4 className="text-xs sm:text-sm font-bold text-brand-dark leading-tight truncate">
               {item.name}
             </h4>
             <span
-              className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border mt-0.5 ${item.occasionColor}`}
+              className={`inline-block text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full border mt-0.5 ${item.occasionColor}`}
             >
               {item.occasion}
             </span>
@@ -240,7 +240,7 @@ function TestimonialCard({ item }: TestimonialCardProps) {
       </div>
 
       {/* Quote */}
-      <p className="text-xs text-brand-muted leading-relaxed italic font-normal">
+      <p className="text-[11px] sm:text-xs text-brand-muted leading-relaxed italic font-normal">
         &ldquo;{item.quote}&rdquo;
       </p>
     </div>
@@ -254,9 +254,9 @@ export function TestimonialsMarquee() {
       className="py-16 md:py-24 relative overflow-hidden bg-brand-warm-subtle/40"
       aria-label="Stories and demo feedback"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12 text-center">
         {/* Eyebrow / Disclaimer badge */}
-        <div className="inline-flex items-center gap-2 mb-4">
+        <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-4">
           <Badge variant="purple">Stories & Inspiration</Badge>
           <span className="text-[11px] font-medium text-brand-muted bg-white px-2.5 py-0.5 rounded-full border border-brand-warm-border">
             Illustrative demo feedback — fictional personas
@@ -273,25 +273,23 @@ export function TestimonialsMarquee() {
       </div>
 
       {/* Marquee Container with edge fade masks */}
-      <div className="relative w-full overflow-hidden group">
+      <div className="relative w-full overflow-hidden marquee-pause-hover">
         {/* Left & Right gradient edge fades */}
         <div
-          className="absolute top-0 bottom-0 left-0 w-16 sm:w-28 md:w-40 bg-gradient-to-r from-brand-warm to-transparent z-10 pointer-events-none"
+          className="absolute top-0 bottom-0 left-0 w-8 sm:w-20 md:w-36 bg-gradient-to-r from-[#FBF9F6] to-transparent z-10 pointer-events-none"
           aria-hidden="true"
         />
         <div
-          className="absolute top-0 bottom-0 right-0 w-16 sm:w-28 md:w-40 bg-gradient-to-l from-brand-warm to-transparent z-10 pointer-events-none"
+          className="absolute top-0 bottom-0 right-0 w-8 sm:w-20 md:w-36 bg-gradient-to-l from-[#FBF9F6] to-transparent z-10 pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="space-y-4 sm:space-y-5">
+        <div className="space-y-3.5 sm:space-y-5">
           {/* ROW 1: Moves Left to Right */}
           <div className="flex overflow-hidden">
-            <div
-              className="flex gap-4 sm:gap-5 w-max animate-marquee-ltr group-hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] will-change-transform motion-reduce:animate-none"
-            >
+            <div className="flex gap-3 sm:gap-4.5 w-max animate-marquee-ltr">
               {/* Primary Sequence (Accessible) */}
-              <div className="flex gap-4 sm:gap-5">
+              <div className="flex gap-3 sm:gap-4.5">
                 {TESTIMONIALS_DATA.map((item) => (
                   <TestimonialCard key={`r1-primary-${item.id}`} item={item} />
                 ))}
@@ -299,7 +297,7 @@ export function TestimonialsMarquee() {
 
               {/* Duplicated Sequence (Aria Hidden for infinite seamless loop) */}
               <div
-                className="flex gap-4 sm:gap-5"
+                className="flex gap-3 sm:gap-4.5"
                 aria-hidden="true"
               >
                 {TESTIMONIALS_DATA.map((item) => (
@@ -311,11 +309,9 @@ export function TestimonialsMarquee() {
 
           {/* ROW 2: Moves Right to Left */}
           <div className="flex overflow-hidden">
-            <div
-              className="flex gap-4 sm:gap-5 w-max animate-marquee-rtl group-hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] will-change-transform motion-reduce:animate-none"
-            >
+            <div className="flex gap-3 sm:gap-4.5 w-max animate-marquee-rtl">
               {/* Primary Sequence (Accessible) */}
-              <div className="flex gap-4 sm:gap-5">
+              <div className="flex gap-3 sm:gap-4.5">
                 {ROW2_DATA.map((item) => (
                   <TestimonialCard key={`r2-primary-${item.id}`} item={item} />
                 ))}
@@ -323,7 +319,7 @@ export function TestimonialsMarquee() {
 
               {/* Duplicated Sequence (Aria Hidden for infinite seamless loop) */}
               <div
-                className="flex gap-4 sm:gap-5"
+                className="flex gap-3 sm:gap-4.5"
                 aria-hidden="true"
               >
                 {ROW2_DATA.map((item) => (

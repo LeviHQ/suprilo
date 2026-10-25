@@ -43,8 +43,8 @@ export default function Home() {
         <HowItWorks />
         <Features />
         <UseCases />
-        <TestimonialsMarquee />
         <Pricing onSelectPlan={handleSelectPlan} />
+        <TestimonialsMarquee />
         <FinalCta onOpenCtaModal={openCtaModal} />
       </main>
       <Footer />
