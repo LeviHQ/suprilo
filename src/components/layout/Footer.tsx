@@ -17,20 +17,17 @@ export function Footer() {
               className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded-lg"
               aria-label="Suprilo Home"
             >
-              <div className="relative h-12 w-44">
+              <div className="relative h-16 sm:h-20 w-52 sm:w-64 mx-auto md:mx-0 aspect-[800/285]">
                 <Image
                   src="/brand/logo.png"
                   alt="Suprilo - Make Every Moment a Surprise"
                   fill
-                  sizes="176px"
-                  className="object-contain object-left"
+                  sizes="(max-width: 640px) 208px, 256px"
+                  className="object-contain object-center md:object-left"
                 />
               </div>
             </Link>
-            <p className="text-sm text-brand-muted font-medium">
-              Make Every Moment a Surprise.
-            </p>
-            <p className="text-xs text-brand-muted/80 leading-relaxed">
+            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed max-w-xs mx-auto md:mx-0">
               Digital scratch cards for real smiles, heartfelt memories, and unexpected celebrations.
             </p>
           </div>

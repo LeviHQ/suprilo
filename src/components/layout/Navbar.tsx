@@ -53,16 +53,16 @@ export function Navbar({ onOpenCtaModal }: NavbarProps) {
           {/* Logo brand */}
           <Link
             href="/"
-            className="flex items-center gap-2 group transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded-lg"
+            className="flex items-center gap-2 group transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded-lg py-1"
             aria-label="Suprilo Home"
           >
-            <div className="relative h-12 w-36 sm:w-44 overflow-hidden">
+            <div className="relative h-12 sm:h-14 md:h-16 w-40 sm:w-48 md:w-56 aspect-[800/285]">
               <Image
                 src="/brand/logo.png"
                 alt="Suprilo - Make Every Moment a Surprise"
                 fill
                 priority
-                sizes="(max-width: 640px) 144px, 176px"
+                sizes="(max-width: 640px) 160px, (max-width: 768px) 192px, 208px"
                 className="object-contain object-left group-hover:scale-[1.02] transition-transform duration-200"
               />
             </div>
