@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Sparkles,
   ArrowLeft,
@@ -11,91 +12,30 @@ import {
   Share2,
   RefreshCw,
   Sliders,
-  Check,
-  Info,
   Gift,
-  Smile,
+  Cake,
+  Flower2,
+  Trophy,
+  Star,
+  Camera,
+  Trash2,
+  RotateCcw,
+  Wand2,
 } from "lucide-react";
 import { ScratchCard, CoverStyle } from "@/components/scratch/ScratchCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { useAuth } from "@/context/AuthContext";
+import { UserAvatar } from "@/components/ui/UserAvatar";
+import { CreationIntroAnimation } from "@/components/create/CreationIntroAnimation";
+import { CreationChoiceCards } from "@/components/create/CreationChoiceCards";
+import {
+  getTemplateById,
+  DEFAULT_SCRATCH_TEMPLATE,
+} from "@/data/templates";
+import { cn } from "@/lib/utils";
 
-interface CardPreset {
-  id: string;
-  name: string;
-  icon: React.ElementType;
-  tag: string;
-  recipient: string;
-  message: string;
-  secondary: string;
-  sender: string;
-  coverStyle: CoverStyle;
-  coverText: string;
-}
-
-const PRESETS: CardPreset[] = [
-  {
-    id: "magic",
-    name: "Magic & Appreciation",
-    icon: Sparkles,
-    tag: "A Little Joy",
-    recipient: "Friend",
-    message: "“You're someone else's little bit of magic 💖”",
-    secondary: "Thanks for making ordinary moments special.",
-    sender: "Alex",
-    coverStyle: "lavender-pink",
-    coverText: "Scratch to reveal your surprise ✨",
-  },
-  {
-    id: "birthday",
-    name: "Birthday Celebration",
-    icon: PartyPopper,
-    tag: "Happy Birthday!",
-    recipient: "Maya",
-    message: "“Happy 25th, Maya! ✨”",
-    secondary: "Every single day is brighter with your laugh. Can't wait to celebrate tonight!",
-    sender: "Alex",
-    coverStyle: "golden-foil",
-    coverText: "Scratch to reveal your birthday surprise 🎂",
-  },
-  {
-    id: "love",
-    name: "Love & Romance",
-    icon: Heart,
-    tag: "With All My Heart",
-    recipient: "My Love",
-    message: "“Every day with you is my favorite adventure 💌”",
-    secondary: "Dinner reservation is booked for 8 PM tonight at our secret spot.",
-    sender: "Sam",
-    coverStyle: "lavender-pink",
-    coverText: "Scratch to uncover our surprise ❤️",
-  },
-  {
-    id: "just-because",
-    name: "Just Because",
-    icon: Smile,
-    tag: "Midday Smile",
-    recipient: "Mom",
-    message: "“Just thinking of you today and sending love ☕”",
-    secondary: "Check your front porch later for a little sweet treat!",
-    sender: "Adarsh",
-    coverStyle: "mint-fresh",
-    coverText: "Scratch for a little moment of joy 🌿",
-  },
-  {
-    id: "celebration",
-    name: "Big Milestone",
-    icon: Gift,
-    tag: "You Did It!",
-    recipient: "Champion",
-    message: "“So endlessly proud of you! You aced it! 🚀”",
-    secondary: "Hard work always pays off. The sky is the limit!",
-    sender: "Your Fan Club",
-    coverStyle: "cosmic-purple",
-    coverText: "Scratch to open your celebratory note 🎉",
-  },
-];
-
+// Foil Finishes
 const FOIL_OPTIONS: { id: CoverStyle; name: string; previewColor: string; desc: string }[] = [
   {
     id: "lavender-pink",
@@ -123,8 +63,56 @@ const FOIL_OPTIONS: { id: CoverStyle; name: string; previewColor: string; desc: 
   },
 ];
 
-import { useAuth } from "@/context/AuthContext";
-import { UserAvatar } from "@/components/ui/UserAvatar";
+// Interior Card Background Palettes
+const BG_PALETTES = [
+  {
+    id: "soft-pink",
+    name: "Soft Pink",
+    gradient: "from-pink-50 via-white to-rose-50",
+    textColor: "text-rose-950",
+    border: "border-pink-200",
+  },
+  {
+    id: "warm-sunshine",
+    name: "Sunshine",
+    gradient: "from-amber-50 via-white to-orange-50",
+    textColor: "text-amber-950",
+    border: "border-amber-200",
+  },
+  {
+    id: "royal-amethyst",
+    name: "Amethyst",
+    gradient: "from-purple-50 via-white to-indigo-50",
+    textColor: "text-indigo-950",
+    border: "border-purple-200",
+  },
+  {
+    id: "mint-fresh",
+    name: "Mint Fresh",
+    gradient: "from-emerald-50 via-white to-teal-50",
+    textColor: "text-emerald-950",
+    border: "border-emerald-200",
+  },
+  {
+    id: "pure-ivory",
+    name: "Pure Ivory",
+    gradient: "from-brand-warm-subtle via-white to-brand-warm",
+    textColor: "text-brand-dark",
+    border: "border-brand-warm-border",
+  },
+];
+
+// Decorative Stickers
+const STICKERS = [
+  { id: "heart", label: "Heart", icon: Heart },
+  { id: "sparkles", label: "Sparkles", icon: Sparkles },
+  { id: "cake", label: "Cake", icon: Cake },
+  { id: "flower", label: "Flower", icon: Flower2 },
+  { id: "gift", label: "Gift", icon: Gift },
+  { id: "confetti", label: "Party", icon: PartyPopper },
+  { id: "trophy", label: "Trophy", icon: Trophy },
+  { id: "star", label: "Star", icon: Star },
+];
 
 function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -149,21 +137,40 @@ function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-export default function CreateCardPage() {
+function CreateCardStudio() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading, isSigningIn, signInWithGoogle } = useAuth();
 
-  const [selectedPreset, setSelectedPreset] = React.useState<string>("magic");
-  const [tag, setTag] = React.useState("A Little Joy");
-  const [recipient, setRecipient] = React.useState("Friend");
+  const templateParam = searchParams.get("template");
+  const modeParam = searchParams.get("mode");
+
+  // Flow State: 'choices' (with animated intro) or 'editor'
+  const [viewState, setViewState] = React.useState<"choices" | "editor">(() => {
+    if (templateParam || modeParam) return "editor";
+    return "choices";
+  });
+
+  const [hasIntroCompleted, setHasIntroCompleted] = React.useState(false);
+
+  // Card Content State
+  const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(templateParam);
+  const [tag, setTag] = React.useState("Special Surprise");
+  const [recipient, setRecipient] = React.useState("Maya");
   const [message, setMessage] = React.useState("“You're someone else's little bit of magic 💖”");
   const [secondary, setSecondary] = React.useState("Thanks for making ordinary moments special.");
   const [sender, setSender] = React.useState("Alex");
   const [coverStyle, setCoverStyle] = React.useState<CoverStyle>("lavender-pink");
   const [coverText, setCoverText] = React.useState("Scratch to reveal your surprise ✨");
+  const [selectedBgPalette, setSelectedBgPalette] = React.useState("soft-pink");
+  const [selectedSticker, setSelectedSticker] = React.useState("heart");
+  const [photoUrl, setPhotoUrl] = React.useState<string | null>(null);
 
-  // Scratch card instance key to force clean canvas remount on preset change
+  // Scratch card instance key to force clean canvas remount
   const [cardKey, setCardKey] = React.useState(0);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+  const [copiedLink, setCopiedLink] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // Set sender initial name from authenticated user if available
   React.useEffect(() => {
@@ -172,6 +179,63 @@ export default function CreateCardPage() {
       if (firstName) setSender(firstName);
     }
   }, [user, sender]);
+
+  // Load configuration whenever template query param changes
+  React.useEffect(() => {
+    if (templateParam) {
+      const template = getTemplateById(templateParam);
+      if (template) {
+        setSelectedTemplateId(template.id);
+        setTag(template.tag);
+        setRecipient(template.recipient);
+        setMessage(template.message);
+        setSecondary(template.secondary);
+        setCoverStyle(template.coverStyle);
+        setCoverText(template.coverText);
+        setSender(user?.displayName ? user.displayName.split(" ")[0] : template.sender);
+        setViewState("editor");
+        setCardKey((prev) => prev + 1);
+      }
+    } else if (modeParam === "scratch") {
+      setSelectedTemplateId(null);
+      setTag(DEFAULT_SCRATCH_TEMPLATE.tag);
+      setRecipient(DEFAULT_SCRATCH_TEMPLATE.recipient);
+      setMessage(DEFAULT_SCRATCH_TEMPLATE.message);
+      setSecondary(DEFAULT_SCRATCH_TEMPLATE.secondary);
+      setCoverStyle(DEFAULT_SCRATCH_TEMPLATE.coverStyle);
+      setCoverText(DEFAULT_SCRATCH_TEMPLATE.coverText);
+      setSender(user?.displayName ? user.displayName.split(" ")[0] : DEFAULT_SCRATCH_TEMPLATE.sender);
+      setViewState("editor");
+      setCardKey((prev) => prev + 1);
+    }
+  }, [templateParam, modeParam, user]);
+
+  // Handle Photo upload
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Please select an image smaller than 5MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPhotoUrl(event.target?.result as string);
+        setCardKey((prev) => prev + 1);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setCardKey((prev) => prev + 1);
+  };
+
+  const handleResetCard = () => {
+    setCardKey((prev) => prev + 1);
+  };
 
   // Loading Screen
   if (loading) {
@@ -247,25 +311,42 @@ export default function CreateCardPage() {
     );
   }
 
-  // Apply preset
-  const handleSelectPreset = (preset: CardPreset) => {
-    setSelectedPreset(preset.id);
-    setTag(preset.tag);
-    setRecipient(preset.recipient);
-    setMessage(preset.message);
-    setSecondary(preset.secondary);
-    setSender(preset.sender);
-    setCoverStyle(preset.coverStyle);
-    setCoverText(preset.coverText);
-    setCardKey((prev) => prev + 1);
+  // Active Background Palette config
+  const activePalette =
+    BG_PALETTES.find((p) => p.id === selectedBgPalette) || BG_PALETTES[0];
+
+  // Sticker Component renderer
+  const renderStickerIcon = () => {
+    switch (selectedSticker) {
+      case "heart":
+        return <Heart className="w-6 h-6 fill-brand-pink text-brand-pink animate-pulse" />;
+      case "sparkles":
+        return <Sparkles className="w-6 h-6 text-brand-orange animate-spin" style={{ animationDuration: "5s" }} />;
+      case "cake":
+        return <Cake className="w-6 h-6 text-amber-500" />;
+      case "flower":
+        return <Flower2 className="w-6 h-6 text-pink-500" />;
+      case "gift":
+        return <Gift className="w-6 h-6 text-purple-600" />;
+      case "confetti":
+        return <PartyPopper className="w-6 h-6 text-orange-500" />;
+      case "trophy":
+        return <Trophy className="w-6 h-6 text-amber-500" />;
+      case "star":
+        return <Star className="w-6 h-6 text-yellow-500 fill-yellow-400" />;
+      default:
+        return <Sparkles className="w-6 h-6 text-brand-pink" />;
+    }
   };
 
-  const handleResetCard = () => {
-    setCardKey((prev) => prev + 1);
-  };
-
+  // Hidden Content revealed when scratched
   const hiddenContent = (
-    <div className="flex flex-col justify-between h-full text-center">
+    <div
+      className={cn(
+        "flex flex-col justify-between h-full text-center p-2 rounded-xl transition-colors duration-300",
+        activePalette.textColor
+      )}
+    >
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pink text-white shadow-sm">
@@ -277,23 +358,37 @@ export default function CreateCardPage() {
         </span>
       </div>
 
-      {/* Main Message Note */}
-      <div className="my-auto py-2 space-y-2">
-        <div className="w-11 h-11 mx-auto rounded-full bg-brand-pink-light flex items-center justify-center text-brand-pink shadow-sm">
-          <Heart className="w-5 h-5 fill-brand-pink text-brand-pink animate-pulse" />
-        </div>
-        <h4 className="text-lg sm:text-xl font-extrabold text-brand-dark leading-snug px-2">
+      {/* Main Message Note + Optional Photo */}
+      <div className="my-auto py-2 space-y-2.5">
+        {photoUrl ? (
+          <div className="relative w-28 h-28 mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-brand-pink/30">
+            <Image
+              src={photoUrl}
+              alt="Secret memory photo"
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+        ) : (
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-white shadow-sm border border-brand-warm-border flex items-center justify-center">
+            {renderStickerIcon()}
+          </div>
+        )}
+
+        <h4 className="text-lg sm:text-xl font-extrabold leading-snug px-2 tracking-tight">
           {message || "Your secret message will appear here!"}
         </h4>
+
         {secondary && (
-          <p className="text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[280px] mx-auto font-medium">
+          <p className="text-xs sm:text-sm opacity-80 leading-relaxed max-w-[280px] mx-auto font-medium">
             {secondary}
           </p>
         )}
       </div>
 
       {/* Footer Info */}
-      <div className="flex items-center justify-between text-[10px] text-brand-muted/80 pt-2 border-t border-brand-warm-border/50">
+      <div className="flex items-center justify-between text-[10px] opacity-75 pt-2 border-t border-brand-warm-border/40">
         <span>To: {recipient || "Someone special"}</span>
         <span>suprilo.com/s/preview</span>
       </div>
@@ -328,6 +423,16 @@ export default function CreateCardPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {viewState === "editor" && (
+              <Link href="/templates">
+                <Button variant="secondary" size="sm" className="gap-1.5 text-xs">
+                  <Wand2 className="w-3.5 h-3.5 text-brand-pink" />
+                  <span className="hidden sm:inline">Browse Templates</span>
+                  <span className="sm:hidden">Templates</span>
+                </Button>
+              </Link>
+            )}
+
             <Link
               href="/profile"
               className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
@@ -339,149 +444,123 @@ export default function CreateCardPage() {
               </span>
             </Link>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsShareModalOpen(true)}
-              className="gap-1.5 shadow-md hover:shadow-brand-pink/25 text-xs font-semibold"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>Share Card</span>
-            </Button>
+            {viewState === "editor" && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsShareModalOpen(true)}
+                className="gap-1.5 shadow-md hover:shadow-brand-pink/25 text-xs font-semibold"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share Card</span>
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Main Studio Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Phase 2A Notice Banner */}
-        <div className="mb-6 p-4 rounded-2xl bg-brand-orange-light/80 border border-[#FED7AA] flex items-start gap-3 text-xs text-brand-dark">
-          <Info className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <p className="font-semibold text-slate-900">
-              Card Studio Interactive Starter (Phase 2A)
-            </p>
-            <p className="text-brand-muted leading-relaxed">
-              Customize your secret message and foil finish below. You can test and scratch the card right in the live preview. Cloud publishing and unique public links will arrive in Phase 2B.
-            </p>
-          </div>
-        </div>
+      {/* Main Studio Body */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {/* ======================================================== */}
+        {/* VIEW 1: CREATION CHOICE SCREEN WITH DELIGHTFUL INTRO */}
+        {/* ======================================================== */}
+        {viewState === "choices" ? (
+          <div className="space-y-6">
+            {!hasIntroCompleted && (
+              <CreationIntroAnimation onComplete={() => setHasIntroCompleted(true)} />
+            )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT COLUMN: Controls & Presets (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* 1. Occasion Presets */}
-            <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-bold text-brand-dark">Choose an Occasion Preset</h2>
-                  <p className="text-xs text-brand-muted">Pick a preset to instantly load beautiful wording and colors</p>
+            <CreationChoiceCards
+              onSelectScratch={() => {
+                setViewState("editor");
+                router.push("/create?mode=scratch");
+              }}
+              onExploreTemplates={() => {
+                router.push("/templates");
+              }}
+            />
+          </div>
+        ) : (
+          /* ======================================================== */
+          /* VIEW 2: SHARED CARD STUDIO EDITOR */
+          /* ======================================================== */
+          <div className="space-y-6">
+            {/* Header Status Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-brand-pink-light text-brand-pink flex items-center justify-center">
+                  <Sliders className="w-4 h-4" />
                 </div>
-                <Sliders className="w-4 h-4 text-brand-muted" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-brand-dark">
+                      {selectedTemplateId
+                        ? `Editing: ${getTemplateById(selectedTemplateId)?.title || "Template"}`
+                        : "Custom Scratch Creation"}
+                    </h2>
+                    <Badge variant="pink" className="text-[10px] py-0">
+                      Live Studio
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-brand-muted">
+                    Preview your card live on the right. Scratch with your finger or mouse!
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
-                {PRESETS.map((preset) => {
-                  const Icon = preset.icon;
-                  const isActive = selectedPreset === preset.id;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => handleSelectPreset(preset)}
-                      className={`flex flex-col items-start p-3 rounded-2xl border text-left transition-all ${
-                        isActive
-                          ? "bg-brand-pink-light border-brand-pink text-brand-pink shadow-sm ring-2 ring-brand-pink/20"
-                          : "bg-brand-warm-subtle/70 border-brand-warm-border text-brand-muted hover:border-brand-pink/40 hover:text-brand-dark"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full mb-1.5">
-                        <Icon className={`w-4 h-4 ${isActive ? "text-brand-pink" : "text-brand-muted"}`} />
-                        {isActive && <Check className="w-3.5 h-3.5 text-brand-pink" />}
-                      </div>
-                      <span className="text-xs font-bold text-brand-dark">{preset.name}</span>
-                      <span className="text-[10px] text-brand-muted truncate max-w-full">
-                        {preset.tag}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setViewState("choices")}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-muted hover:text-brand-dark px-3 py-1.5 rounded-xl border border-brand-warm-border hover:bg-brand-warm-subtle transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Choose Another Mode</span>
+                </button>
               </div>
             </div>
 
-            {/* 2. Message & Details Form */}
-            <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-5">
-              <h2 className="text-base font-bold text-brand-dark">Personalize Your Card Details</h2>
+            {/* Split Grid: Left Editor Controls (7 cols) + Right Live Preview (5 cols) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* LEFT COLUMN: Controls */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* 1. Recipient & Occasion Details */}
+                <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-5">
+                  <h3 className="text-base font-bold text-brand-dark">1. Card Header & Names</h3>
 
-              <div className="space-y-4 text-xs">
-                {/* Recipient & Tag in row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label htmlFor="recipient" className="font-semibold text-brand-dark">
-                      Recipient Name
-                    </label>
-                    <input
-                      id="recipient"
-                      type="text"
-                      value={recipient}
-                      onChange={(e) => setRecipient(e.target.value)}
-                      placeholder="e.g. Maya"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark placeholder-brand-muted/60 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-1.5">
+                      <label htmlFor="recipient" className="font-semibold text-brand-dark">
+                        Recipient Name
+                      </label>
+                      <input
+                        id="recipient"
+                        type="text"
+                        value={recipient}
+                        onChange={(e) => setRecipient(e.target.value)}
+                        placeholder="e.g. Maya"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="tag" className="font-semibold text-brand-dark">
+                        Occasion Tag
+                      </label>
+                      <input
+                        id="tag"
+                        type="text"
+                        value={tag}
+                        onChange={(e) => setTag(e.target.value)}
+                        placeholder="e.g. Happy Birthday!"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label htmlFor="tag" className="font-semibold text-brand-dark">
-                      Occasion Tag
-                    </label>
-                    <input
-                      id="tag"
-                      type="text"
-                      value={tag}
-                      onChange={(e) => setTag(e.target.value)}
-                      placeholder="e.g. Happy Birthday!"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark placeholder-brand-muted/60 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
-                    />
-                  </div>
-                </div>
-
-                {/* Secret Message */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="message" className="font-semibold text-brand-dark">
-                      Hidden Surprise Message
-                    </label>
-                    <span className="text-[10px] text-brand-muted">This is revealed under the scratch foil</span>
-                  </div>
-                  <textarea
-                    id="message"
-                    rows={2}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Write the big surprise headline..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark placeholder-brand-muted/60 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink resize-none"
-                  />
-                </div>
-
-                {/* Secondary Note & Sender */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label htmlFor="secondary" className="font-semibold text-brand-dark">
-                      Secondary Note / Details
-                    </label>
-                    <input
-                      id="secondary"
-                      type="text"
-                      value={secondary}
-                      onChange={(e) => setSecondary(e.target.value)}
-                      placeholder="e.g. Can't wait to celebrate tonight!"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark placeholder-brand-muted/60 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 text-xs">
                     <label htmlFor="sender" className="font-semibold text-brand-dark">
-                      From (Your Name / Sign-off)
+                      Your Name / Sender Signature
                     </label>
                     <input
                       id="sender"
@@ -489,165 +568,352 @@ export default function CreateCardPage() {
                       value={sender}
                       onChange={(e) => setSender(e.target.value)}
                       placeholder="e.g. Alex"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark placeholder-brand-muted/60 focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
                     />
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* 3. Scratch Foil Cover Finish */}
-            <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-4">
-              <div>
-                <h2 className="text-base font-bold text-brand-dark">Scratch Foil Style</h2>
-                <p className="text-xs text-brand-muted">Select the metallic texture and color for the scratch-off surface</p>
-              </div>
+                {/* 2. Hidden Message & Secret Note */}
+                <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-5">
+                  <h3 className="text-base font-bold text-brand-dark">2. Secret Hidden Message</h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {FOIL_OPTIONS.map((foil) => {
-                  const isActive = coverStyle === foil.id;
-                  return (
-                    <button
-                      key={foil.id}
-                      type="button"
-                      onClick={() => {
-                        setCoverStyle(foil.id);
-                        setCardKey((prev) => prev + 1);
-                      }}
-                      className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all ${
-                        isActive
-                          ? "border-brand-pink bg-brand-pink-light/40 shadow-sm ring-2 ring-brand-pink/20"
-                          : "border-brand-warm-border bg-brand-warm-subtle/60 hover:border-brand-pink/30"
-                      }`}
-                    >
-                      <div className={`w-full h-8 rounded-xl bg-gradient-to-r ${foil.previewColor} mb-2 shadow-inner`} />
-                      <div>
-                        <p className="text-xs font-bold text-brand-dark">{foil.name}</p>
-                        <p className="text-[10px] text-brand-muted leading-tight mt-0.5">{foil.desc}</p>
+                  <div className="space-y-4 text-xs">
+                    <div className="space-y-1.5">
+                      <label htmlFor="message" className="font-semibold text-brand-dark">
+                        Primary Surprise Text (Revealed upon scratch)
+                      </label>
+                      <textarea
+                        id="message"
+                        rows={3}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Type your heartfelt secret or exciting reveal..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="secondary" className="font-semibold text-brand-dark">
+                        Secondary Message / Hint (Optional)
+                      </label>
+                      <input
+                        id="secondary"
+                        type="text"
+                        value={secondary}
+                        onChange={(e) => setSecondary(e.target.value)}
+                        placeholder="e.g. Dinner reservation at 8 PM tonight!"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Scratch Foil Finish Selection */}
+                <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-4">
+                  <div>
+                    <h3 className="text-base font-bold text-brand-dark">3. Scratch Foil Texture</h3>
+                    <p className="text-xs text-brand-muted">Choose the metallic sheen that coats your card</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    {FOIL_OPTIONS.map((foil) => {
+                      const isSelected = coverStyle === foil.id;
+                      return (
+                        <button
+                          key={foil.id}
+                          type="button"
+                          onClick={() => {
+                            setCoverStyle(foil.id);
+                            setCardKey((prev) => prev + 1);
+                          }}
+                          className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+                            isSelected
+                              ? "bg-brand-pink-light/60 border-brand-pink ring-2 ring-brand-pink/20 shadow-sm"
+                              : "border-brand-warm-border bg-brand-warm-subtle/40 hover:border-brand-pink/30 hover:bg-white"
+                          }`}
+                        >
+                          <div
+                            className={`w-8 h-8 rounded-xl bg-gradient-to-br ${foil.previewColor} shadow-inner shrink-0 mt-0.5 border border-white/50`}
+                          />
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-brand-dark block truncate">
+                              {foil.name}
+                            </span>
+                            <span className="text-[10px] text-brand-muted line-clamp-1">
+                              {foil.desc}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Foil Prompt Text */}
+                  <div className="pt-2 space-y-1.5 text-xs">
+                    <label htmlFor="coverText" className="font-semibold text-brand-dark">
+                      Foil Overlay Instructions
+                    </label>
+                    <input
+                      id="coverText"
+                      type="text"
+                      value={coverText}
+                      onChange={(e) => setCoverText(e.target.value)}
+                      placeholder="e.g. Scratch to reveal your surprise ✨"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark text-xs focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Background Palette & Sticker Styling */}
+                <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-5">
+                  <div>
+                    <h3 className="text-base font-bold text-brand-dark">4. Interior Styling & Stickers</h3>
+                    <p className="text-xs text-brand-muted">Customize the revealed backdrop and decorative icon</p>
+                  </div>
+
+                  {/* Palette Selector */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-semibold text-brand-dark">Card Background Theme</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      {BG_PALETTES.map((palette) => {
+                        const isSelected = selectedBgPalette === palette.id;
+                        return (
+                          <button
+                            key={palette.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedBgPalette(palette.id);
+                              setCardKey((k) => k + 1);
+                            }}
+                            className={cn(
+                              "p-2.5 rounded-xl border text-center transition-all text-xs font-semibold bg-gradient-to-br",
+                              palette.gradient,
+                              isSelected
+                                ? "ring-2 ring-brand-pink border-brand-pink shadow-sm scale-105"
+                                : "border-brand-warm-border opacity-85 hover:opacity-100"
+                            )}
+                          >
+                            <span className={palette.textColor}>{palette.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Sticker Selector */}
+                  <div className="space-y-2 pt-2">
+                    <span className="text-xs font-semibold text-brand-dark">Decorative Sticker</span>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                      {STICKERS.map((item) => {
+                        const Icon = item.icon;
+                        const isSelected = selectedSticker === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSticker(item.id);
+                              setCardKey((k) => k + 1);
+                            }}
+                            className={cn(
+                              "p-2.5 rounded-xl border flex items-center justify-center shrink-0 transition-all",
+                              isSelected
+                                ? "bg-brand-pink-light border-brand-pink text-brand-pink ring-2 ring-brand-pink/20 shadow-sm"
+                                : "bg-white border-brand-warm-border text-brand-muted hover:text-brand-dark"
+                            )}
+                            title={item.label}
+                          >
+                            <Icon className="w-4 h-4" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Optional Photo Memory Attachment */}
+                  <div className="space-y-2 pt-2 border-t border-brand-warm-border/60">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-brand-dark">
+                        Personal Hidden Photo (Optional)
+                      </span>
+                      {photoUrl && (
+                        <button
+                          type="button"
+                          onClick={handleRemovePhoto}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:underline"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Remove Photo</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                      id="photo-upload-input"
+                    />
+
+                    {photoUrl ? (
+                      <div className="flex items-center gap-3 p-3 rounded-2xl bg-brand-warm-subtle border border-brand-warm-border">
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm shrink-0">
+                          <Image src={photoUrl} alt="Preview" fill className="object-cover" unoptimized />
+                        </div>
+                        <div className="min-w-0 flex-1 text-xs">
+                          <p className="font-bold text-brand-dark truncate">Custom Photo Attached</p>
+                          <p className="text-[10px] text-brand-muted">Appears beneath the scratch foil</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-xs shrink-0"
+                        >
+                          Replace
+                        </Button>
                       </div>
-                    </button>
-                  );
-                })}
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full p-4 rounded-2xl border-2 border-dashed border-brand-warm-border hover:border-brand-pink/40 bg-brand-warm-subtle/40 flex items-center justify-center gap-2 text-xs font-semibold text-brand-muted hover:text-brand-dark transition-colors"
+                      >
+                        <Camera className="w-4 h-4 text-brand-pink" />
+                        <span>Upload a secret photo from device (JPG, PNG)</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Cover Instruction Text */}
-              <div className="pt-2 text-xs space-y-1.5">
-                <label htmlFor="coverText" className="font-semibold text-brand-dark">
-                  Scratch Overlay Text
-                </label>
-                <input
-                  id="coverText"
-                  type="text"
-                  value={coverText}
-                  onChange={(e) => {
-                    setCoverText(e.target.value);
-                    setCardKey((prev) => prev + 1);
-                  }}
-                  placeholder="e.g. Scratch to reveal your surprise ✨"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
-                />
+              {/* RIGHT COLUMN: Interactive Live Scratch Preview (5 cols) */}
+              <div className="lg:col-span-5 sticky top-24 space-y-4">
+                <div className="bg-white rounded-3xl p-5 sm:p-6 border border-brand-warm-border shadow-card space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-brand-dark">Interactive Live Preview</h3>
+                      <p className="text-[11px] text-brand-muted">Scratch the card to test your surprise</p>
+                    </div>
+
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleResetCard}
+                      className="gap-1 text-xs px-2.5 py-1"
+                      title="Reset foil"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Reset Foil</span>
+                    </Button>
+                  </div>
+
+                  {/* Real Canvas Scratch Component */}
+                  <div className="flex justify-center py-2">
+                    <div className="w-full max-w-[340px]">
+                      <ScratchCard
+                        key={cardKey}
+                        hiddenContent={hiddenContent}
+                        coverStyle={coverStyle}
+                        coverText={coverText}
+                        revealThreshold={0.65}
+                        brushRadius={26}
+                        className="shadow-lg mx-auto"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Share CTA button */}
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => setIsShareModalOpen(true)}
+                    className="w-full justify-center gap-2 font-bold shadow-md hover:shadow-brand-pink/25"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share This Surprise Card</span>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* RIGHT COLUMN: Live Interactive Scratch Card Preview (5 cols) */}
-          <div className="lg:col-span-5 sticky top-24 space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-dark">
-                  Live Scratch Preview
-                </h3>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleResetCard}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-muted hover:text-brand-dark bg-white hover:bg-brand-warm-subtle px-3 py-1.5 rounded-full border border-brand-warm-border transition-colors shadow-sm"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Re-cover Card</span>
-              </button>
-            </div>
-
-            {/* The Real Canvas Scratch Card Instance */}
-            <div className="relative">
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-brand-orange via-brand-pink to-brand-purple rounded-3xl opacity-20 blur-xl pointer-events-none"
-                aria-hidden="true"
-              />
-              <ScratchCard
-                key={cardKey}
-                hiddenContent={hiddenContent}
-                coverText={coverText || "Scratch to reveal your surprise ✨"}
-                coverStyle={coverStyle}
-                revealThreshold={0.65}
-                brushRadius={26}
-                ariaLabel="Live scratch card preview in studio"
-              />
-            </div>
-
-            {/* Quick Helper Note */}
-            <p className="text-center text-[11px] text-brand-muted">
-              ✨ Scratch with your mouse or finger right on the preview to test how your recipient will experience it!
-            </p>
-          </div>
-        </div>
+        )}
       </main>
 
-      {/* Share / Save Modal Info */}
+      {/* Share / Publish Modal */}
       {isShareModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="share-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-brand-dark/40 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-brand-dark/60 backdrop-blur-sm"
             onClick={() => setIsShareModalOpen(false)}
             aria-hidden="true"
           />
 
-          <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-brand-warm-border p-6 sm:p-8 z-10 animate-in fade-in zoom-in-95 duration-200 text-center space-y-4">
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-pink-light flex items-center justify-center text-brand-pink shadow-inner">
-              <Sparkles className="w-7 h-7" />
+          <div className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-brand-warm-border space-y-5 z-10 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-brand-pink-light text-brand-pink flex items-center justify-center mx-auto shadow-inner">
+              <Share2 className="w-6 h-6" />
             </div>
 
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-orange-light text-[#D97706]">
-                Phase 2A Active Preview
-              </span>
-              <h3 id="share-dialog-title" className="text-xl font-extrabold text-brand-dark">
-                Your Card is Ready in Preview!
-              </h3>
-              <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-                You can test and scratch your card in the studio preview right now. Public cloud link generation (for WhatsApp, iMessage, and Messenger) will go live in the Phase 2B update!
+            <div className="text-center space-y-1.5">
+              <h3 className="text-xl font-extrabold text-brand-dark">Your Surprise is Ready!</h3>
+              <p className="text-xs text-brand-muted leading-relaxed">
+                Copy the link below or send it directly to your recipient. When they open it, they can scratch off the foil to discover your secret note!
               </p>
             </div>
 
-            <div className="p-3.5 bg-brand-warm-subtle rounded-2xl border border-brand-warm-border text-left space-y-2 text-xs">
-              <p className="font-bold text-brand-dark">Current Card Summary:</p>
-              <ul className="text-brand-muted space-y-1">
-                <li>• <strong>Recipient:</strong> {recipient || "Someone special"}</li>
-                <li>• <strong>Tag:</strong> {tag || "Surprise"}</li>
-                <li>• <strong>Foil Style:</strong> {coverStyle}</li>
-                <li>• <strong>Sender:</strong> {sender || "Anonymous"}</li>
-              </ul>
+            {/* Link Box */}
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-brand-warm border border-brand-warm-border text-xs font-mono">
+              <span className="truncate flex-1 text-brand-dark">
+                suprilo.com/s/demo-{coverStyle}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText(
+                    `https://suprilo.com/s/demo-${coverStyle}`
+                  );
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2500);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-white border border-brand-warm-border text-brand-pink font-sans font-bold hover:bg-brand-pink-light transition-colors shrink-0"
+              >
+                {copiedLink ? "Copied!" : "Copy Link"}
+              </button>
             </div>
 
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                className="w-full justify-center"
-                onClick={() => setIsShareModalOpen(false)}
-              >
-                Continue Editing
-              </Button>
-            </div>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => setIsShareModalOpen(false)}
+              className="w-full justify-center text-xs"
+            >
+              Close
+            </Button>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+export default function CreateCardPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-brand-warm flex items-center justify-center p-4">
+          <div className="text-center space-y-3">
+            <div className="w-12 h-12 mx-auto rounded-2xl bg-brand-pink-light flex items-center justify-center text-brand-pink animate-pulse">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <p className="text-sm font-semibold text-brand-dark">Loading your Card Studio...</p>
+          </div>
+        </div>
+      }
+    >
+      <CreateCardStudio />
+    </React.Suspense>
   );
 }
