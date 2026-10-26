@@ -210,10 +210,10 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              // Logged-out Sign In button (opens direct Google Auth)
+              // Logged-out Sign In button (stays on current page after signing in)
               <button
                 type="button"
-                onClick={() => signInWithGoogle("/profile")}
+                onClick={() => signInWithGoogle()}
                 disabled={isSigningIn}
                 className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-brand-dark hover:text-brand-pink px-3.5 py-2 rounded-xl hover:bg-brand-warm-subtle border border-brand-warm-border/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink disabled:opacity-60"
               >
@@ -284,7 +284,7 @@ export function Navbar() {
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    signInWithGoogle("/profile");
+                    signInWithGoogle();
                   }}
                   disabled={isSigningIn}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-warm-subtle border border-brand-warm-border text-xs font-bold text-brand-dark hover:bg-brand-warm-border transition-colors disabled:opacity-60"

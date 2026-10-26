@@ -126,6 +126,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           sessionStorage.setItem(AUTH_RETURN_URL_KEY, returnUrl);
         } catch {}
+      } else {
+        try {
+          sessionStorage.removeItem(AUTH_RETURN_URL_KEY);
+        } catch {}
       }
 
       try {
