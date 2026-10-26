@@ -34,7 +34,7 @@ function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export function Navbar() {
   const router = useRouter();
-  const { user, loading, isSigningIn, signInWithGoogle, signOutUser } = useAuth();
+  const { user, loading, openAuthModal, signOutUser } = useAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
@@ -92,7 +92,7 @@ export function Navbar() {
   const handleCreateClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      signInWithGoogle("/create");
+      openAuthModal("/create");
     } else {
       router.push("/create");
     }
@@ -213,12 +213,11 @@ export function Navbar() {
               // Logged-out Sign In button
               <button
                 type="button"
-                onClick={() => signInWithGoogle()}
-                disabled={isSigningIn}
+                onClick={() => openAuthModal("/profile")}
                 className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-brand-dark hover:text-brand-pink px-3.5 py-2 rounded-xl hover:bg-brand-warm-subtle border border-brand-warm-border/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
               >
                 <GoogleIcon className="w-4 h-4" />
-                <span>{isSigningIn ? "Signing in..." : "Sign In"}</span>
+                <span>Sign In</span>
               </button>
             )}
 
@@ -284,13 +283,12 @@ export function Navbar() {
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    signInWithGoogle();
+                    openAuthModal("/profile");
                   }}
-                  disabled={isSigningIn}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-warm-subtle border border-brand-warm-border text-xs font-bold text-brand-dark hover:bg-brand-warm-border transition-colors"
                 >
                   <GoogleIcon className="w-4 h-4" />
-                  <span>{isSigningIn ? "Signing in..." : "Sign In with Google"}</span>
+                  <span>Sign In with Google</span>
                 </button>
               </div>
             )}

@@ -9,13 +9,13 @@ import { useAuth } from "@/context/AuthContext";
 
 export function ScratchCardDemo() {
   const router = useRouter();
-  const { user, signInWithGoogle } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [isRevealed, setIsRevealed] = React.useState(false);
 
   const handleCreateClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      signInWithGoogle("/create");
+      openAuthModal("/create");
     } else {
       router.push("/create");
     }

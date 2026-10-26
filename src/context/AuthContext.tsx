@@ -15,12 +15,16 @@ import {
   getFirebaseAuth,
   getGoogleProvider,
 } from "@/lib/firebase";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isSigningIn: boolean;
   error: string | null;
+  isAuthModalOpen: boolean;
+  openAuthModal: (returnUrl?: string) => void;
+  closeAuthModal: () => void;
   signInWithGoogle: (returnUrl?: string) => Promise<User | null>;
   signOutUser: () => Promise<void>;
   clearError: () => void;
@@ -36,6 +40,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true);
   const [isSigningIn, setIsSigningIn] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const [authModalState, setAuthModalState] = React.useState<{
+    isOpen: boolean;
+    returnUrl?: string;
+  }>({
+    isOpen: false,
+    returnUrl: "/create",
+  });
+
+  const openAuthModal = React.useCallback((returnUrl: string = "/create") => {
+    setAuthModalState({ isOpen: true, returnUrl });
+  }, []);
+
+  const closeAuthModal = React.useCallback(() => {
+    setAuthModalState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
 
   const clearError = React.useCallback(() => {
     setError(null);
@@ -181,14 +201,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       isSigningIn,
       error,
+      isAuthModalOpen: authModalState.isOpen,
+      openAuthModal,
+      closeAuthModal,
       signInWithGoogle,
       signOutUser,
       clearError,
     }),
-    [user, loading, isSigningIn, error, signInWithGoogle, signOutUser, clearError]
+    [
+      user,
+      loading,
+      isSigningIn,
+      error,
+      authModalState.isOpen,
+      openAuthModal,
+      closeAuthModal,
+      signInWithGoogle,
+      signOutUser,
+      clearError,
+    ]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <AuthModal
+        isOpen={authModalState.isOpen}
+        onClose={closeAuthModal}
+        returnUrl={authModalState.returnUrl}
+      />
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthContextType {

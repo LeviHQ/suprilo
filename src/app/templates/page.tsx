@@ -20,10 +20,12 @@ import {
 } from "@/data/templates";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 export default function TemplatesGalleryPage() {
   const router = useRouter();
+  const { user, openAuthModal } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState<TemplateCategory | "all">("all");
 
@@ -47,7 +49,20 @@ export default function TemplatesGalleryPage() {
   }, [searchQuery, selectedCategory]);
 
   const handleSelectTemplate = (template: TemplateDefinition) => {
-    router.push(`/create?template=${template.id}`);
+    if (!user) {
+      openAuthModal(`/create?template=${template.id}`);
+    } else {
+      router.push(`/create?template=${template.id}`);
+    }
+  };
+
+  const handleScratchClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      openAuthModal("/create?mode=scratch");
+    } else {
+      router.push("/create?mode=scratch");
+    }
   };
 
   return (
@@ -72,19 +87,25 @@ export default function TemplatesGalleryPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/create?mode=scratch">
-              <Button variant="secondary" size="sm" className="gap-1.5 text-xs">
-                <span>Blank Canvas</span>
-              </Button>
-            </Link>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleScratchClick}
+              className="gap-1.5 text-xs"
+            >
+              <span>Blank Canvas</span>
+            </Button>
 
-            <Link href="/create?mode=scratch">
-              <Button variant="primary" size="sm" className="gap-1.5 text-xs shadow-sm">
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Start from Scratch</span>
-                <span className="sm:hidden">Scratch</span>
-              </Button>
-            </Link>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleScratchClick}
+              className="gap-1.5 text-xs shadow-sm"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Start from Scratch</span>
+              <span className="sm:hidden">Scratch</span>
+            </Button>
           </div>
         </div>
       </header>

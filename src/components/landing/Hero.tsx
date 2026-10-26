@@ -10,12 +10,12 @@ import { useAuth } from "@/context/AuthContext";
 
 export function Hero() {
   const router = useRouter();
-  const { user, signInWithGoogle } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
   const handleCreateClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      signInWithGoogle("/create");
+      openAuthModal("/create");
     } else {
       router.push("/create");
     }
