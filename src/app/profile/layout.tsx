@@ -44,6 +44,14 @@ export default function ProfileDashboardLayout({
   const { user, loading, isSigningIn, signInWithGoogle } = useAuth();
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
 
+  const handleOpenMobileNav = React.useCallback(() => {
+    setIsMobileNavOpen(true);
+  }, []);
+
+  const handleCloseMobileNav = React.useCallback(() => {
+    setIsMobileNavOpen(false);
+  }, []);
+
   // 1. Loading State
   if (loading) {
     return (
@@ -125,11 +133,11 @@ export default function ProfileDashboardLayout({
       <Sidebar />
 
       {/* Slide-over Mobile Navigation Drawer */}
-      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
+      <MobileNav isOpen={isMobileNavOpen} onClose={handleCloseMobileNav} />
 
       {/* Main Content Area */}
       <div className="lg:pl-64 xl:pl-72 flex-1 flex flex-col min-h-screen">
-        <DashboardHeader onOpenMobileNav={() => setIsMobileNavOpen(true)} />
+        <DashboardHeader onOpenMobileNav={handleOpenMobileNav} />
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
           {children}

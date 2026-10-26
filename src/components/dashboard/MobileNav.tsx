@@ -20,9 +20,14 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const router = useRouter();
   const { user, signOutUser } = useAuth();
 
-  // Close on route change
+  const prevPathnameRef = React.useRef(pathname);
+
+  // Close only if route actually changes
   React.useEffect(() => {
-    onClose();
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
+      onClose();
+    }
   }, [pathname, onClose]);
 
   // Lock body scroll when mobile drawer is open
@@ -55,7 +60,10 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       />
 
       {/* Slide-over Drawer */}
-      <div className="fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-left duration-200">
+      <div
+        className="fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-left duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-brand-warm-border">
           <Link href="/" className="flex items-center gap-2">
