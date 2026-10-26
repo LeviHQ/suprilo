@@ -193,6 +193,155 @@ class SoundManager {
       });
     } catch {}
   }
+
+  /**
+   * Soft, organic wind breeze sound for cloud parting.
+   */
+  public playWindBreeze(): void {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const duration = 2.2;
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.03 * white) / 1.03;
+        data[i] = last * 2.8;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(400, now);
+      filter.frequency.exponentialRampToValueAtTime(950, now + 0.9);
+      filter.frequency.exponentialRampToValueAtTime(320, now + duration);
+      filter.Q.setValueAtTime(1.8, now);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.12, now + 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      noise.start(now);
+      noise.stop(now + duration);
+    } catch {}
+  }
+
+  /**
+   * Cartoon vintage airplane propeller sound that glides in and softens to idle.
+   */
+  public playAirplaneEngine(): void {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const duration = 3.2;
+
+      // Dual tone propeller engine (harmonic rich)
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc1.type = "sawtooth";
+      osc2.type = "triangle";
+
+      // Slight Doppler / deceleration effect
+      osc1.frequency.setValueAtTime(120, now);
+      osc1.frequency.linearRampToValueAtTime(145, now + 1.0);
+      osc1.frequency.exponentialRampToValueAtTime(95, now + duration);
+
+      osc2.frequency.setValueAtTime(240, now);
+      osc2.frequency.linearRampToValueAtTime(290, now + 1.0);
+      osc2.frequency.exponentialRampToValueAtTime(190, now + duration);
+
+      // Tremolo LFO for propeller blade stutter
+      const lfo = ctx.createOscillator();
+      lfo.frequency.setValueAtTime(22, now);
+      lfo.frequency.linearRampToValueAtTime(16, now + duration);
+
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.setValueAtTime(0.35, now);
+
+      const tremoloGain = ctx.createGain();
+      tremoloGain.gain.setValueAtTime(0.65, now);
+
+      lfo.connect(lfoGain);
+      lfoGain.connect(tremoloGain.gain);
+
+      // Low pass to give warm friendly cartoon tone
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(450, now);
+
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.001, now);
+      masterGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+      masterGain.gain.linearRampToValueAtTime(0.08, now + 1.8);
+      masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc1.connect(tremoloGain);
+      osc2.connect(tremoloGain);
+      tremoloGain.connect(filter);
+      filter.connect(masterGain);
+      masterGain.connect(ctx.destination);
+
+      lfo.start(now);
+      osc1.start(now);
+      osc2.start(now);
+
+      lfo.stop(now + duration);
+      osc1.stop(now + duration);
+      osc2.stop(now + duration);
+    } catch {}
+  }
+
+  /**
+   * Sparkly magical chime for the balloon options arriving.
+   */
+  public playBalloonArrival(): void {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Cheerful warm chord: C5, G5, C6
+      const notes = [523.25, 783.99, 1046.5];
+
+      notes.forEach((freq, idx) => {
+        const noteTime = now + idx * 0.1;
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, noteTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.02, noteTime + 0.3);
+
+        noteGain.gain.setValueAtTime(0.001, noteTime);
+        noteGain.gain.linearRampToValueAtTime(0.09, noteTime + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.7);
+
+        osc.connect(noteGain);
+        noteGain.connect(ctx.destination);
+
+        osc.start(noteTime);
+        osc.stop(noteTime + 0.75);
+      });
+    } catch {}
+  }
 }
 
 export const soundManager = new SoundManager();

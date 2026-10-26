@@ -27,8 +27,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { CreationIntroAnimation } from "@/components/create/CreationIntroAnimation";
-import { CreationChoiceCards } from "@/components/create/CreationChoiceCards";
+import { CreationFlightStage } from "@/components/create/CreationFlightStage";
 import {
   getTemplateById,
   DEFAULT_SCRATCH_TEMPLATE,
@@ -150,8 +149,6 @@ function CreateCardStudio() {
     if (templateParam || modeParam) return "editor";
     return "choices";
   });
-
-  const [hasIntroCompleted, setHasIntroCompleted] = React.useState(false);
 
   // Card Content State
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(templateParam);
@@ -481,24 +478,18 @@ function CreateCardStudio() {
       {/* Main Studio Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* ======================================================== */}
-        {/* VIEW 1: CREATION CHOICE SCREEN WITH DELIGHTFUL INTRO */}
+        {/* VIEW 1: CREATION CHOICE SCREEN WITH DELIGHTFUL FLIGHT STAGE */}
         {/* ======================================================== */}
         {viewState === "choices" ? (
-          <div className="space-y-6">
-            {!hasIntroCompleted && (
-              <CreationIntroAnimation onComplete={() => setHasIntroCompleted(true)} />
-            )}
-
-            <CreationChoiceCards
-              onSelectScratch={() => {
-                setViewState("editor");
-                router.push("/create?mode=scratch");
-              }}
-              onExploreTemplates={() => {
-                router.push("/templates");
-              }}
-            />
-          </div>
+          <CreationFlightStage
+            onSelectScratch={() => {
+              setViewState("editor");
+              router.push("/create?mode=scratch");
+            }}
+            onExploreTemplates={() => {
+              router.push("/templates");
+            }}
+          />
         ) : (
           /* ======================================================== */
           /* VIEW 2: SHARED CARD STUDIO EDITOR */
