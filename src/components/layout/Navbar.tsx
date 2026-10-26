@@ -34,7 +34,7 @@ function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export function Navbar() {
   const router = useRouter();
-  const { user, loading, openAuthModal, signOutUser } = useAuth();
+  const { user, loading, isSigningIn, signInWithGoogle, openAuthModal, signOutUser } = useAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
@@ -210,14 +210,15 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              // Logged-out Sign In button
+              // Logged-out Sign In button (opens direct Google Auth)
               <button
                 type="button"
-                onClick={() => openAuthModal("/profile")}
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-brand-dark hover:text-brand-pink px-3.5 py-2 rounded-xl hover:bg-brand-warm-subtle border border-brand-warm-border/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink"
+                onClick={() => signInWithGoogle("/profile")}
+                disabled={isSigningIn}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-brand-dark hover:text-brand-pink px-3.5 py-2 rounded-xl hover:bg-brand-warm-subtle border border-brand-warm-border/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink disabled:opacity-60"
               >
                 <GoogleIcon className="w-4 h-4" />
-                <span>Sign In</span>
+                <span>{isSigningIn ? "Signing in..." : "Sign In"}</span>
               </button>
             )}
 
@@ -283,12 +284,13 @@ export function Navbar() {
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    openAuthModal("/profile");
+                    signInWithGoogle("/profile");
                   }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-warm-subtle border border-brand-warm-border text-xs font-bold text-brand-dark hover:bg-brand-warm-border transition-colors"
+                  disabled={isSigningIn}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-warm-subtle border border-brand-warm-border text-xs font-bold text-brand-dark hover:bg-brand-warm-border transition-colors disabled:opacity-60"
                 >
                   <GoogleIcon className="w-4 h-4" />
-                  <span>Sign In with Google</span>
+                  <span>{isSigningIn ? "Signing in..." : "Sign In with Google"}</span>
                 </button>
               </div>
             )}
