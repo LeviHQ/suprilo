@@ -8,7 +8,6 @@ import {
   Search,
   ArrowLeft,
   Sparkles,
-  PlusCircle,
   X,
   ArrowRight,
 } from "lucide-react";
@@ -21,6 +20,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/context/AuthContext";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { cn } from "@/lib/utils";
 
 export default function TemplatesGalleryPage() {
@@ -56,15 +56,6 @@ export default function TemplatesGalleryPage() {
     }
   };
 
-  const handleScratchClick = (e: React.MouseEvent) => {
-    if (!user) {
-      e.preventDefault();
-      openAuthModal("/create?mode=scratch");
-    } else {
-      router.push("/create?mode=scratch");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink">
       {/* Top Navbar */}
@@ -95,25 +86,16 @@ export default function TemplatesGalleryPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleScratchClick}
-              className="gap-1.5 text-xs"
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
+              title="View Profile Dashboard"
             >
-              <span>Blank Canvas</span>
-            </Button>
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleScratchClick}
-              className="gap-1.5 text-xs shadow-sm"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Start from Scratch</span>
-              <span className="sm:hidden">Scratch</span>
-            </Button>
+              <UserAvatar user={user} size="sm" />
+              <span className="hidden sm:inline text-xs font-semibold text-brand-dark">
+                {user?.displayName?.split(" ")[0] || "Profile"}
+              </span>
+            </Link>
           </div>
         </div>
       </header>

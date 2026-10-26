@@ -474,18 +474,6 @@ function CreateCardStudio() {
                 {user.displayName?.split(" ")[0] || "Profile"}
               </span>
             </Link>
-
-            {viewState === "editor" && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsShareModalOpen(true)}
-                className="gap-1.5 shadow-md hover:shadow-brand-pink/25 text-xs font-semibold"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share Card</span>
-              </Button>
-            )}
           </div>
         </div>
       </header>
