@@ -233,6 +233,18 @@ function CreateCardStudio() {
     setCardKey((prev) => prev + 1);
   };
 
+  const handleBack = () => {
+    if (viewState === "editor" && !templateParam && !modeParam) {
+      setViewState("choices");
+      return;
+    }
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   const handleResetCard = () => {
     setCardKey((prev) => prev + 1);
   };
@@ -257,17 +269,25 @@ function CreateCardStudio() {
       <div className="min-h-screen bg-brand-warm flex flex-col">
         <header className="h-16 border-b border-brand-warm-border bg-white px-4">
           <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-muted hover:text-brand-dark"
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white hover:bg-brand-warm-subtle text-brand-dark hover:text-brand-pink border border-brand-warm-border shadow-xs active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink shrink-0"
+              aria-label="Go back"
+              title="Go back"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
-            </Link>
+            </button>
             <div className="relative h-8 w-24">
               <Image src="/brand/logo.png" alt="Suprilo" fill className="object-contain" priority />
             </div>
-            <div className="w-16" />
+            <div className="w-9" />
           </div>
         </header>
 
@@ -299,11 +319,20 @@ function CreateCardStudio() {
                 <span>{isSigningIn ? "Signing in..." : "Continue with Google"}</span>
               </Button>
 
-              <Link href="/" className="block">
-                <Button variant="secondary" size="md" className="w-full justify-center text-xs">
-                  Return to Home
-                </Button>
-              </Link>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.history.length > 1) {
+                    router.back();
+                  } else {
+                    router.push("/");
+                  }
+                }}
+                className="w-full justify-center text-xs"
+              >
+                Go Back
+              </Button>
             </div>
           </div>
         </div>
@@ -400,17 +429,19 @@ function CreateCardStudio() {
       {/* Top Navigation */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-muted hover:text-brand-dark bg-brand-warm-subtle hover:bg-brand-warm-border px-3 py-1.5 rounded-full border border-brand-warm-border transition-colors"
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white hover:bg-brand-warm-subtle text-brand-dark hover:text-brand-pink border border-brand-warm-border shadow-xs active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink shrink-0"
+              aria-label="Go back"
+              title="Go back"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Home</span>
-            </Link>
+              <ArrowLeft className="w-4 h-4" />
+            </button>
 
             <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-9 w-28 aspect-[800/285]">
+              <div className="relative h-8 sm:h-9 w-24 sm:w-28 aspect-[800/285]">
                 <Image
                   src="/brand/logo.png"
                   alt="Suprilo"

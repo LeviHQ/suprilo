@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -41,6 +40,7 @@ export default function ProfileDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, isSigningIn, signInWithGoogle } = useAuth();
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
 
@@ -72,17 +72,25 @@ export default function ProfileDashboardLayout({
       <div className="min-h-screen bg-brand-warm flex flex-col">
         <header className="h-16 border-b border-brand-warm-border bg-white px-4">
           <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-muted hover:text-brand-dark"
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white hover:bg-brand-warm-subtle text-brand-dark hover:text-brand-pink border border-brand-warm-border shadow-xs active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink shrink-0"
+              aria-label="Go back"
+              title="Go back"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
-            </Link>
+            </button>
             <div className="relative h-8 w-24">
               <Image src="/brand/logo.png" alt="Suprilo" fill className="object-contain" priority />
             </div>
-            <div className="w-16" />
+            <div className="w-9" />
           </div>
         </header>
 
@@ -114,11 +122,20 @@ export default function ProfileDashboardLayout({
                 <span>{isSigningIn ? "Signing in..." : "Sign In with Google"}</span>
               </Button>
 
-              <Link href="/" className="block">
-                <Button variant="secondary" size="md" className="w-full justify-center text-xs">
-                  Return to Home
-                </Button>
-              </Link>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.history.length > 1) {
+                    router.back();
+                  } else {
+                    router.push("/");
+                  }
+                }}
+                className="w-full justify-center text-xs"
+              >
+                Go Back
+              </Button>
             </div>
           </div>
         </div>
