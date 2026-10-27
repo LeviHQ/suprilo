@@ -114,3 +114,162 @@
     animation-play-state: paused !important;
   }
 }
+
+/* ========================================================================= */
+/* SUPRILO DELIGHTFUL CREATION FLIGHT STAGE KEYFRAMES (60FPS GPU COMPOSITED) */
+/* ========================================================================= */
+
+/* 1. Clouds Parting from Center: Left cluster parts to far left, Right cluster to far right */
+@keyframes cloud-part-left-from-center {
+  0% {
+    transform: translate3d(-85%, -40%, 0) scale(1.1);
+    opacity: 0.98;
+  }
+  30% {
+    opacity: 0.95;
+    transform: translate3d(-105%, -42%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-260%, -50%, 0) scale(0.85);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+@keyframes cloud-part-right-from-center {
+  0% {
+    transform: translate3d(-15%, -40%, 0) scale(1.1);
+    opacity: 0.98;
+  }
+  30% {
+    opacity: 0.95;
+    transform: translate3d(5%, -42%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(160%, -50%, 0) scale(0.85);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+.anim-cloud-part-left {
+  animation: cloud-part-left-from-center 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.anim-cloud-part-right {
+  animation: cloud-part-right-from-center 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* 2. Airplane Flight Arc: Emerges in center behind clouds, glides to the left dock */
+@keyframes plane-emerge-to-left {
+  0% {
+    transform: translate3d(140px, 30px, 0) scale(0.35) rotate(-6deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+    transform: translate3d(90px, 8px, 0) scale(0.85) rotate(-3deg);
+  }
+  70% {
+    transform: translate3d(-12px, -6px, 0) scale(1.04) rotate(1deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes plane-idle-hover {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0) rotate(1.5deg);
+  }
+}
+
+.anim-plane-stage {
+  animation: plane-emerge-to-left 2.2s cubic-bezier(0.2, 0.9, 0.3, 1) forwards,
+             plane-idle-hover 3.4s ease-in-out infinite 2.2s;
+  will-change: transform, opacity;
+}
+
+/* 3. Propeller blur */
+@keyframes prop-spin-fast {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.anim-propeller {
+  animation: prop-spin-fast 0.1s linear infinite;
+  transform-origin: center;
+}
+
+/* 4. Threads Fade & Extend */
+@keyframes threads-reveal {
+  0%, 45% {
+    opacity: 0;
+    transform: scaleY(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.anim-threads-reveal {
+  animation: threads-reveal 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+  transform-origin: top;
+}
+
+/* 5. Balloons Floating In */
+@keyframes balloons-float-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0) scale(0.96);
+  }
+  40% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes balloon-gentle-bob-1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes balloon-gentle-bob-2 {
+  0%, 100% {
+    transform: translate3d(0, -2px, 0);
+  }
+  50% {
+    transform: translate3d(0, 4px, 0);
+  }
+}
+
+.anim-balloons-entrance {
+  animation: balloons-float-in 2.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.anim-bob-card-1 {
+  animation: balloon-gentle-bob-1 4s ease-in-out infinite 2.1s;
+}
+
+.anim-bob-card-2 {
+  animation: balloon-gentle-bob-2 4.5s ease-in-out infinite 2.3s;
+}
+

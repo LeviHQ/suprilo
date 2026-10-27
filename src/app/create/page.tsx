@@ -139,7 +139,7 @@ function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
 function CreateCardStudio() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading, isSigningIn, signInWithGoogle } = useAuth();
+  const { user, loading, isSigningIn, signInWithGoogle, openAuthModal } = useAuth();
 
   const templateParam = searchParams.get("template");
   const modeParam = searchParams.get("mode");
@@ -246,8 +246,8 @@ function CreateCardStudio() {
     setCardKey((prev) => prev + 1);
   };
 
-  // Loading Screen
-  if (loading) {
+  // Loading Screen only when entering active editor studio
+  if (loading && viewState === "editor") {
     return (
       <div className="min-h-screen bg-brand-warm flex items-center justify-center p-4">
         <div className="text-center space-y-3">
@@ -260,8 +260,8 @@ function CreateCardStudio() {
     );
   }
 
-  // Auth Gate: Require sign in to create cards
-  if (!user) {
+  // Auth Gate: Require sign in when entering the active card editor studio
+  if (viewState === "editor" && !user) {
     return (
       <div className="min-h-screen bg-brand-warm flex flex-col">
         <header className="h-16 border-b border-brand-warm-border bg-white px-4">
@@ -461,30 +461,45 @@ function CreateCardStudio() {
               </Link>
             )}
 
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
-              title="View Profile Dashboard"
-            >
-              <UserAvatar user={user} size="sm" />
-              <span className="hidden sm:inline text-xs font-semibold text-brand-dark">
-                {user.displayName?.split(" ")[0] || "Profile"}
-              </span>
-            </Link>
+            {user ? (
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
+                title="View Profile Dashboard"
+              >
+                <UserAvatar user={user} size="sm" />
+                <span className="hidden sm:inline text-xs font-semibold text-brand-dark">
+                  {user.displayName?.split(" ")[0] || "Profile"}
+                </span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openAuthModal("/create")}
+                className="flex items-center gap-1.5 text-xs font-semibold text-brand-dark hover:text-brand-pink px-3 py-1.5 rounded-full bg-brand-warm-subtle border border-brand-warm-border/80 hover:bg-brand-warm-border transition-colors"
+              >
+                <UserAvatar user={null} size="sm" />
+                <span className="hidden sm:inline">Sign In</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Studio Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-8">
         {/* ======================================================== */}
         {/* VIEW 1: CREATION CHOICE SCREEN WITH DELIGHTFUL FLIGHT STAGE */}
         {/* ======================================================== */}
         {viewState === "choices" ? (
           <CreationFlightStage
             onSelectScratch={() => {
-              setViewState("editor");
-              router.push("/create?mode=scratch");
+              if (!user) {
+                openAuthModal("/create?mode=scratch");
+              } else {
+                setViewState("editor");
+                router.push("/create?mode=scratch");
+              }
             }}
             onExploreTemplates={() => {
               router.push("/templates");

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const headingFont = Plus_Jakarta_Sans({
@@ -69,8 +70,6 @@ export const metadata: Metadata = {
     images: ["/brand/logo.png"],
   },
 };
-
-import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout({
   children,

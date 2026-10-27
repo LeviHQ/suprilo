@@ -194,8 +194,11 @@ class SoundManager {
     } catch {}
   }
 
+  // Cached lightweight noise buffer for zero main-thread lag
+  private cachedWindBuffer: AudioBuffer | null = null;
+
   /**
-   * Soft, organic wind breeze sound for cloud parting.
+   * Soft, organic wind breeze sound for cloud parting (lightweight, zero main-thread lag).
    */
   public playWindBreeze(): void {
     if (this.isMuted) return;
@@ -204,31 +207,35 @@ class SoundManager {
 
     try {
       const now = ctx.currentTime;
-      const duration = 2.2;
-      const bufferSize = Math.floor(ctx.sampleRate * duration);
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
+      const duration = 1.4;
 
-      let last = 0;
-      for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        last = (last + 0.03 * white) / 1.03;
-        data[i] = last * 2.8;
+      // Create or reuse a tiny 0.4s noise buffer (minimal memory & CPU)
+      if (!this.cachedWindBuffer) {
+        const bufferSize = Math.floor(ctx.sampleRate * 0.4);
+        this.cachedWindBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = this.cachedWindBuffer.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          last = (last + 0.05 * white) / 1.05;
+          data[i] = last * 2.2;
+        }
       }
 
       const noise = ctx.createBufferSource();
-      noise.buffer = buffer;
+      noise.buffer = this.cachedWindBuffer;
+      noise.loop = true;
 
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(400, now);
-      filter.frequency.exponentialRampToValueAtTime(950, now + 0.9);
-      filter.frequency.exponentialRampToValueAtTime(320, now + duration);
-      filter.Q.setValueAtTime(1.8, now);
+      filter.frequency.setValueAtTime(350, now);
+      filter.frequency.exponentialRampToValueAtTime(750, now + 0.6);
+      filter.frequency.exponentialRampToValueAtTime(280, now + duration);
+      filter.Q.setValueAtTime(1.4, now);
 
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.12, now + 0.6);
+      gain.gain.linearRampToValueAtTime(0.09, now + 0.4);
       gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       noise.connect(filter);
@@ -241,7 +248,7 @@ class SoundManager {
   }
 
   /**
-   * Cartoon vintage airplane propeller sound that glides in and softens to idle.
+   * Cartoon vintage airplane propeller sound that glides in and softens (lightweight, zero lag).
    */
   public playAirplaneEngine(): void {
     if (this.isMuted) return;
@@ -250,61 +257,31 @@ class SoundManager {
 
     try {
       const now = ctx.currentTime;
-      const duration = 3.2;
+      const duration = 2.0;
 
-      // Dual tone propeller engine (harmonic rich)
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      osc1.type = "sawtooth";
-      osc2.type = "triangle";
+      // Pure low-frequency warm oscillators (zero CPU impact)
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(115, now);
+      osc.frequency.linearRampToValueAtTime(135, now + 0.8);
+      osc.frequency.exponentialRampToValueAtTime(85, now + duration);
 
-      // Slight Doppler / deceleration effect
-      osc1.frequency.setValueAtTime(120, now);
-      osc1.frequency.linearRampToValueAtTime(145, now + 1.0);
-      osc1.frequency.exponentialRampToValueAtTime(95, now + duration);
-
-      osc2.frequency.setValueAtTime(240, now);
-      osc2.frequency.linearRampToValueAtTime(290, now + 1.0);
-      osc2.frequency.exponentialRampToValueAtTime(190, now + duration);
-
-      // Tremolo LFO for propeller blade stutter
-      const lfo = ctx.createOscillator();
-      lfo.frequency.setValueAtTime(22, now);
-      lfo.frequency.linearRampToValueAtTime(16, now + duration);
-
-      const lfoGain = ctx.createGain();
-      lfoGain.gain.setValueAtTime(0.35, now);
-
-      const tremoloGain = ctx.createGain();
-      tremoloGain.gain.setValueAtTime(0.65, now);
-
-      lfo.connect(lfoGain);
-      lfoGain.connect(tremoloGain.gain);
-
-      // Low pass to give warm friendly cartoon tone
+      // Warm lowpass filter to produce cartoon motor purr
       const filter = ctx.createBiquadFilter();
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(450, now);
+      filter.frequency.setValueAtTime(380, now);
 
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.001, now);
-      masterGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
-      masterGain.gain.linearRampToValueAtTime(0.08, now + 1.8);
-      masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.06, now + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-      osc1.connect(tremoloGain);
-      osc2.connect(tremoloGain);
-      tremoloGain.connect(filter);
-      filter.connect(masterGain);
-      masterGain.connect(ctx.destination);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
 
-      lfo.start(now);
-      osc1.start(now);
-      osc2.start(now);
-
-      lfo.stop(now + duration);
-      osc1.stop(now + duration);
-      osc2.stop(now + duration);
+      osc.start(now);
+      osc.stop(now + duration);
     } catch {}
   }
 
@@ -318,27 +295,25 @@ class SoundManager {
 
     try {
       const now = ctx.currentTime;
-      // Cheerful warm chord: C5, G5, C6
-      const notes = [523.25, 783.99, 1046.5];
+      const notes = [523.25, 659.25, 783.99, 1046.5];
 
       notes.forEach((freq, idx) => {
-        const noteTime = now + idx * 0.1;
+        const noteTime = now + idx * 0.08;
         const osc = ctx.createOscillator();
         const noteGain = ctx.createGain();
 
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, noteTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 1.02, noteTime + 0.3);
 
         noteGain.gain.setValueAtTime(0.001, noteTime);
-        noteGain.gain.linearRampToValueAtTime(0.09, noteTime + 0.02);
-        noteGain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.7);
+        noteGain.gain.linearRampToValueAtTime(0.08, noteTime + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.5);
 
         osc.connect(noteGain);
         noteGain.connect(ctx.destination);
 
         osc.start(noteTime);
-        osc.stop(noteTime + 0.75);
+        osc.stop(noteTime + 0.55);
       });
     } catch {}
   }
