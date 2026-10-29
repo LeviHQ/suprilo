@@ -301,20 +301,20 @@ export function CreationFlightStage({
           </svg>
         </div>
 
-        {/* Mobile threads: Red thread to Card 1, Blue thread sweeps across to right edge */}
+        {/* Mobile threads: Red thread to Card 1, Blue thread towards Card 2 behind Card 1 */}
         <div className="sm:hidden w-full h-8 relative pointer-events-none anim-threads-reveal -my-1 z-10">
           <svg className="w-full h-full" viewBox="0 0 380 32" fill="none" preserveAspectRatio="none">
             {/* Red/Pink Thread directly into Card 1's badge */}
             <path
-              d="M 75 2 C 75 14, 80 22, 80 32"
+              d="M 75 2 C 75 14, 80 22, 85 32"
               stroke="#FF4D6D"
               strokeWidth="2.5"
               strokeDasharray="5 4"
               opacity="0.85"
             />
-            {/* Blue/Purple Thread sweeps across over Card 1 to its right edge */}
+            {/* Blue/Purple Thread flows from plane tail towards Card 2 (slipping behind Card 1) */}
             <path
-              d="M 75 2 C 150 12, 260 18, 350 32"
+              d="M 75 2 C 110 14, 150 22, 190 32"
               stroke="#8B5CF6"
               strokeWidth="2.5"
               strokeDasharray="5 4"
@@ -332,19 +332,6 @@ export function CreationFlightStage({
         {/* BALLOON 1: Use a Template (Warm Rose & Peach Theme)      */}
         {/* ======================================================== */}
         <div className="anim-bob-card-1 group relative bg-white rounded-3xl p-3.5 sm:p-6 border-2 border-brand-pink/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-3 hover:-translate-y-1">
-          {/* Mobile: Purple thread running down the right edge of Card 1 towards Card 2 */}
-          <div className="sm:hidden absolute top-0 right-[22px] bottom-0 w-4 pointer-events-none z-10 overflow-visible anim-threads-reveal">
-            <svg className="w-full h-full" viewBox="0 0 16 100" preserveAspectRatio="none" fill="none">
-              <path
-                d="M 8 0 C 12 35, 4 65, 8 100"
-                stroke="#8B5CF6"
-                strokeWidth="2.5"
-                strokeDasharray="5 4"
-                opacity="0.85"
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-          </div>
           {/* Warm background glow */}
           <div
             className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-gradient-to-br from-brand-pink/15 via-brand-orange/10 to-transparent rounded-full blur-lg pointer-events-none"
@@ -418,11 +405,11 @@ export function CreationFlightStage({
         {/* BALLOON 2: Start from Scratch (Purple & Yellow Theme)     */}
         {/* ======================================================== */}
         <div className="anim-bob-card-2 group relative bg-white rounded-3xl p-3.5 sm:p-6 border-2 border-brand-purple/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-3 hover:-translate-y-1">
-          {/* Mobile: Connecting ribbon thread flowing from Card 1 into Card 2's balloon badge */}
-          <div className="sm:hidden absolute -top-8 left-0 right-0 h-8 pointer-events-none z-10 anim-threads-reveal">
-            <svg className="w-full h-full" viewBox="0 0 380 32" fill="none" preserveAspectRatio="none">
+          {/* Mobile: Purple ribbon emerging from behind Card 1 directly into Card 2's balloon badge */}
+          <div className="sm:hidden absolute -top-7 left-0 right-0 h-7 pointer-events-none z-10 anim-threads-reveal">
+            <svg className="w-full h-full" viewBox="0 0 380 28" fill="none" preserveAspectRatio="none">
               <path
-                d="M 350 2 C 320 20, 200 28, 85 32"
+                d="M 190 0 C 170 14, 120 22, 85 28"
                 stroke="#8B5CF6"
                 strokeWidth="2.5"
                 strokeDasharray="5 4"
