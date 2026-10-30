@@ -27,6 +27,7 @@ interface AuthContextType {
   closeAuthModal: () => void;
   signInWithGoogle: (returnUrl?: string) => Promise<User | null>;
   signOutUser: () => Promise<void>;
+  getIdToken: (forceRefresh?: boolean) => Promise<string | null>;
   clearError: () => void;
 }
 
@@ -179,6 +180,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
+   * Get fresh Firebase ID Token for authenticated server API calls
+   */
+  const getIdToken = React.useCallback(
+    async (forceRefresh: boolean = false): Promise<string | null> => {
+      if (!user) return null;
+      try {
+        return await user.getIdToken(forceRefresh);
+      } catch {
+        return null;
+      }
+    },
+    [user]
+  );
+
+  /**
    * Sign Out
    */
   const signOutUser = React.useCallback(async () => {
@@ -210,6 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       closeAuthModal,
       signInWithGoogle,
       signOutUser,
+      getIdToken,
       clearError,
     }),
     [
@@ -222,6 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       closeAuthModal,
       signInWithGoogle,
       signOutUser,
+      getIdToken,
       clearError,
     ]
   );
