@@ -28,10 +28,9 @@ import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { CreationFlightStage } from "@/components/create/CreationFlightStage";
-import {
-  getTemplateById,
-  DEFAULT_SCRATCH_TEMPLATE,
-} from "@/data/templates";
+import { getTemplateById } from "@/data/templates";
+import { useCardEditor } from "@/hooks/useCardEditor";
+import { BgPaletteId, StickerId } from "@/types/card";
 import { cn } from "@/lib/utils";
 
 // Foil Finishes
@@ -63,7 +62,13 @@ const FOIL_OPTIONS: { id: CoverStyle; name: string; previewColor: string; desc: 
 ];
 
 // Interior Card Background Palettes
-const BG_PALETTES = [
+const BG_PALETTES: {
+  id: BgPaletteId;
+  name: string;
+  gradient: string;
+  textColor: string;
+  border: string;
+}[] = [
   {
     id: "soft-pink",
     name: "Soft Pink",
@@ -102,7 +107,7 @@ const BG_PALETTES = [
 ];
 
 // Decorative Stickers
-const STICKERS = [
+const STICKERS: { id: StickerId; label: string; icon: React.ElementType }[] = [
   { id: "heart", label: "Heart", icon: Heart },
   { id: "sparkles", label: "Sparkles", icon: Sparkles },
   { id: "cake", label: "Cake", icon: Cake },
@@ -144,70 +149,46 @@ function CreateCardStudio() {
   const templateParam = searchParams.get("template");
   const modeParam = searchParams.get("mode");
 
+  // Determine user first name for default sender assignment
+  const userFirstName = user?.displayName ? user.displayName.split(" ")[0] : "Alex";
+
   // Flow State: 'choices' (with animated intro) or 'editor'
   const [viewState, setViewState] = React.useState<"choices" | "editor">(() => {
     if (templateParam || modeParam) return "editor";
     return "choices";
   });
 
-  // Card Content State
-  const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(templateParam);
-  const [tag, setTag] = React.useState("Special Surprise");
-  const [recipient, setRecipient] = React.useState("Maya");
-  const [message, setMessage] = React.useState("“You're someone else's little bit of magic 💖”");
-  const [secondary, setSecondary] = React.useState("Thanks for making ordinary moments special.");
-  const [sender, setSender] = React.useState("Alex");
-  const [coverStyle, setCoverStyle] = React.useState<CoverStyle>("lavender-pink");
-  const [coverText, setCoverText] = React.useState("Scratch to reveal your surprise ✨");
-  const [selectedBgPalette, setSelectedBgPalette] = React.useState("soft-pink");
-  const [selectedSticker, setSelectedSticker] = React.useState("heart");
-  const [photoUrl, setPhotoUrl] = React.useState<string | null>(null);
+  // Canonical reducer-backed card editor hook
+  const {
+    state,
+    cardKey,
+    characterCounts,
+    limits,
+    setField,
+    setPhotoUrl,
+    setFoilStyle,
+    setBgPalette,
+    setSticker,
+    remountCanvas,
+    clearDraft,
+  } = useCardEditor({
+    templateParam,
+    modeParam,
+    defaultSender: userFirstName,
+  });
 
-  // Scratch card instance key to force clean canvas remount
-  const [cardKey, setCardKey] = React.useState(0);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Set sender initial name from authenticated user if available
+  // Sync viewState when search parameters change externally
   React.useEffect(() => {
-    if (user?.displayName && sender === "Alex") {
-      const firstName = user.displayName.split(" ")[0];
-      if (firstName) setSender(firstName);
-    }
-  }, [user, sender]);
-
-  // Load configuration whenever template query param changes
-  React.useEffect(() => {
-    if (templateParam) {
-      const template = getTemplateById(templateParam);
-      if (template) {
-        setSelectedTemplateId(template.id);
-        setTag(template.tag);
-        setRecipient(template.recipient);
-        setMessage(template.message);
-        setSecondary(template.secondary);
-        setCoverStyle(template.coverStyle);
-        setCoverText(template.coverText);
-        setSender(user?.displayName ? user.displayName.split(" ")[0] : template.sender);
-        setViewState("editor");
-        setCardKey((prev) => prev + 1);
-      }
-    } else if (modeParam === "scratch") {
-      setSelectedTemplateId(null);
-      setTag(DEFAULT_SCRATCH_TEMPLATE.tag);
-      setRecipient(DEFAULT_SCRATCH_TEMPLATE.recipient);
-      setMessage(DEFAULT_SCRATCH_TEMPLATE.message);
-      setSecondary(DEFAULT_SCRATCH_TEMPLATE.secondary);
-      setCoverStyle(DEFAULT_SCRATCH_TEMPLATE.coverStyle);
-      setCoverText(DEFAULT_SCRATCH_TEMPLATE.coverText);
-      setSender(user?.displayName ? user.displayName.split(" ")[0] : DEFAULT_SCRATCH_TEMPLATE.sender);
+    if (templateParam || modeParam) {
       setViewState("editor");
-      setCardKey((prev) => prev + 1);
     }
-  }, [templateParam, modeParam, user]);
+  }, [templateParam, modeParam]);
 
-  // Handle Photo upload
+  // Handle Photo upload (kept in-memory for preview; omitted from sessionStorage)
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -218,7 +199,6 @@ function CreateCardStudio() {
       const reader = new FileReader();
       reader.onload = (event) => {
         setPhotoUrl(event.target?.result as string);
-        setCardKey((prev) => prev + 1);
       };
       reader.readAsDataURL(file);
     }
@@ -227,7 +207,6 @@ function CreateCardStudio() {
   const handleRemovePhoto = () => {
     setPhotoUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    setCardKey((prev) => prev + 1);
   };
 
   const handleBack = () => {
@@ -243,7 +222,13 @@ function CreateCardStudio() {
   };
 
   const handleResetCard = () => {
-    setCardKey((prev) => prev + 1);
+    remountCanvas();
+  };
+
+  const handleChooseAnotherMode = () => {
+    clearDraft();
+    setViewState("choices");
+    router.replace("/create");
   };
 
   // Loading Screen only when entering active editor studio
@@ -339,11 +324,11 @@ function CreateCardStudio() {
 
   // Active Background Palette config
   const activePalette =
-    BG_PALETTES.find((p) => p.id === selectedBgPalette) || BG_PALETTES[0];
+    BG_PALETTES.find((p) => p.id === state.bgPalette) || BG_PALETTES[0];
 
   // Sticker Component renderer
   const renderStickerIcon = () => {
-    switch (selectedSticker) {
+    switch (state.sticker) {
       case "heart":
         return <Heart className="w-6 h-6 fill-brand-pink text-brand-pink animate-pulse" />;
       case "sparkles":
@@ -374,22 +359,22 @@ function CreateCardStudio() {
       )}
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pink text-white shadow-sm">
-          <Sparkles className="w-3 h-3" />
-          <span>{tag || "Surprise"}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pink text-white shadow-sm truncate max-w-[140px]">
+          <Sparkles className="w-3 h-3 shrink-0" />
+          <span className="truncate">{state.occasionTag || "Surprise"}</span>
         </span>
-        <span className="text-[11px] font-bold text-brand-purple">
-          From {sender || "Someone"} with ❤️
+        <span className="text-[11px] font-bold text-brand-purple truncate max-w-[140px]">
+          From {state.senderName || "Someone"} with ❤️
         </span>
       </div>
 
       {/* Main Message Note + Optional Photo */}
-      <div className="my-auto py-2 space-y-2.5">
-        {photoUrl ? (
-          <div className="relative w-28 h-28 mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-brand-pink/30">
+      <div className="my-auto py-1 sm:py-2 space-y-2">
+        {state.photoUrl ? (
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-brand-pink/30">
             <Image
-              src={photoUrl}
+              src={state.photoUrl}
               alt="Secret memory photo"
               fill
               className="object-cover"
@@ -397,26 +382,33 @@ function CreateCardStudio() {
             />
           </div>
         ) : (
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-white shadow-sm border border-brand-warm-border flex items-center justify-center">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 mx-auto rounded-2xl bg-white shadow-sm border border-brand-warm-border flex items-center justify-center">
             {renderStickerIcon()}
           </div>
         )}
 
-        <h4 className="text-lg sm:text-xl font-extrabold leading-snug px-2 tracking-tight">
-          {message || "Your secret message will appear here!"}
+        <h4
+          className={cn(
+            "font-extrabold leading-snug px-2 tracking-tight break-words",
+            state.primaryMessage.length > 90
+              ? "text-sm sm:text-base"
+              : "text-base sm:text-lg"
+          )}
+        >
+          {state.primaryMessage || "Your secret message will appear here!"}
         </h4>
 
-        {secondary && (
-          <p className="text-xs sm:text-sm opacity-80 leading-relaxed max-w-[280px] mx-auto font-medium">
-            {secondary}
+        {state.secondaryMessage && (
+          <p className="text-[11px] sm:text-xs opacity-80 leading-relaxed max-w-[280px] mx-auto font-medium break-words">
+            {state.secondaryMessage}
           </p>
         )}
       </div>
 
       {/* Footer Info */}
       <div className="flex items-center justify-between text-[10px] opacity-75 pt-2 border-t border-brand-warm-border/40">
-        <span>To: {recipient || "Someone special"}</span>
-        <span>suprilo.com/s/preview</span>
+        <span className="truncate max-w-[180px]">To: {state.recipientName || "Someone special"}</span>
+        <span className="shrink-0 font-mono">suprilo.com/s/preview</span>
       </div>
     </div>
   );
@@ -519,8 +511,8 @@ function CreateCardStudio() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-bold text-brand-dark">
-                      {selectedTemplateId
-                        ? `Editing: ${getTemplateById(selectedTemplateId)?.title || "Template"}`
+                      {state.templateId
+                        ? `Editing: ${getTemplateById(state.templateId)?.title || "Template"}`
                         : "Custom Scratch Creation"}
                     </h2>
                     <Badge variant="pink" className="text-[10px] py-0">
@@ -536,7 +528,7 @@ function CreateCardStudio() {
               <div className="flex items-center gap-2 self-start sm:self-auto">
                 <button
                   type="button"
-                  onClick={() => setViewState("choices")}
+                  onClick={handleChooseAnotherMode}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-muted hover:text-brand-dark px-3 py-1.5 rounded-xl border border-brand-warm-border hover:bg-brand-warm-subtle transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -555,28 +547,40 @@ function CreateCardStudio() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div className="space-y-1.5">
-                      <label htmlFor="recipient" className="font-semibold text-brand-dark">
-                        Recipient Name
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="recipient" className="font-semibold text-brand-dark">
+                          Recipient Name
+                        </label>
+                        <span className="text-[10px] text-brand-muted font-mono">
+                          {characterCounts.recipient.current}/{limits.RECIPIENT_MAX}
+                        </span>
+                      </div>
                       <input
                         id="recipient"
                         type="text"
-                        value={recipient}
-                        onChange={(e) => setRecipient(e.target.value)}
+                        maxLength={limits.RECIPIENT_MAX}
+                        value={state.recipientName}
+                        onChange={(e) => setField("recipientName", e.target.value)}
                         placeholder="e.g. Maya"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label htmlFor="tag" className="font-semibold text-brand-dark">
-                        Occasion Tag
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="tag" className="font-semibold text-brand-dark">
+                          Occasion Tag
+                        </label>
+                        <span className="text-[10px] text-brand-muted font-mono">
+                          {characterCounts.tag.current}/{limits.TAG_MAX}
+                        </span>
+                      </div>
                       <input
                         id="tag"
                         type="text"
-                        value={tag}
-                        onChange={(e) => setTag(e.target.value)}
+                        maxLength={limits.TAG_MAX}
+                        value={state.occasionTag}
+                        onChange={(e) => setField("occasionTag", e.target.value)}
                         placeholder="e.g. Happy Birthday!"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
                       />
@@ -584,14 +588,20 @@ function CreateCardStudio() {
                   </div>
 
                   <div className="space-y-1.5 text-xs">
-                    <label htmlFor="sender" className="font-semibold text-brand-dark">
-                      Your Name / Sender Signature
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="sender" className="font-semibold text-brand-dark">
+                        Your Name / Sender Signature
+                      </label>
+                      <span className="text-[10px] text-brand-muted font-mono">
+                        {characterCounts.sender.current}/{limits.SENDER_MAX}
+                      </span>
+                    </div>
                     <input
                       id="sender"
                       type="text"
-                      value={sender}
-                      onChange={(e) => setSender(e.target.value)}
+                      maxLength={limits.SENDER_MAX}
+                      value={state.senderName}
+                      onChange={(e) => setField("senderName", e.target.value)}
                       placeholder="e.g. Alex"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
                     />
@@ -604,28 +614,40 @@ function CreateCardStudio() {
 
                   <div className="space-y-4 text-xs">
                     <div className="space-y-1.5">
-                      <label htmlFor="message" className="font-semibold text-brand-dark">
-                        Primary Surprise Text (Revealed upon scratch)
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="message" className="font-semibold text-brand-dark">
+                          Primary Surprise Text (Revealed upon scratch)
+                        </label>
+                        <span className="text-[10px] text-brand-muted font-mono">
+                          {characterCounts.primaryMessage.current}/{limits.PRIMARY_MESSAGE_MAX}
+                        </span>
+                      </div>
                       <textarea
                         id="message"
                         rows={3}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        maxLength={limits.PRIMARY_MESSAGE_MAX}
+                        value={state.primaryMessage}
+                        onChange={(e) => setField("primaryMessage", e.target.value)}
                         placeholder="Type your heartfelt secret or exciting reveal..."
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm leading-relaxed"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label htmlFor="secondary" className="font-semibold text-brand-dark">
-                        Secondary Message / Hint (Optional)
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="secondary" className="font-semibold text-brand-dark">
+                          Secondary Message / Hint (Optional)
+                        </label>
+                        <span className="text-[10px] text-brand-muted font-mono">
+                          {characterCounts.secondaryMessage.current}/{limits.SECONDARY_MESSAGE_MAX}
+                        </span>
+                      </div>
                       <input
                         id="secondary"
                         type="text"
-                        value={secondary}
-                        onChange={(e) => setSecondary(e.target.value)}
+                        maxLength={limits.SECONDARY_MESSAGE_MAX}
+                        value={state.secondaryMessage}
+                        onChange={(e) => setField("secondaryMessage", e.target.value)}
                         placeholder="e.g. Dinner reservation at 8 PM tonight!"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink text-sm"
                       />
@@ -642,15 +664,12 @@ function CreateCardStudio() {
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     {FOIL_OPTIONS.map((foil) => {
-                      const isSelected = coverStyle === foil.id;
+                      const isSelected = state.foilStyle === foil.id;
                       return (
                         <button
                           key={foil.id}
                           type="button"
-                          onClick={() => {
-                            setCoverStyle(foil.id);
-                            setCardKey((prev) => prev + 1);
-                          }}
+                          onClick={() => setFoilStyle(foil.id)}
                           className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all ${
                             isSelected
                               ? "bg-brand-pink-light/60 border-brand-pink ring-2 ring-brand-pink/20 shadow-sm"
@@ -675,14 +694,20 @@ function CreateCardStudio() {
 
                   {/* Foil Prompt Text */}
                   <div className="pt-2 space-y-1.5 text-xs">
-                    <label htmlFor="coverText" className="font-semibold text-brand-dark">
-                      Foil Overlay Instructions
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="coverText" className="font-semibold text-brand-dark">
+                        Foil Overlay Instructions
+                      </label>
+                      <span className="text-[10px] text-brand-muted font-mono">
+                        {characterCounts.coverText.current}/{limits.COVER_TEXT_MAX}
+                      </span>
+                    </div>
                     <input
                       id="coverText"
                       type="text"
-                      value={coverText}
-                      onChange={(e) => setCoverText(e.target.value)}
+                      maxLength={limits.COVER_TEXT_MAX}
+                      value={state.coverText}
+                      onChange={(e) => setField("coverText", e.target.value)}
                       placeholder="e.g. Scratch to reveal your surprise ✨"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark text-xs focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
                     />
@@ -701,15 +726,12 @@ function CreateCardStudio() {
                     <span className="text-xs font-semibold text-brand-dark">Card Background Theme</span>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                       {BG_PALETTES.map((palette) => {
-                        const isSelected = selectedBgPalette === palette.id;
+                        const isSelected = state.bgPalette === palette.id;
                         return (
                           <button
                             key={palette.id}
                             type="button"
-                            onClick={() => {
-                              setSelectedBgPalette(palette.id);
-                              setCardKey((k) => k + 1);
-                            }}
+                            onClick={() => setBgPalette(palette.id)}
                             className={cn(
                               "p-2.5 rounded-xl border text-center transition-all text-xs font-semibold bg-gradient-to-br",
                               palette.gradient,
@@ -731,15 +753,12 @@ function CreateCardStudio() {
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                       {STICKERS.map((item) => {
                         const Icon = item.icon;
-                        const isSelected = selectedSticker === item.id;
+                        const isSelected = state.sticker === item.id;
                         return (
                           <button
                             key={item.id}
                             type="button"
-                            onClick={() => {
-                              setSelectedSticker(item.id);
-                              setCardKey((k) => k + 1);
-                            }}
+                            onClick={() => setSticker(item.id)}
                             className={cn(
                               "p-2.5 rounded-xl border flex items-center justify-center shrink-0 transition-all",
                               isSelected
@@ -761,7 +780,7 @@ function CreateCardStudio() {
                       <span className="text-xs font-semibold text-brand-dark">
                         Personal Hidden Photo (Optional)
                       </span>
-                      {photoUrl && (
+                      {state.photoUrl && (
                         <button
                           type="button"
                           onClick={handleRemovePhoto}
@@ -782,10 +801,10 @@ function CreateCardStudio() {
                       id="photo-upload-input"
                     />
 
-                    {photoUrl ? (
+                    {state.photoUrl ? (
                       <div className="flex items-center gap-3 p-3 rounded-2xl bg-brand-warm-subtle border border-brand-warm-border">
                         <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm shrink-0">
-                          <Image src={photoUrl} alt="Preview" fill className="object-cover" unoptimized />
+                          <Image src={state.photoUrl} alt="Preview" fill className="object-cover" unoptimized />
                         </div>
                         <div className="min-w-0 flex-1 text-xs">
                           <p className="font-bold text-brand-dark truncate">Custom Photo Attached</p>
@@ -842,8 +861,8 @@ function CreateCardStudio() {
                       <ScratchCard
                         key={cardKey}
                         hiddenContent={hiddenContent}
-                        coverStyle={coverStyle}
-                        coverText={coverText}
+                        coverStyle={state.foilStyle}
+                        coverText={state.coverText}
                         revealThreshold={0.65}
                         brushRadius={26}
                         className="shadow-lg mx-auto"
@@ -892,13 +911,13 @@ function CreateCardStudio() {
             {/* Link Box */}
             <div className="flex items-center gap-2 p-2.5 rounded-xl bg-brand-warm border border-brand-warm-border text-xs font-mono">
               <span className="truncate flex-1 text-brand-dark">
-                suprilo.com/s/demo-{coverStyle}
+                suprilo.com/s/demo-{state.foilStyle}
               </span>
               <button
                 type="button"
                 onClick={() => {
                   navigator.clipboard?.writeText(
-                    `https://suprilo.com/s/demo-${coverStyle}`
+                    `https://suprilo.com/s/demo-${state.foilStyle}`
                   );
                   setCopiedLink(true);
                   setTimeout(() => setCopiedLink(false), 2500);
