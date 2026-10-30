@@ -2,17 +2,20 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Sparkles, ArrowUpRight, RotateCcw, Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Sparkles, ArrowRight, RotateCcw, Heart } from "lucide-react";
 import { soundManager } from "@/lib/sound";
 import { CelebrationConfetti } from "@/components/scratch/CelebrationConfetti";
+import { useAuth } from "@/context/AuthContext";
 
 export function HowItWorks() {
+  const router = useRouter();
+  const { user, openAuthModal } = useAuth();
   const [scratchPercent, setScratchPercent] = React.useState(25); // Initial state matches reference's partially scratched view
   const [isRevealed, setIsRevealed] = React.useState(false);
   const [hasInteracted, setHasInteracted] = React.useState(false);
   const [showConfetti, setShowConfetti] = React.useState(false);
   const [demoKey, setDemoKey] = React.useState(0);
-  const [isHighlighted, setIsHighlighted] = React.useState(false);
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const cardContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -209,13 +212,12 @@ export function HowItWorks() {
     setDemoKey((k) => k + 1);
   };
 
-  // Scroll to demo when bottom CTA is clicked
-  const handleScrollToDemo = () => {
-    const el = document.getElementById("scratch-demo-card");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setIsHighlighted(true);
-      setTimeout(() => setIsHighlighted(false), 2200);
+  const handleCreateClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      openAuthModal("/create");
+    } else {
+      router.push("/create");
     }
   };
 
@@ -379,9 +381,7 @@ export function HowItWorks() {
               <div
                 ref={cardContainerRef}
                 aria-label={`Interactive scratch card: ${scratchPercent}% revealed`}
-                className={`relative w-[270px] sm:w-[285px] h-[190px] sm:h-[195px] rounded-2xl overflow-hidden shadow-lg border border-pink-200/80 transition-all duration-300 cursor-crosshair ${
-                  isHighlighted ? "ring-4 ring-brand-pink/50 scale-105" : "hover:shadow-xl"
-                }`}
+                className="relative w-[270px] sm:w-[285px] h-[190px] sm:h-[195px] rounded-2xl overflow-hidden shadow-lg border border-pink-200/80 transition-all duration-300 cursor-crosshair hover:shadow-xl"
                 style={{
                   transform: "rotate(-3.5deg)",
                   touchAction: "none",
@@ -519,15 +519,15 @@ export function HowItWorks() {
             <line x1="6" y1="18" x2="18" y2="22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
 
-          {/* Interactive Button */}
+          {/* Create Surprise Card Button */}
           <button
             type="button"
-            onClick={handleScrollToDemo}
-            className="group inline-flex items-center justify-center gap-2 sm:gap-2.5 px-6 sm:px-9 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#FF4D6D] to-[#F43F5E] text-white font-bold text-xs sm:text-sm md:text-base shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-95 transition-all text-center"
+            onClick={handleCreateClick}
+            className="group inline-flex items-center justify-center gap-2 sm:gap-2.5 px-7 sm:px-10 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#FF4D6D] to-[#F43F5E] text-white font-extrabold text-sm sm:text-base md:text-lg shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 hover:scale-[1.03] active:scale-95 transition-all text-center cursor-pointer"
           >
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white animate-pulse" />
-            <span>Try the demo: scratch the card to reveal the surprise</span>
-            <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+            <span>Create a Surprise Card</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform shrink-0" />
           </button>
 
           {/* Right radiating yellow rays */}
