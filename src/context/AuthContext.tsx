@@ -1,31 +1,75 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import {
-  User,
-  onAuthStateChanged,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  signOut,
-} from "firebase/auth";
-import {
-  isFirebaseConfigured,
-  getFirebaseAuth,
-  getGoogleProvider,
-} from "@/lib/firebase";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 import { AuthModal } from "@/components/auth/AuthModal";
 
-interface AuthContextType {
-  user: User | null;
+/**
+ * Normalized application-level user model.
+ * Preserves complete backward compatibility with existing components (Navbar, UserAvatar,
+ * Profile, Card Studio, Template Gallery) while backed purely by Supabase Auth.
+ */
+export interface SupriloUser {
+  id: string; // Supabase user UUID
+  uid: string; // Backward-compatible alias of id
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  metadata: {
+    creationTime: string; // ISO 8601 timestamp string from created_at
+    lastSignInTime: string; // ISO 8601 timestamp string from last_sign_in_at
+  };
+}
+
+/**
+ * Transforms a Supabase Auth user into the normalized application SupriloUser format.
+ * Safely handles missing, null, or undefined OAuth provider metadata.
+ */
+export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | null {
+  if (!user) return null;
+
+  const userMeta = user.user_metadata || {};
+
+  // Resolve display name across standard Google OAuth metadata conventions
+  const displayName =
+    (typeof userMeta.full_name === "string" && userMeta.full_name.trim()) ||
+    (typeof userMeta.name === "string" && userMeta.name.trim()) ||
+    (typeof userMeta.given_name === "string" && userMeta.given_name.trim()) ||
+    (user.email ? user.email.split("@")[0] : null) ||
+    "Creator";
+
+  // Resolve avatar URL across standard Google OAuth metadata conventions
+  const photoURL =
+    (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
+    (typeof userMeta.picture === "string" && userMeta.picture) ||
+    null;
+
+  const creationTime = user.created_at || new Date().toISOString();
+  const lastSignInTime = user.last_sign_in_at || creationTime;
+
+  return {
+    id: user.id,
+    uid: user.id,
+    email: user.email || null,
+    displayName,
+    photoURL,
+    metadata: {
+      creationTime,
+      lastSignInTime,
+    },
+  };
+}
+
+export interface AuthContextType {
+  user: SupriloUser | null;
   loading: boolean;
   isSigningIn: boolean;
   error: string | null;
   isAuthModalOpen: boolean;
   openAuthModal: (returnUrl?: string) => void;
   closeAuthModal: () => void;
-  signInWithGoogle: (returnUrl?: string) => Promise<User | null>;
+  signInWithGoogle: (returnUrl?: string) => Promise<SupriloUser | null>;
   signOutUser: () => Promise<void>;
   getIdToken: (forceRefresh?: boolean) => Promise<string | null>;
   clearError: () => void;
@@ -33,11 +77,8 @@ interface AuthContextType {
 
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_RETURN_URL_KEY = "suprilo_auth_return_url";
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [user, setUser] = React.useState<User | null>(null);
+  const [user, setUser] = React.useState<SupriloUser | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isSigningIn, setIsSigningIn] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -62,154 +103,151 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
   }, []);
 
-  // Process redirect result on mount (for mobile fallback)
+  // Initialize and synchronize Supabase authentication state
   React.useEffect(() => {
     let isMounted = true;
-    const currentAuth = getFirebaseAuth();
+    let supabaseClient: ReturnType<typeof createClient>;
 
-    if (!currentAuth || !isFirebaseConfigured()) {
+    try {
+      supabaseClient = createClient();
+    } catch (clientInitErr) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Supabase browser client initialization deferred:", clientInitErr);
+      }
       setLoading(false);
       return;
     }
 
-    getRedirectResult(currentAuth)
-      .then((result) => {
+    // 1. Initial verified user check via getUser() (validates with auth server)
+    supabaseClient.auth
+      .getUser()
+      .then(({ data: { user: initialUser }, error: getUserError }) => {
         if (!isMounted) return;
-        if (result?.user) {
-          setUser(result.user);
-          const savedReturnUrl = sessionStorage.getItem(AUTH_RETURN_URL_KEY);
-          if (savedReturnUrl) {
-            sessionStorage.removeItem(AUTH_RETURN_URL_KEY);
-            router.push(savedReturnUrl);
-          }
+        if (!getUserError && initialUser) {
+          setUser(normalizeSupabaseUser(initialUser));
+        } else {
+          setUser(null);
         }
+        setLoading(false);
       })
-      .catch((err: { code?: string; message?: string }) => {
+      .catch(() => {
         if (!isMounted) return;
-        if (err.code !== "auth/popup-closed-by-user") {
-          setError(getFriendlyErrorMessage(err.code));
-        }
+        setUser(null);
+        setLoading(false);
       });
 
-    // Track authentication state changes
-    const unsubscribe = onAuthStateChanged(currentAuth, (currentUser) => {
+    // 2. Real-time auth listener for session events (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED)
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       if (!isMounted) return;
-      setUser(currentUser);
+      if (session?.user) {
+        setUser(normalizeSupabaseUser(session.user));
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
+    // 3. Cleanup subscription on unmount
     return () => {
       isMounted = false;
-      unsubscribe();
+      subscription.unsubscribe();
     };
-  }, [router]);
+  }, []);
 
   /**
-   * Sign In with Google
+   * Google OAuth 2.0 Sign-In via Supabase PKCE Authorization Flow.
+   * Redirects user through /auth/callback with the sanitized destination.
    */
   const signInWithGoogle = React.useCallback(
-    async (returnUrl?: string): Promise<User | null> => {
+    async (returnUrl: string = "/create"): Promise<SupriloUser | null> => {
       if (isSigningIn) return null;
-
-      const currentAuth = getFirebaseAuth();
-      const currentProvider = getGoogleProvider();
-
-      if (!currentAuth || !currentProvider || !isFirebaseConfigured()) {
-        const msg = "Firebase is not configured. Please add your Firebase environment variables in Vercel settings.";
-        setError(msg);
-        return null;
-      }
 
       setIsSigningIn(true);
       setError(null);
 
-      if (returnUrl) {
-        try {
-          sessionStorage.setItem(AUTH_RETURN_URL_KEY, returnUrl);
-        } catch {}
-      } else {
-        try {
-          sessionStorage.removeItem(AUTH_RETURN_URL_KEY);
-        } catch {}
+      let supabaseClient: ReturnType<typeof createClient>;
+      try {
+        supabaseClient = createClient();
+      } catch {
+        setError(
+          "Supabase authentication is not configured. Please ensure environment variables are configured."
+        );
+        setIsSigningIn(false);
+        return null;
       }
 
       try {
-        const result = await signInWithPopup(currentAuth, currentProvider);
-        const signedInUser = result.user;
-        setUser(signedInUser);
+        const origin =
+          typeof window !== "undefined" && window.location.origin
+            ? window.location.origin
+            : "http://localhost:3000";
 
-        if (returnUrl) {
-          try {
-            sessionStorage.removeItem(AUTH_RETURN_URL_KEY);
-          } catch {}
-          router.push(returnUrl);
-        }
+        // Sanitize destination to strictly relative path
+        const safeDestination =
+          returnUrl.startsWith("/") && !returnUrl.startsWith("//") && !returnUrl.startsWith("/\\")
+            ? returnUrl
+            : "/create";
 
-        setIsSigningIn(false);
-        return signedInUser;
-      } catch (err: unknown) {
-        const firebaseErr = err as { code?: string; message?: string };
-        const code = firebaseErr?.code || "";
+        const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeDestination)}`;
 
-        // User intentionally closed the popup: stay on page silently
-        if (
-          code === "auth/popup-closed-by-user" ||
-          code === "auth/cancelled-popup-request"
-        ) {
+        const { error: oauthError } = await supabaseClient.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo,
+            queryParams: {
+              access_type: "offline",
+              prompt: "select_account",
+            },
+          },
+        });
+
+        if (oauthError) {
+          setError(oauthError.message || "Failed to initiate Google Sign-In.");
           setIsSigningIn(false);
           return null;
         }
 
-        // If popup is blocked by mobile browser, fallback to redirect
-        if (code === "auth/popup-blocked") {
-          try {
-            await signInWithRedirect(currentAuth, currentProvider);
-            return null;
-          } catch {
-            setError("Sign-in popup was blocked by your browser. Please allow popups and try again.");
-          }
-        } else {
-          setError(getFriendlyErrorMessage(code));
-        }
-
+        // Browser redirects to Google OAuth screen; return null during redirect
+        return null;
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Unable to sign in with Google right now. Please try again.";
+        setError(message);
         setIsSigningIn(false);
         return null;
       }
     },
-    [isSigningIn, router]
+    [isSigningIn]
   );
 
   /**
-   * Get fresh Firebase ID Token for authenticated server API calls
+   * Retrieves fresh Supabase session JWT for authenticated API requests
    */
-  const getIdToken = React.useCallback(
-    async (forceRefresh: boolean = false): Promise<string | null> => {
-      if (!user) return null;
-      try {
-        return await user.getIdToken(forceRefresh);
-      } catch {
-        return null;
-      }
-    },
-    [user]
-  );
+  const getIdToken = React.useCallback(async (): Promise<string | null> => {
+    try {
+      const supabaseClient = createClient();
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession();
+      return session?.access_token || null;
+    } catch {
+      return null;
+    }
+  }, []);
 
   /**
-   * Sign Out
+   * Sign out of Supabase session and clear client state
    */
   const signOutUser = React.useCallback(async () => {
-    const currentAuth = getFirebaseAuth();
-    if (!currentAuth) {
-      setUser(null);
-      return;
-    }
     try {
-      await signOut(currentAuth);
+      const supabaseClient = createClient();
+      await supabaseClient.auth.signOut();
       setUser(null);
       setError(null);
-      try {
-        sessionStorage.removeItem(AUTH_RETURN_URL_KEY);
-      } catch {}
     } catch {
       setError("Unable to sign out right now. Please check your connection.");
     }
@@ -262,19 +300,4 @@ export function useAuth(): AuthContextType {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
-
-function getFriendlyErrorMessage(code?: string): string {
-  switch (code) {
-    case "auth/network-request-failed":
-      return "Network error. Please check your internet connection and try again.";
-    case "auth/unauthorized-domain":
-      return "This domain is not authorized for Google Sign-In in Firebase Console. Please add localhost / your domain to Authorized Domains.";
-    case "auth/operation-not-allowed":
-      return "Google Sign-In is not enabled in Firebase Console. Please enable Google in Firebase Authentication -> Sign-in method.";
-    case "auth/user-disabled":
-      return "This user account has been disabled.";
-    default:
-      return "Unable to sign in with Google right now. Please try again.";
-  }
 }

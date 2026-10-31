@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { updateProfile } from "firebase/auth";
+import { createClient } from "@/lib/supabase/client";
 import {
   Mail,
   ShieldCheck,
@@ -43,7 +43,7 @@ export default function AccountSettingsPage() {
 
   if (!user) return null;
 
-  // Real update via Firebase Auth updateProfile
+  // Update profile name via Supabase Auth updateUser
   const handleUpdateName = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) {
@@ -56,9 +56,11 @@ export default function AccountSettingsPage() {
     setNameSuccess(false);
 
     try {
-      await updateProfile(user, {
-        displayName: displayName.trim(),
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: displayName.trim() },
       });
+      if (error) throw error;
       setNameSuccess(true);
       setTimeout(() => setNameSuccess(false), 4000);
     } catch {
@@ -152,7 +154,7 @@ export default function AccountSettingsPage() {
           {nameSuccess && (
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Display name successfully updated in Firebase!</span>
+              <span>Display name successfully updated!</span>
             </div>
           )}
 
@@ -264,7 +266,7 @@ export default function AccountSettingsPage() {
             <span className="text-brand-muted font-medium">Session Persistence</span>
             <div className="flex items-center gap-1.5 font-bold text-brand-dark pt-1">
               <CheckCircle2 className="w-4 h-4 text-blue-600" />
-              <span>Firebase Managed (Secure)</span>
+              <span>Supabase Auth (Secure)</span>
             </div>
           </div>
         </div>

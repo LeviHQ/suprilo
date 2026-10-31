@@ -1,13 +1,13 @@
-import type { User } from "firebase/auth";
+import type { SupriloUser } from "@/context/AuthContext";
 
 export type AuthUserLike =
-  | User
+  | SupriloUser
   | { getIdToken: (forceRefresh?: boolean) => Promise<string | null> }
   | null;
 
 /**
  * Reusable client-side API helper.
- * Automatically attaches the user's Firebase ID token in the Authorization Bearer header.
+ * Automatically attaches the user's session token in the Authorization Bearer header.
  */
 export async function fetchWithAuth(
   input: RequestInfo | URL,
@@ -16,7 +16,7 @@ export async function fetchWithAuth(
 ): Promise<Response> {
   const headers = new Headers(init?.headers);
 
-  if (user) {
+  if (user && "getIdToken" in user && typeof user.getIdToken === "function") {
     try {
       const token = await user.getIdToken();
       if (token) {
