@@ -7,32 +7,46 @@ export const dynamic = "force-dynamic";
  * Diagnostic Authentication Verification Endpoint
  * GET /api/auth/me
  *
- * Validates the caller's Firebase ID token and returns authenticated identity.
- * Strictly used to verify server-side authentication without exposing tokens or credentials.
+ * Validates the caller's Supabase session (via HttpOnly cookies or Bearer token)
+ * and returns the normalized authenticated identity.
+ * Strictly used to verify server-side authentication without exposing tokens, cookies, or credentials.
  */
 export async function GET(request: Request) {
-  const authResult = await verifyUserAuth(request);
+  try {
+    const authResult = await verifyUserAuth(request);
 
-  if (!authResult.success) {
+    if (!authResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: authResult.error,
+        },
+        { status: authResult.status }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        user: {
+          id: authResult.user.id,
+          uid: authResult.user.uid,
+          email: authResult.user.email,
+          emailVerified: authResult.user.emailVerified,
+        },
+      },
+      { status: 200 }
+    );
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: authResult.error,
+        error: {
+          code: "AUTH_SERVICE_UNAVAILABLE",
+          message: "An unexpected error occurred during session verification.",
+        },
       },
-      { status: authResult.status }
+      { status: 500 }
     );
   }
-
-  return NextResponse.json(
-    {
-      success: true,
-      user: {
-        uid: authResult.user.uid,
-        email: authResult.user.email,
-        emailVerified: authResult.user.emailVerified,
-      },
-    },
-    { status: 200 }
-  );
 }
-

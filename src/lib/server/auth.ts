@@ -1,18 +1,27 @@
 // Server-Side Authentication Verification Helper
-// Validates Firebase ID tokens sent via Bearer Authorization headers.
+// Validates Supabase Auth sessions via HttpOnly cookies or Bearer Authorization tokens.
 // Server-only boundary: never import into client components.
 
-import { getFirebaseAdminAuth, isFirebaseAdminConfigured } from "./firebaseAdmin";
+import { createClient } from "@/lib/supabase/server";
 
 if (typeof window !== "undefined") {
   throw new Error("Security Violation: auth server helper cannot be executed on the client.");
 }
 
 export interface AuthenticatedUser {
-  uid: string;
+  id: string; // Supabase user UUID
+  uid: string; // Backward-compatible alias of id
   email: string | null;
   emailVerified: boolean;
 }
+
+export type AuthErrorCode =
+  | "AUTH_HEADER_MALFORMED"
+  | "AUTH_TOKEN_EMPTY"
+  | "AUTH_TOKEN_EXPIRED"
+  | "AUTH_TOKEN_INVALID"
+  | "AUTH_SESSION_MISSING"
+  | "AUTH_SERVICE_UNAVAILABLE";
 
 export type VerifyAuthResult =
   | {
@@ -22,114 +31,165 @@ export type VerifyAuthResult =
   | {
       success: false;
       error: {
-        code:
-          | "AUTH_HEADER_MISSING"
-          | "AUTH_HEADER_MALFORMED"
-          | "AUTH_TOKEN_EMPTY"
-          | "AUTH_TOKEN_EXPIRED"
-          | "AUTH_TOKEN_INVALID"
-          | "AUTH_SERVICE_UNAVAILABLE";
+        code: AuthErrorCode;
         message: string;
       };
       status: number;
     };
 
 /**
- * Validates the incoming Request's Authorization header against Firebase Admin Auth.
- * Derives user identity strictly from the cryptographically verified JWT payload.
+ * Normalizes Supabase Auth user into canonical server identity model.
+ */
+function normalizeServerUser(user: {
+  id: string;
+  email?: string | null;
+  email_confirmed_at?: string | null;
+  confirmed_at?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+}): AuthenticatedUser {
+  const emailVerified = Boolean(
+    user.email_confirmed_at ||
+      user.confirmed_at ||
+      user.user_metadata?.email_verified
+  );
+
+  return {
+    id: user.id,
+    uid: user.id,
+    email: user.email || null,
+    emailVerified,
+  };
+}
+
+/**
+ * Validates the caller's Supabase session cryptographically.
  *
- * @param request Standard incoming HTTP Request
+ * Supports two authentication paths:
+ * 1. Bearer Token: If an 'Authorization: Bearer <jwt>' header is present, validates the JWT against Supabase Auth.
+ * 2. Cookie Session: If no Authorization header is present, validates the SSR HttpOnly cookie session via `@supabase/ssr`.
+ *
+ * Never trusts user IDs supplied directly in request bodies or query parameters.
+ * Does not use a service-role key for user session verification.
+ *
+ * @param request Optional standard incoming HTTP Request
  * @returns Discriminated union with authenticated user or error descriptor
  */
-export async function verifyUserAuth(request: Request): Promise<VerifyAuthResult> {
-  const authHeader =
-    request.headers.get("authorization") || request.headers.get("Authorization");
+export async function verifyUserAuth(request?: Request): Promise<VerifyAuthResult> {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
 
-  // 1. Check existence of Authorization header
-  if (!authHeader) {
-    return {
-      success: false,
-      error: {
-        code: "AUTH_HEADER_MISSING",
-        message: "Missing Authorization header. An authenticated 'Bearer <token>' is required.",
-      },
-      status: 401,
-    };
-  }
-
-  // 2. Validate Bearer scheme format
-  const parts = authHeader.trim().split(/\s+/);
-  if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
-    return {
-      success: false,
-      error: {
-        code: "AUTH_HEADER_MALFORMED",
-        message: "Malformed Authorization header. Format must be 'Bearer <firebase_id_token>'.",
-      },
-      status: 401,
-    };
-  }
-
-  const token = parts[1];
-  if (!token || token.length < 10) {
-    return {
-      success: false,
-      error: {
-        code: "AUTH_TOKEN_EMPTY",
-        message: "Bearer token cannot be empty.",
-      },
-      status: 401,
-    };
-  }
-
-  // 3. Verify server environment configuration
-  if (!isFirebaseAdminConfigured()) {
+  try {
+    supabase = await createClient();
+  } catch (err: unknown) {
     return {
       success: false,
       error: {
         code: "AUTH_SERVICE_UNAVAILABLE",
         message:
-          "Authentication service is not fully configured on the server. Missing server credentials.",
+          err instanceof Error
+            ? err.message
+            : "Supabase authentication service is not configured on the server.",
       },
       status: 503,
     };
   }
 
-  // 4. Verify ID Token cryptographically with Firebase Admin SDK
-  try {
-    const adminAuth = getFirebaseAdminAuth();
-    const decodedToken = await adminAuth.verifyIdToken(token);
+  // 1. Check for Authorization header (Bearer token)
+  const authHeader =
+    request?.headers.get("authorization") || request?.headers.get("Authorization");
 
-    return {
-      success: true,
-      user: {
-        uid: decodedToken.uid,
-        email: decodedToken.email || null,
-        emailVerified: Boolean(decodedToken.email_verified),
-      },
-    };
-  } catch (err: unknown) {
-    const firebaseError = err as { code?: string; message?: string };
-
-    if (firebaseError.code === "auth/id-token-expired") {
+  if (authHeader) {
+    const parts = authHeader.trim().split(/\s+/);
+    if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
       return {
         success: false,
         error: {
-          code: "AUTH_TOKEN_EXPIRED",
-          message: "Firebase ID token has expired. Please refresh your session.",
+          code: "AUTH_HEADER_MALFORMED",
+          message:
+            "Malformed Authorization header. Format must be 'Bearer <access_token>'.",
+        },
+        status: 401,
+      };
+    }
+
+    const token = parts[1];
+    if (!token || token.length < 10) {
+      return {
+        success: false,
+        error: {
+          code: "AUTH_TOKEN_EMPTY",
+          message: "Bearer token cannot be empty.",
+        },
+        status: 401,
+      };
+    }
+
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(token);
+
+      if (error || !user) {
+        const isExpired =
+          error?.message?.toLowerCase().includes("expired") ||
+          error?.name === "AuthSessionMissingError";
+
+        return {
+          success: false,
+          error: {
+            code: isExpired ? "AUTH_TOKEN_EXPIRED" : "AUTH_TOKEN_INVALID",
+            message: error?.message || "Invalid or expired authorization token.",
+          },
+          status: 401,
+        };
+      }
+
+      return {
+        success: true,
+        user: normalizeServerUser(user),
+      };
+    } catch {
+      return {
+        success: false,
+        error: {
+          code: "AUTH_TOKEN_INVALID",
+          message: "Failed to verify authorization token.",
+        },
+        status: 401,
+      };
+    }
+  }
+
+  // 2. Cookie-based authentication (default for browser SSR & Route Handlers)
+  try {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return {
+        success: false,
+        error: {
+          code: "AUTH_SESSION_MISSING",
+          message: "No active authentication session found. Please sign in.",
         },
         status: 401,
       };
     }
 
     return {
+      success: true,
+      user: normalizeServerUser(user),
+    };
+  } catch {
+    return {
       success: false,
       error: {
-        code: "AUTH_TOKEN_INVALID",
-        message: "Invalid or revoked Firebase ID token.",
+        code: "AUTH_SESSION_MISSING",
+        message: "No active authentication session found. Please sign in.",
       },
       status: 401,
     };
   }
 }
-
