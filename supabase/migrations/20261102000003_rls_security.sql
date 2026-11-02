@@ -1,8 +1,8 @@
 -- ============================================================================
 -- Suprilo Phase 2C — Migration 3: Row Level Security & Access Permissions
 -- File: supabase/migrations/20261102000003_rls_security.sql
--- Description: Zero direct authenticated INSERT on cards, owner-only RLS policies,
---              lockdown of slug_registry, metrics, and server-only procedure grants.
+-- Description: Zero direct authenticated INSERT on cards, column-level UPDATE restriction,
+--              controlled publishing & archiving grants, and complete table lockdowns.
 -- ============================================================================
 
 -- ============================================================================
@@ -46,10 +46,28 @@ CREATE POLICY "cards_owner_delete"
   USING (auth.uid() = user_id);
 
 -- CRITICAL PERMISSION MATRIX FOR public.cards:
--- 1. Grant SELECT, UPDATE, DELETE to authenticated users for their owned cards.
--- 2. DO NOT grant INSERT to authenticated (Zero Direct Insert).
--- All card creation MUST route through public.create_card_draft(...).
-GRANT SELECT, UPDATE, DELETE ON TABLE public.cards TO authenticated;
+-- 1. Grant SELECT and DELETE to authenticated users for their owned cards.
+-- 2. ZERO direct INSERT: All card creation must route through public.create_card_draft(...).
+-- 3. RESTRICTED COLUMN-LEVEL UPDATE: Authenticated users can ONLY update draft content fields.
+--    Direct UPDATE on status, draft_slot, published_at, user_id, created_at, or slug is DENIED.
+--    Publishing and archiving MUST execute via their respective SECURITY DEFINER RPCs.
+GRANT SELECT, DELETE ON TABLE public.cards TO authenticated;
+GRANT UPDATE (
+  recipient_name,
+  sender_name,
+  occasion_tag,
+  primary_message,
+  secondary_message,
+  foil_style,
+  cover_text,
+  bg_palette,
+  sticker,
+  font_family,
+  photo_path,
+  reveal_threshold,
+  sound_enabled
+) ON TABLE public.cards TO authenticated;
+
 GRANT ALL ON TABLE public.cards TO service_role;
 
 -- ============================================================================
@@ -98,18 +116,27 @@ GRANT EXECUTE ON FUNCTION public.create_card_draft(
   text, text, text, text, text, text, text, text, text, text, text, text, text, text, numeric, boolean
 ) TO authenticated, service_role;
 
--- 7b. get_published_card_by_slug (Anonymous Recipients & Authenticated Users)
+-- 7b. publish_card_draft (Authenticated Users & Service Role)
+REVOKE ALL ON FUNCTION public.publish_card_draft(uuid) FROM PUBLIC, anon;
+
+GRANT EXECUTE ON FUNCTION public.publish_card_draft(uuid) TO authenticated, service_role;
+
+-- 7c. archive_card (Authenticated Users & Service Role)
+REVOKE ALL ON FUNCTION public.archive_card(uuid) FROM PUBLIC, anon;
+
+GRANT EXECUTE ON FUNCTION public.archive_card(uuid) TO authenticated, service_role;
+
+-- 7d. get_published_card_by_slug (Anonymous Recipients & Authenticated Users)
 REVOKE ALL ON FUNCTION public.get_published_card_by_slug(text) FROM PUBLIC;
 
 GRANT EXECUTE ON FUNCTION public.get_published_card_by_slug(text) TO anon, authenticated, service_role;
 
--- 7c. record_card_telemetry (Trusted Server Backend Only)
+-- 7e. record_card_telemetry (Trusted Server Backend Only)
 REVOKE ALL ON FUNCTION public.record_card_telemetry(text, text, text) FROM PUBLIC, anon, authenticated;
 
 GRANT EXECUTE ON FUNCTION public.record_card_telemetry(text, text, text) TO service_role;
 
--- 7d. claim_storage_cleanup_batch (Trusted Cleanup Worker Only)
+-- 7f. claim_storage_cleanup_batch (Trusted Cleanup Worker Only)
 REVOKE ALL ON FUNCTION public.claim_storage_cleanup_batch(text, integer) FROM PUBLIC, anon, authenticated;
 
 GRANT EXECUTE ON FUNCTION public.claim_storage_cleanup_batch(text, integer) TO service_role;
-

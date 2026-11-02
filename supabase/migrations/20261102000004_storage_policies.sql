@@ -2,7 +2,7 @@
 -- Suprilo Phase 2C — Migration 4: Storage Configuration & Bucket Policies
 -- File: supabase/migrations/20261102000004_storage_policies.sql
 -- Description: Private card-photos bucket initialization, size and MIME type guards,
---              and owner-only folder isolation policies on storage.objects.
+--              and strict two-tier folder ownership verification on storage.objects.
 -- ============================================================================
 
 -- ============================================================================
@@ -25,17 +25,31 @@ ON CONFLICT (id) DO UPDATE SET
 -- ============================================================================
 -- 2. Storage Object RLS Policies
 -- Path Structure: {user_id}/{card_id}/{filename}
--- Strict folder isolation: users may only manipulate objects within their user_id folder.
--- Public direct reads are completely disabled; recipient viewing uses signed URLs.
+-- Strict Two-Tier Verification:
+--   Tier 1: Folder 1 must strictly match auth.uid().
+--   Tier 2: Folder 2 must be a valid UUID matching an existing card owned by auth.uid().
+-- Public direct reads are completely disabled; recipient viewing uses server-signed URLs.
 -- ============================================================================
 
 -- Owner Upload (INSERT)
+-- Verifies that uploads target an existing card owned by the caller.
 CREATE POLICY "card_photos_owner_insert"
   ON storage.objects FOR INSERT
   TO authenticated
   WITH CHECK (
     bucket_id = 'card-photos' AND
-    (storage.foldername(name))[1] = auth.uid()::text
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    EXISTS (
+      SELECT 1 FROM public.cards c
+      WHERE c.id = (
+        CASE
+          WHEN (storage.foldername(name))[2] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          THEN ((storage.foldername(name))[2])::uuid
+          ELSE NULL
+        END
+      )
+      AND c.user_id = auth.uid()
+    )
   );
 
 -- Owner Read (SELECT)
@@ -48,16 +62,40 @@ CREATE POLICY "card_photos_owner_select"
   );
 
 -- Owner Update (UPDATE)
+-- Validates both source object ownership (USING) and destination object ownership (WITH CHECK).
+-- Prevents moving or renaming objects into another user's folder or an unowned card folder.
 CREATE POLICY "card_photos_owner_update"
   ON storage.objects FOR UPDATE
   TO authenticated
   USING (
     bucket_id = 'card-photos' AND
-    (storage.foldername(name))[1] = auth.uid()::text
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    EXISTS (
+      SELECT 1 FROM public.cards c
+      WHERE c.id = (
+        CASE
+          WHEN (storage.foldername(name))[2] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          THEN ((storage.foldername(name))[2])::uuid
+          ELSE NULL
+        END
+      )
+      AND c.user_id = auth.uid()
+    )
   )
   WITH CHECK (
     bucket_id = 'card-photos' AND
-    (storage.foldername(name))[1] = auth.uid()::text
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    EXISTS (
+      SELECT 1 FROM public.cards c
+      WHERE c.id = (
+        CASE
+          WHEN (storage.foldername(name))[2] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          THEN ((storage.foldername(name))[2])::uuid
+          ELSE NULL
+        END
+      )
+      AND c.user_id = auth.uid()
+    )
   );
 
 -- Owner Delete (DELETE)
@@ -68,4 +106,3 @@ CREATE POLICY "card_photos_owner_delete"
     bucket_id = 'card-photos' AND
     (storage.foldername(name))[1] = auth.uid()::text
   );
-

@@ -1,8 +1,8 @@
 -- ============================================================================
 -- Suprilo Phase 2C — Migration 2: Functions, Lifecycle Triggers & Procedures
 -- File: supabase/migrations/20261102000002_functions_triggers.sql
--- Description: Concurrency-safe draft slot allocation, lifecycle enforcement,
---              permanent slug registry synchronization, and telemetry procedures.
+-- Description: Concurrency-safe draft slot allocation, controlled publishing/archiving,
+--              freeze of published content, storage verification, permanent slug retirement.
 -- ============================================================================
 
 -- ============================================================================
@@ -49,7 +49,7 @@ BEGIN
   -- 1. Acquire exclusive per-user transaction advisory lock to prevent concurrent slot races
   PERFORM pg_advisory_xact_lock(hashtext('draft_slot_' || v_user_id::text));
 
-  -- 2. Allocate the lowest available draft slot (1, 2, or 3)
+  -- 2. Allocate lowest available draft slot (1, 2, or 3)
   SELECT s.slot INTO v_allocated_slot
   FROM generate_series(1, 3) AS s(slot)
   LEFT JOIN public.cards c
@@ -75,7 +75,7 @@ BEGIN
   v_card_id := gen_random_uuid();
 
   -- 4. Reserve slug in the canonical slug registry
-  -- Any attempt to reuse an existing active or retired slug will fail via PRIMARY KEY constraint
+  -- Any attempt to reuse an existing active or retired slug fails via PRIMARY KEY constraint
   INSERT INTO public.slug_registry (slug, card_id, status)
   VALUES (p_slug, v_card_id, 'active');
 
@@ -136,9 +136,197 @@ END;
 $$;
 
 -- ============================================================================
--- 2. Trigger Function: public.enforce_card_lifecycle()
--- Guards lifecycle state transitions, protects immutable attributes,
--- and synchronizes draft slot freeing upon publication or archiving.
+-- 2. Function: public.publish_card_draft(p_card_id uuid)
+-- Controlled publishing procedure enforcing ownership, content completeness,
+-- physical storage photo verification, advisory locking, and atomic draft slot release.
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.publish_card_draft(p_card_id uuid)
+RETURNS public.cards
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_user_id uuid;
+  v_card public.cards;
+BEGIN
+  -- 1. Derive user identity exclusively from auth.uid()
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'UNAUTHENTICATED: Must be logged in to publish a card'
+      USING ERRCODE = '28000';
+  END IF;
+
+  IF p_card_id IS NULL THEN
+    RAISE EXCEPTION 'INVALID_ARGUMENT: card_id cannot be null'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- 2. Acquire user-level transaction advisory lock to synchronize slot freeing
+  PERFORM pg_advisory_xact_lock(hashtext('draft_slot_' || v_user_id::text));
+
+  -- 3. Fetch and lock card row
+  SELECT * INTO v_card
+  FROM public.cards
+  WHERE id = p_card_id
+  FOR UPDATE;
+
+  -- 4. Card existence and ownership verification
+  IF v_card.id IS NULL THEN
+    RAISE EXCEPTION 'CARD_NOT_FOUND: Card does not exist.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF v_card.user_id <> v_user_id THEN
+    RAISE EXCEPTION 'UNAUTHORIZED: Cannot publish a card owned by another user.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- 5. Idempotent return if card is already published
+  IF v_card.status = 'published' THEN
+    RETURN v_card;
+  END IF;
+
+  -- 6. Validate lifecycle state transition
+  IF v_card.status = 'archived' THEN
+    RAISE EXCEPTION 'INVALID_TRANSITION: Archived cards cannot be published.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF v_card.status <> 'draft' THEN
+    RAISE EXCEPTION 'INVALID_TRANSITION: Only draft cards can be published.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- 7. Validate required card content and limits before publishing
+  IF char_length(trim(v_card.recipient_name)) < 1 OR char_length(trim(v_card.recipient_name)) > 30 THEN
+    RAISE EXCEPTION 'INVALID_CONTENT: recipient_name must be between 1 and 30 characters.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF char_length(trim(v_card.sender_name)) < 1 OR char_length(trim(v_card.sender_name)) > 30 THEN
+    RAISE EXCEPTION 'INVALID_CONTENT: sender_name must be between 1 and 30 characters.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF char_length(trim(v_card.occasion_tag)) < 1 OR char_length(trim(v_card.occasion_tag)) > 25 THEN
+    RAISE EXCEPTION 'INVALID_CONTENT: occasion_tag must be between 1 and 25 characters.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF char_length(trim(v_card.primary_message)) < 1 OR char_length(trim(v_card.primary_message)) > 160 THEN
+    RAISE EXCEPTION 'INVALID_CONTENT: primary_message must be between 1 and 160 characters.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF v_card.secondary_message IS NOT NULL AND char_length(v_card.secondary_message) > 90 THEN
+    RAISE EXCEPTION 'INVALID_CONTENT: secondary_message cannot exceed 90 characters.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF char_length(trim(v_card.cover_text)) < 1 OR char_length(trim(v_card.cover_text)) > 60 THEN
+    RAISE EXCEPTION 'INVALID_CONTENT: cover_text must be between 1 and 60 characters.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- 8. If photo_path is attached, verify ownership path convention AND physical object existence in storage.objects
+  IF v_card.photo_path IS NOT NULL THEN
+    -- Verify folder format: {user_id}/{card_id}/{filename}
+    IF NOT (v_card.photo_path ~ ('^' || v_user_id::text || '/' || v_card.id::text || '/[a-zA-Z0-9._-]+$')) THEN
+      RAISE EXCEPTION 'INVALID_PHOTO_PATH: Attached photo does not match user and card folder convention.'
+        USING ERRCODE = 'check_violation';
+    END IF;
+
+    -- Verify that the physical object exists in the private 'card-photos' bucket
+    IF NOT EXISTS (
+      SELECT 1 FROM storage.objects
+      WHERE bucket_id = 'card-photos'
+        AND name = v_card.photo_path
+    ) THEN
+      RAISE EXCEPTION 'PHOTO_NOT_FOUND: Referenced photo object does not exist in storage.'
+        USING ERRCODE = 'check_violation';
+    END IF;
+  END IF;
+
+  -- 9. Atomically publish card and release draft slot
+  UPDATE public.cards
+  SET status = 'published',
+      draft_slot = NULL,
+      published_at = coalesce(published_at, now()),
+      updated_at = now()
+  WHERE id = p_card_id
+  RETURNING * INTO v_card;
+
+  RETURN v_card;
+END;
+$$;
+
+-- ============================================================================
+-- 3. Function: public.archive_card(p_card_id uuid)
+-- Controlled archiving procedure releasing draft slots if archiving a draft
+-- and permanently locking status.
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.archive_card(p_card_id uuid)
+RETURNS public.cards
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_user_id uuid;
+  v_card public.cards;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'UNAUTHENTICATED: Must be logged in to archive a card'
+      USING ERRCODE = '28000';
+  END IF;
+
+  IF p_card_id IS NULL THEN
+    RAISE EXCEPTION 'INVALID_ARGUMENT: card_id cannot be null'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- Acquire advisory lock in case archiving a draft frees a slot
+  PERFORM pg_advisory_xact_lock(hashtext('draft_slot_' || v_user_id::text));
+
+  SELECT * INTO v_card
+  FROM public.cards
+  WHERE id = p_card_id
+  FOR UPDATE;
+
+  IF v_card.id IS NULL THEN
+    RAISE EXCEPTION 'CARD_NOT_FOUND: Card does not exist.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  IF v_card.user_id <> v_user_id THEN
+    RAISE EXCEPTION 'UNAUTHORIZED: Cannot archive a card owned by another user.'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- Idempotent return if already archived
+  IF v_card.status = 'archived' THEN
+    RETURN v_card;
+  END IF;
+
+  -- Atomically archive card and release draft slot
+  UPDATE public.cards
+  SET status = 'archived',
+      draft_slot = NULL,
+      published_at = coalesce(published_at, now()),
+      updated_at = now()
+  WHERE id = p_card_id
+  RETURNING * INTO v_card;
+
+  RETURN v_card;
+END;
+$$;
+
+-- ============================================================================
+-- 4. Trigger Function: public.enforce_card_lifecycle()
+-- Guards lifecycle state transitions, protects immutable system fields,
+-- and FREEZES all editable content & style fields once published or archived.
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.enforce_card_lifecycle()
 RETURNS TRIGGER
@@ -153,7 +341,7 @@ BEGIN
     PERFORM pg_advisory_xact_lock(hashtext('draft_slot_' || OLD.user_id::text));
   END IF;
 
-  -- 2. Enforce strictly immutable ownership, creation timestamp, and slug
+  -- 2. Enforce strictly immutable system fields
   IF NEW.user_id IS DISTINCT FROM OLD.user_id THEN
     RAISE EXCEPTION 'IMMUTABLE_FIELD: Card ownership (user_id) cannot be transferred or changed.'
       USING ERRCODE = 'check_violation';
@@ -175,7 +363,33 @@ BEGIN
       USING ERRCODE = 'check_violation';
   END IF;
 
-  -- 4. Protect draft_slot from direct client modification while card remains in draft
+  -- 4. FREEZE ALL EDITABLE CONTENT & STYLE FIELDS ON PUBLISHED AND ARCHIVED CARDS
+  -- Once published or archived, NO user-editable content or design field may be altered.
+  -- This holds true even during a transition from published to archived.
+  IF OLD.status IN ('published', 'archived') THEN
+    IF (
+      NEW.recipient_name IS DISTINCT FROM OLD.recipient_name OR
+      NEW.sender_name IS DISTINCT FROM OLD.sender_name OR
+      NEW.occasion_tag IS DISTINCT FROM OLD.occasion_tag OR
+      NEW.primary_message IS DISTINCT FROM OLD.primary_message OR
+      NEW.secondary_message IS DISTINCT FROM OLD.secondary_message OR
+      NEW.foil_style IS DISTINCT FROM OLD.foil_style OR
+      NEW.cover_text IS DISTINCT FROM OLD.cover_text OR
+      NEW.bg_palette IS DISTINCT FROM OLD.bg_palette OR
+      NEW.sticker IS DISTINCT FROM OLD.sticker OR
+      NEW.font_family IS DISTINCT FROM OLD.font_family OR
+      NEW.photo_path IS DISTINCT FROM OLD.photo_path OR
+      NEW.reveal_threshold IS DISTINCT FROM OLD.reveal_threshold OR
+      NEW.sound_enabled IS DISTINCT FROM OLD.sound_enabled OR
+      NEW.template_id IS DISTINCT FROM OLD.template_id OR
+      NEW.creation_mode IS DISTINCT FROM OLD.creation_mode
+    ) THEN
+      RAISE EXCEPTION 'IMMUTABLE_FIELD: Published and archived cards cannot have their content or styling modified.'
+        USING ERRCODE = 'check_violation';
+    END IF;
+  END IF;
+
+  -- 5. Protect draft_slot from direct client modification while card remains in draft
   IF OLD.status = 'draft' AND NEW.status = 'draft' THEN
     IF NEW.draft_slot IS DISTINCT FROM OLD.draft_slot THEN
       RAISE EXCEPTION 'IMMUTABLE_FIELD: draft_slot cannot be modified or cleared while card remains in draft status.'
@@ -183,7 +397,7 @@ BEGIN
     END IF;
   END IF;
 
-  -- 5. Atomically free draft slot upon publication or archiving
+  -- 6. Atomically free draft slot upon publication or archiving
   IF OLD.status = 'draft' AND NEW.status = 'published' THEN
     NEW.published_at := coalesce(NEW.published_at, now());
     NEW.draft_slot := NULL;
@@ -194,7 +408,7 @@ BEGIN
     NEW.draft_slot := NULL;
   END IF;
 
-  -- 6. Guarantee that published and archived cards never possess a draft_slot
+  -- 7. Guarantee that published and archived cards never possess a draft_slot
   IF NEW.status IN ('published', 'archived') AND NEW.draft_slot IS NOT NULL THEN
     RAISE EXCEPTION 'INVALID_STATE: Non-draft cards cannot possess a draft_slot.'
       USING ERRCODE = 'check_violation';
@@ -211,7 +425,7 @@ CREATE TRIGGER trg_cards_lifecycle
   EXECUTE FUNCTION public.enforce_card_lifecycle();
 
 -- ============================================================================
--- 3. Trigger Function: public.process_cards_before_delete()
+-- 5. Trigger Function: public.process_cards_before_delete()
 -- Synchronizes draft slot release on draft deletion, permanently retires the
 -- card's slug in slug_registry, and enqueues photo assets for cleanup.
 -- ============================================================================
@@ -249,7 +463,7 @@ CREATE TRIGGER trg_cards_before_delete
   EXECUTE FUNCTION public.process_cards_before_delete();
 
 -- ============================================================================
--- 4. Function: public.get_published_card_by_slug(p_slug text)
+-- 6. Function: public.get_published_card_by_slug(p_slug text)
 -- Read-only, public-facing RPC to retrieve a published card for recipients.
 -- Never exposes user_id, draft slots, or unpublished cards.
 -- ============================================================================
@@ -310,7 +524,7 @@ END;
 $$;
 
 -- ============================================================================
--- 5. Function: public.record_card_telemetry(...)
+-- 7. Function: public.record_card_telemetry(...)
 -- Server-only procedure for incrementing views and reveals.
 -- Enforces 15-minute visitor cooldown window with atomic re-claiming.
 -- ============================================================================
@@ -381,7 +595,7 @@ END;
 $$;
 
 -- ============================================================================
--- 6. Function: public.claim_storage_cleanup_batch(...)
+-- 8. Function: public.claim_storage_cleanup_batch(...)
 -- Server-only worker procedure for claiming pending photo deletion jobs.
 -- Utilizes FOR UPDATE SKIP LOCKED for high-concurrency worker safety.
 -- ============================================================================
@@ -414,4 +628,3 @@ BEGIN
   RETURNING *;
 END;
 $$;
-
