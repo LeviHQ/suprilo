@@ -29,7 +29,7 @@ export default function ProfileHomePage() {
 
   if (!user) return null;
 
-  // Real timestamps from Firebase User Metadata
+  // Real timestamps from user session metadata
   const memberSince = user.metadata.creationTime
     ? new Date(user.metadata.creationTime).toLocaleDateString("en-US", {
         month: "short",

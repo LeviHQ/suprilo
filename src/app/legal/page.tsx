@@ -172,7 +172,7 @@ export default function LegalHubPage() {
           <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
             <h4 className="font-black text-[#17152A]">1. Authentication</h4>
             <p className="leading-relaxed">
-              Firebase Authentication via Google Sign-In only. Collects basic profile info (Google Display Name, Google Email, Profile Picture URL, Firebase UID). No email/password database or SMS phone auth.
+              Supabase Authentication via Google Sign-In only. Collects basic profile info (Google Display Name, Google Email, Profile Picture URL, Supabase User ID). No email/password database or SMS phone auth.
             </p>
           </div>
 
@@ -193,7 +193,7 @@ export default function LegalHubPage() {
           <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
             <h4 className="font-black text-[#17152A]">4. Cookies & Analytics</h4>
             <p className="leading-relaxed">
-              No advertising, remarketing, or behavioral profiling cookies. No third-party tracking scripts (Google Analytics, PostHog, Meta Pixel) installed. Client state is managed via Firebase IndexedDB and sessionStorage.
+              No advertising, remarketing, or behavioral profiling cookies. No third-party tracking scripts (Google Analytics, PostHog, Meta Pixel) installed. Client state is managed via secure Supabase HttpOnly cookies and sessionStorage.
             </p>
           </div>
 

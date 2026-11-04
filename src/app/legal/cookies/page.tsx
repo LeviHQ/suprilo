@@ -6,7 +6,7 @@ import { LEGAL_DOCUMENTS } from "@/lib/legal-config";
 export const metadata = {
   title: "Cookie Policy (Pre-Launch Draft) | Suprilo",
   description:
-    "Suprilo Cookie Policy draft explaining essential browser storage, Firebase sessions, and absence of advertising tracking.",
+    "Suprilo Cookie Policy draft explaining essential browser storage, Supabase session cookies, and absence of advertising tracking.",
 };
 
 const docMeta = LEGAL_DOCUMENTS.find((d) => d.slug === "cookies")!;
@@ -75,10 +75,10 @@ export default function CookiePolicyPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-600">
                 <tr>
-                  <td className="p-3 font-mono text-[11px] text-brand-dark">firebase:authUser:*</td>
+                  <td className="p-3 font-mono text-[11px] text-brand-dark">sb-*-auth-token</td>
                   <td className="p-3">Strictly Essential</td>
-                  <td className="p-3">Firebase / Google</td>
-                  <td className="p-3">Maintains authenticated creator login session in browser IndexedDB. Persists until sign-out.</td>
+                  <td className="p-3">Supabase</td>
+                  <td className="p-3">Maintains authenticated creator login session via secure HttpOnly session cookies. Refreshed automatically; persists until sign-out.</td>
                 </tr>
                 <tr>
                   <td className="p-3 font-mono text-[11px] text-brand-dark">suprilo_auth_return_url</td>
@@ -99,7 +99,7 @@ export default function CookiePolicyPage() {
             3. Essential Authentication Storage
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            The Firebase authentication tokens stored in your browser are strictly necessary for the operation of the creator studio. Without them, you would be forced to sign into Google every single time you navigate between pages or customize a card. Because these items are strictly essential to provide the service requested by you, they do not require optional cookie consent banners under applicable data protection frameworks.
+            The Supabase authentication session cookies stored in your browser are strictly necessary for the operation of the creator studio. Without them, you would be forced to sign into Google every single time you navigate between pages or customize a card. Because these items are strictly essential to provide the service requested by you, they do not require optional cookie consent banners under applicable data protection frameworks.
           </p>
         </section>
 

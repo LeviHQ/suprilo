@@ -83,7 +83,7 @@ export default function TermsOfServicePage() {
             3. Creator Accounts & Google Sign-In
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            To create and customize scratch cards, users authenticate using Google Sign-In powered by Firebase Authentication. You agree to:
+            To create and customize scratch cards, users authenticate using Google Sign-In powered by Supabase Authentication. You agree to:
           </p>
           <ul className="list-disc pl-5 space-y-1.5 text-xs text-slate-600">
             <li>Provide authentic, accurate information associated with your Google profile.</li>

@@ -86,13 +86,13 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-1">
               <h3 className="font-bold text-[#17152A]">A. Information Received via Authentication</h3>
               <p className="leading-relaxed">
-                Suprilo uses Google Sign-In via Firebase Authentication. When you create or access an account, we receive basic profile parameters provided by Google:
+                Suprilo uses Google Sign-In via Supabase Authentication. When you create or access an account, we receive basic profile parameters provided by Google:
               </p>
               <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600 pt-1">
                 <li>Your Google Full Name / Display Name</li>
                 <li>Your Google Account Email Address</li>
                 <li>Your Google Profile Picture URL (used to display your avatar in the creator studio)</li>
-                <li>A unique Firebase User Identifier (UID) generated for session management</li>
+                <li>A unique Supabase User Identifier (UUID) generated for session management</li>
               </ul>
               <p className="text-xs text-slate-500 pt-1">
                 We do not collect, view, or store your Google account password.
@@ -216,12 +216,12 @@ export default function PrivacyPolicyPage() {
 
           <div className="space-y-3 text-xs text-slate-600">
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <h4 className="font-bold text-[#17152A]">Firebase Authentication (Google LLC)</h4>
+              <h4 className="font-bold text-[#17152A]">Supabase Inc.</h4>
               <p className="mt-1">
-                <span className="font-semibold">Role: </span>User identity management, Google Sign-In integration, and cryptographic session verification.
+                <span className="font-semibold">Role: </span>User authentication, session management, database hosting, and secure asset storage.
               </p>
               <p className="mt-0.5">
-                <span className="font-semibold">Data Shared: </span>User ID, email, display name, and auth tokens.
+                <span className="font-semibold">Data Shared: </span>User ID, email, display name, avatar URL, and session tokens.
               </p>
             </div>
 
@@ -287,7 +287,7 @@ export default function PrivacyPolicyPage() {
           </p>
           <ul className="list-disc pl-5 space-y-1.5 text-xs text-slate-600">
             <li>HTTPS / TLS encryption in transit for all client-to-server communications.</li>
-            <li>Firebase OAuth 2.0 token-based session verification.</li>
+            <li>Supabase OAuth 2.0 PKCE and HttpOnly cookie-based session verification.</li>
             <li>Scoped client-side file reading with strict image file-size ceilings (5MB).</li>
             <li>Restricted administrative access limited to verified personnel.</li>
           </ul>
@@ -375,7 +375,7 @@ export default function PrivacyPolicyPage() {
             11. International Data Processing
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            Suprilo is developed in India and hosted globally via cloud infrastructure partners including Google Firebase and Vercel. Consequently, your data may be processed on servers located outside your country of residence.
+            Suprilo is developed in India and hosted globally via cloud infrastructure partners including Supabase and Vercel. Consequently, your data may be processed on servers located outside your country of residence.
           </p>
           <p className="text-xs text-slate-600 leading-relaxed">
             We ensure all cross-border data processing complies with applicable transfer mechanisms and statutory blacklists/whitelists issued under Section 16 of the DPDP Act 2023.
