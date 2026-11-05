@@ -23,12 +23,14 @@ export interface UseCardAutosaveOptions {
   editorState: CardEditorState;
   client?: SupabaseClient;
   debounceMs?: number;
+  isPublished?: boolean;
 }
 
 export interface UseCardAutosaveReturn {
   saveStatus: AutosaveStatus;
   saveError: string | null;
   retryAutosave: () => Promise<void>;
+  flushAutosave: () => Promise<{ success: boolean; error?: string }>;
   lastSavedAt: number | null;
   savePhotoPath: (photoPath: string | null) => Promise<SavePhotoPathResult>;
 }
@@ -110,6 +112,7 @@ export function useCardAutosave({
   editorState,
   client,
   debounceMs = 800,
+  isPublished = false,
 }: UseCardAutosaveOptions): UseCardAutosaveReturn {
   const [saveStatus, setSaveStatus] = React.useState<AutosaveStatus>("idle");
   const [saveError, setSaveError] = React.useState<string | null>(null);
@@ -121,6 +124,8 @@ export function useCardAutosave({
   const currentUserIdRef = React.useRef<string | null>(user?.id || null);
   const isActiveRef = React.useRef(isActive);
   isActiveRef.current = isActive;
+  const isPublishedRef = React.useRef(isPublished);
+  isPublishedRef.current = isPublished;
 
   // Track latest editorState and client in refs
   const editorStateRef = React.useRef(editorState);
@@ -140,6 +145,7 @@ export function useCardAutosave({
   const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightRef = React.useRef(false);
   const queuedSaveRef = React.useRef(false);
+  const lastErrorRef = React.useRef<string | null>(null);
 
   // 1. Account switching safety
   React.useEffect(() => {
@@ -224,7 +230,7 @@ export function useCardAutosave({
     const targetUserId = currentUserIdRef.current;
 
     // Prerequisite guard: authenticated, active, draft exists and is ready
-    if (!targetDraftId || !targetUserId || !isActiveRef.current) {
+    if (!targetDraftId || !targetUserId || !isActiveRef.current || isPublishedRef.current) {
       return;
     }
 
@@ -273,6 +279,7 @@ export function useCardAutosave({
       if (!isStale) {
         if (!saveFailed) {
           // Success & not stale: record baseline
+          lastErrorRef.current = null;
           lastSavedSerializedRef.current = currentSerialized;
           lastSavedRevisionRef.current = savingRevision;
           setLastSavedAt(Date.now());
@@ -303,6 +310,7 @@ export function useCardAutosave({
             failureError instanceof Error
               ? failureError.message
               : "Failed to save draft changes.";
+          lastErrorRef.current = msg;
           setSaveStatus("error");
           setSaveError(msg);
         }
@@ -346,8 +354,8 @@ export function useCardAutosave({
   // 6. Debounced autosave effect on editor state changes
   React.useEffect(() => {
     // Prerequisite checks:
-    // Autosave only when authenticated, editor active, confirmed draftId exists, and draft is ready
-    if (!isActive || !user || !draftId || !isDraftReady) {
+    // Autosave only when authenticated, editor active, confirmed draftId exists, draft is ready, and card not published
+    if (!isActive || !user || !draftId || !isDraftReady || isPublished) {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
@@ -389,7 +397,7 @@ export function useCardAutosave({
         debounceTimerRef.current = null;
       }
     };
-  }, [editorState, isActive, user, draftId, isDraftReady, debounceMs, performAutosave]);
+  }, [editorState, isActive, user, draftId, isDraftReady, isPublished, debounceMs, performAutosave]);
 
   // 7. Manual retry handler
   const retryAutosave = React.useCallback(async () => {
@@ -398,6 +406,54 @@ export function useCardAutosave({
       debounceTimerRef.current = null;
     }
     await performAutosave(true);
+  }, [performAutosave]);
+
+  // 8. Flush pending autosave immediately and await database persistence (Task 2C-5.3.4)
+  const flushAutosave = React.useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    // Cancel pending debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    // Wait if an autosave is currently in-flight
+    while (inFlightRef.current) {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    }
+
+    // Recheck prerequisites
+    const targetDraftId = activeDraftIdRef.current;
+    const targetUserId = currentUserIdRef.current;
+    if (!targetDraftId || !targetUserId || !isActiveRef.current) {
+      return { success: false, error: "Editor is not active or draft is not ready." };
+    }
+
+    if (isPublishedRef.current) {
+      return { success: true };
+    }
+
+    const currentState = editorStateRef.current;
+    const currentSerialized = serializeEditorStateForDraft(currentState);
+
+    // If current editor state matches the last saved state, it's already persisted
+    if (currentSerialized === lastSavedSerializedRef.current) {
+      return { success: true };
+    }
+
+    // Perform immediate save
+    await performAutosave(true);
+
+    const isSaved =
+      serializeEditorStateForDraft(editorStateRef.current) === lastSavedSerializedRef.current;
+
+    if (isSaved) {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        error: lastErrorRef.current || "Failed to save draft changes before publishing.",
+      };
+    }
   }, [performAutosave]);
 
   // 8. Explicit immediate draft update for photo path changes (Task 2C-5.3.3 ordering & isolation fix)
@@ -489,6 +545,7 @@ export function useCardAutosave({
     saveStatus,
     saveError,
     retryAutosave,
+    flushAutosave,
     lastSavedAt,
     savePhotoPath,
   };

@@ -229,6 +229,24 @@ export async function publishCardDraft(
 }
 
 /**
+ * Constructs the canonical public recipient share URL for a published card slug.
+ * In browser environments, prefers window.location.origin (supports localhost, preview, prod).
+ * Defaults to https://suprilo.com if origin is omitted outside browser contexts.
+ */
+export function buildCardShareUrl(slug: string, origin?: string): string {
+  if (!slug || typeof slug !== "string") {
+    throw new Error("Slug is required to construct card share URL.");
+  }
+  const cleanSlug = slug.trim();
+  const base =
+    origin?.trim() ||
+    (typeof window !== "undefined" && window.location?.origin
+      ? window.location.origin
+      : "https://suprilo.com");
+  return `${base.replace(/\/+$/, "")}/s/${cleanSlug}`;
+}
+
+/**
  * Archives a card via the atomic public.archive_card stored procedure.
  *
  * Behavior:

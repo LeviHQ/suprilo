@@ -36,6 +36,7 @@ import { useCardEditor } from "@/hooks/useCardEditor";
 import { useCardDraftSync } from "@/hooks/useCardDraftSync";
 import { useCardAutosave } from "@/hooks/useCardAutosave";
 import { useCardPhotoUpload } from "@/hooks/useCardPhotoUpload";
+import { useCardPublish } from "@/hooks/useCardPublish";
 import { BgPaletteId, StickerId } from "@/types/card";
 import { cn } from "@/lib/utils";
 
@@ -198,23 +199,31 @@ function CreateCardStudio() {
     templateParam,
   });
 
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+  const [copiedLink, setCopiedLink] = React.useState(false);
+  const [isPublished, setIsPublished] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Reset published status when draft or account switches
+  React.useEffect(() => {
+    setIsPublished(false);
+  }, [draftId, user?.id]);
+
   // Supabase Draft Autosave (Task 2C-5.3.2)
   const {
     saveStatus,
     saveError,
     retryAutosave,
+    flushAutosave,
     savePhotoPath,
   } = useCardAutosave({
     draftId,
-    isDraftReady: syncStatus === "created",
+    isDraftReady: syncStatus === "created" && !isPublished,
     user,
     isActive: viewState === "editor",
     editorState: state,
+    isPublished,
   });
-
-  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
-  const [copiedLink, setCopiedLink] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // Supabase Photo Upload Integration (Task 2C-5.3.3)
   const {
@@ -226,7 +235,7 @@ function CreateCardStudio() {
     clearUploadError,
   } = useCardPhotoUpload({
     draftId,
-    isDraftReady: syncStatus === "created",
+    isDraftReady: syncStatus === "created" && !isPublished,
     user,
     isActive: viewState === "editor",
     currentPhotoPath: state.photoPath,
@@ -240,6 +249,31 @@ function CreateCardStudio() {
     },
     onPreviewReady: (previewUrl) => {
       setPhotoUrl(previewUrl);
+    },
+  });
+
+  // Supabase Card Publish Integration (Task 2C-5.3.4)
+  const {
+    publishStatus,
+    publishError,
+    publishedCard,
+    publishedUrl,
+    isPublishing,
+    publishCard,
+    clearPublishError,
+  } = useCardPublish({
+    draftId,
+    isDraftReady: syncStatus === "created",
+    user,
+    isActive: viewState === "editor",
+    saveStatus,
+    saveError,
+    flushAutosave,
+    uploadStatus,
+    uploadError,
+    onPublished: () => {
+      setIsPublished(true);
+      setIsShareModalOpen(true);
     },
   });
 
@@ -570,9 +604,15 @@ function CreateCardStudio() {
                         ? `Editing: ${getTemplateById(state.templateId)?.title || "Template"}`
                         : "Custom Scratch Creation"}
                     </h2>
-                    <Badge variant="pink" className="text-[10px] py-0">
-                      Live Studio
-                    </Badge>
+                    {publishStatus === "published" ? (
+                      <Badge variant="neutral" className="text-[10px] py-0 bg-emerald-50 text-emerald-700 border-emerald-200">
+                        Published
+                      </Badge>
+                    ) : (
+                      <Badge variant="pink" className="text-[10px] py-0">
+                        Live Studio
+                      </Badge>
+                    )}
                     {syncStatus === "creating" && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-brand-muted animate-pulse font-medium">
                         <RefreshCw className="w-3 h-3 animate-spin text-brand-pink" />
@@ -669,6 +709,42 @@ function CreateCardStudio() {
                   >
                     Retry
                   </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Publish Error Alert Banner (Task 2C-5.3.4) */}
+            {publishError && (
+              <div
+                role="alert"
+                className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+              >
+                <div className="flex items-start sm:items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0">
+                    !
+                  </div>
+                  <div>
+                    <span className="font-semibold">{publishError}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void publishCard()}
+                    className="text-xs px-3 py-1 bg-white hover:bg-rose-100 text-rose-800 border-rose-300"
+                  >
+                    Retry Publish
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={clearPublishError}
+                    className="text-rose-500 hover:text-rose-700 font-bold ml-1 text-sm leading-none cursor-pointer"
+                    aria-label="Dismiss error"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
             )}
@@ -1072,15 +1148,41 @@ function CreateCardStudio() {
                     </div>
                   </div>
 
-                  {/* Share CTA button */}
+                  {/* Publish / Share CTA button (Task 2C-5.3.4) */}
                   <Button
+                    type="button"
                     variant="primary"
                     size="lg"
-                    onClick={() => setIsShareModalOpen(true)}
+                    disabled={isPublishing}
+                    onClick={async () => {
+                      if (!user) {
+                        openAuthModal("/create");
+                        return;
+                      }
+                      if (publishStatus === "published") {
+                        setIsShareModalOpen(true);
+                        return;
+                      }
+                      await publishCard();
+                    }}
                     className="w-full justify-center gap-2 font-bold shadow-md hover:shadow-brand-pink/25"
                   >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share This Surprise Card</span>
+                    {isPublishing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Publishing Card...</span>
+                      </>
+                    ) : publishStatus === "published" ? (
+                      <>
+                        <Share2 className="w-4 h-4" />
+                        <span>View Share Link</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4" />
+                        <span>Publish & Share Card</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -1112,19 +1214,22 @@ function CreateCardStudio() {
 
             {/* Link Box */}
             <div className="flex items-center gap-2 p-2.5 rounded-xl bg-brand-warm border border-brand-warm-border text-xs font-mono">
-              <span className="truncate flex-1 text-brand-dark">
-                suprilo.com/s/demo-{state.foilStyle}
+              <span className="truncate flex-1 text-brand-dark select-all">
+                {publishedUrl || (publishedCard ? `https://suprilo.com/s/${publishedCard.slug}` : "")}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard?.writeText(
-                    `https://suprilo.com/s/demo-${state.foilStyle}`
-                  );
-                  setCopiedLink(true);
-                  setTimeout(() => setCopiedLink(false), 2500);
+                  const linkToCopy =
+                    publishedUrl ||
+                    (publishedCard ? `https://suprilo.com/s/${publishedCard.slug}` : "");
+                  if (linkToCopy) {
+                    navigator.clipboard?.writeText(linkToCopy);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2500);
+                  }
                 }}
-                className="px-3 py-1.5 rounded-lg bg-white border border-brand-warm-border text-brand-pink font-sans font-bold hover:bg-brand-pink-light transition-colors shrink-0"
+                className="px-3 py-1.5 rounded-lg bg-white border border-brand-warm-border text-brand-pink font-sans font-bold hover:bg-brand-pink-light transition-colors shrink-0 cursor-pointer"
               >
                 {copiedLink ? "Copied!" : "Copy Link"}
               </button>
