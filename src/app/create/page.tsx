@@ -30,7 +30,9 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 import { CreationFlightStage } from "@/components/create/CreationFlightStage";
 import { getTemplateById } from "@/data/templates";
 import { useCardEditor } from "@/hooks/useCardEditor";
+import { useCardDraftSync } from "@/hooks/useCardDraftSync";
 import { BgPaletteId, StickerId } from "@/types/card";
+import { validatePhotoFile, PhotoUploadStatus } from "@/lib/photo-validation";
 import { cn } from "@/lib/utils";
 
 // Foil Finishes
@@ -177,9 +179,29 @@ function CreateCardStudio() {
     defaultSender: userFirstName,
   });
 
+  // Supabase Draft Synchronization (Task 2C-5.3.1)
+  const {
+    draftId,
+    syncStatus,
+    syncError,
+    isLimitReached,
+    retryCreateDraft,
+    clearActiveDraft,
+  } = useCardDraftSync({
+    user,
+    isActive: viewState === "editor",
+    editorState: state,
+    templateParam,
+  });
+
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Photo validation and upload lifecycle state
+  const [photoError, setPhotoError] = React.useState<string | null>(null);
+  // Upload status lifecycle: idle | uploading | uploaded | error (prepared for Phase 2C-5.3 remote draft sync)
+  const [uploadStatus, setUploadStatus] = React.useState<PhotoUploadStatus>("idle");
 
   // Sync viewState when search parameters change externally
   React.useEffect(() => {
@@ -188,17 +210,27 @@ function CreateCardStudio() {
     }
   }, [templateParam, modeParam]);
 
-  // Handle Photo upload (kept in-memory for preview; omitted from sessionStorage)
+  // Handle Photo upload (validated against 2MB & JPEG/PNG/WebP constraints; kept in-memory for preview)
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhotoError(null);
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Please select an image smaller than 5MB.");
+      const validation = validatePhotoFile(file);
+      if (!validation.valid) {
+        setPhotoError(validation.error || "Please select a valid image file.");
+        setUploadStatus("error");
+        if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
+
+      setUploadStatus("idle");
       const reader = new FileReader();
       reader.onload = (event) => {
         setPhotoUrl(event.target?.result as string);
+      };
+      reader.onerror = () => {
+        setPhotoError("Failed to read image file. Please try another image.");
+        setUploadStatus("error");
       };
       reader.readAsDataURL(file);
     }
@@ -206,6 +238,8 @@ function CreateCardStudio() {
 
   const handleRemovePhoto = () => {
     setPhotoUrl(null);
+    setPhotoError(null);
+    setUploadStatus("idle");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -227,6 +261,7 @@ function CreateCardStudio() {
 
   const handleChooseAnotherMode = () => {
     clearDraft();
+    clearActiveDraft();
     setViewState("choices");
     router.replace("/create");
   };
@@ -509,7 +544,7 @@ function CreateCardStudio() {
                   <Sliders className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h2 className="text-sm font-bold text-brand-dark">
                       {state.templateId
                         ? `Editing: ${getTemplateById(state.templateId)?.title || "Template"}`
@@ -518,6 +553,22 @@ function CreateCardStudio() {
                     <Badge variant="pink" className="text-[10px] py-0">
                       Live Studio
                     </Badge>
+                    {syncStatus === "creating" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-brand-muted animate-pulse font-medium">
+                        <RefreshCw className="w-3 h-3 animate-spin text-brand-pink" />
+                        <span>Initializing draft...</span>
+                      </span>
+                    )}
+                    {syncStatus === "created" && draftId && (
+                      <Badge variant="neutral" className="text-[10px] py-0 bg-emerald-50 text-emerald-700 border-emerald-200">
+                        Draft Synced
+                      </Badge>
+                    )}
+                    {syncStatus === "error" && (
+                      <Badge variant="neutral" className="text-[10px] py-0 bg-rose-50 text-rose-700 border-rose-200">
+                        {isLimitReached ? "Draft Limit Reached" : "Sync Offline"}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-brand-muted">
                     Preview your card live on the right. Scratch with your finger or mouse!
@@ -536,6 +587,43 @@ function CreateCardStudio() {
                 </button>
               </div>
             </div>
+
+            {/* Draft Sync Error Alert Banner */}
+            {syncStatus === "error" && syncError && (
+              <div
+                role="alert"
+                className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+              >
+                <div className="flex items-start sm:items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0">
+                    !
+                  </div>
+                  <div>
+                    <span className="font-semibold">{syncError}</span>
+                    {isLimitReached && (
+                      <span className="block sm:inline sm:ml-1 text-rose-600">
+                        You can manage your existing cards in your{" "}
+                        <Link href="/profile" className="font-bold underline hover:text-rose-900">
+                          Profile Dashboard
+                        </Link>
+                        .
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void retryCreateDraft()}
+                    className="text-xs px-3 py-1 bg-white hover:bg-rose-100 text-rose-800 border-rose-300"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Split Grid: Left Editor Controls (7 cols) + Right Live Preview (5 cols) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -795,11 +883,25 @@ function CreateCardStudio() {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       onChange={handlePhotoUpload}
                       className="hidden"
                       id="photo-upload-input"
                     />
+
+                    {photoError && (
+                      <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between shadow-xs">
+                        <span>{photoError}</span>
+                        <button
+                          type="button"
+                          onClick={() => setPhotoError(null)}
+                          className="text-rose-500 hover:text-rose-700 font-bold ml-2 text-sm leading-none"
+                          aria-label="Dismiss error"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
 
                     {state.photoUrl ? (
                       <div className="flex items-center gap-3 p-3 rounded-2xl bg-brand-warm-subtle border border-brand-warm-border">
@@ -807,7 +909,12 @@ function CreateCardStudio() {
                           <Image src={state.photoUrl} alt="Preview" fill className="object-cover" unoptimized />
                         </div>
                         <div className="min-w-0 flex-1 text-xs">
-                          <p className="font-bold text-brand-dark truncate">Custom Photo Attached</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-bold text-brand-dark truncate">Custom Photo Attached</p>
+                            {uploadStatus === "uploading" && (
+                              <span className="text-[10px] text-brand-pink animate-pulse font-semibold">Uploading...</span>
+                            )}
+                          </div>
                           <p className="text-[10px] text-brand-muted">Appears beneath the scratch foil</p>
                         </div>
                         <Button
@@ -827,7 +934,7 @@ function CreateCardStudio() {
                         className="w-full p-4 rounded-2xl border-2 border-dashed border-brand-warm-border hover:border-brand-pink/40 bg-brand-warm-subtle/40 flex items-center justify-center gap-2 text-xs font-semibold text-brand-muted hover:text-brand-dark transition-colors"
                       >
                         <Camera className="w-4 h-4 text-brand-pink" />
-                        <span>Upload a secret photo from device (JPG, PNG)</span>
+                        <span>Upload a secret photo from device (JPG, PNG, WebP • max 2MB)</span>
                       </button>
                     )}
                   </div>

@@ -1,9 +1,18 @@
-import { CoverStyle } from "@/components/scratch/ScratchCard";
+/**
+ * Cover foil style identifiers supported by the card cover canvas.
+ */
+export type CoverStyle =
+  | "lavender-pink"
+  | "golden-foil"
+  | "cosmic-purple"
+  | "mint-fresh";
 
 /**
- * Character limit constraints for card editor input fields.
- * Chosen carefully to preserve visual balance inside the 4:3 card canvas viewport
- * on both mobile and desktop screens while ensuring zero truncation of existing templates.
+ * Character limit and file constraints for card editor and media.
+ * - Text limits preserve visual balance inside the 4:3 card canvas viewport
+ *   on both mobile and desktop screens while ensuring zero truncation of templates.
+ * - Photo limits strictly match the deployed Supabase Storage bucket `card-photos`
+ *   (2 MB ceiling, JPEG, PNG, WebP).
  */
 export const CARD_LIMITS = {
   RECIPIENT_MAX: 30,
@@ -12,7 +21,20 @@ export const CARD_LIMITS = {
   PRIMARY_MESSAGE_MAX: 160,
   SECONDARY_MESSAGE_MAX: 90, // Set to 90 to comfortably accommodate the longest template (84 chars)
   COVER_TEXT_MAX: 60,
+  MAX_PHOTO_SIZE_BYTES: 2 * 1024 * 1024, // 2 MB (2,097,152 bytes) matching card-photos bucket limit
 } as const;
+
+/**
+ * Allowed MIME types for uploaded card photos, strictly matching the
+ * `card-photos` private storage bucket configuration.
+ */
+export const ALLOWED_PHOTO_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+export type AllowedPhotoMimeType = (typeof ALLOWED_PHOTO_MIME_TYPES)[number];
 
 export type CreationMode = "template" | "scratch";
 
@@ -59,6 +81,7 @@ export interface CardEditorState {
   sticker: StickerId;
   fontFamily?: string;
   photoUrl: string | null; // In-memory Data URL for client-side preview; not saved to sessionStorage
+  photoPath?: string | null; // Private storage reference: {user_id}/{card_id}/{filename}
   soundEnabled: boolean;
 }
 
@@ -94,6 +117,7 @@ export interface CardContentPayload {
   primaryMessage: string;
   secondaryMessage?: string | null;
   photoUrl?: string | null;
+  photoPath?: string | null;
   foilStyle: CoverStyle;
   coverText: string;
   bgPalette: BgPaletteId;
@@ -102,23 +126,113 @@ export interface CardContentPayload {
 }
 
 /**
- * Backend-oriented data model representing a persisted card record in the database.
- * Client editor state does not determine ID, slug, userId, or analytics.
+ * Direct row interface matching the public.cards table in Supabase PostgreSQL.
+ * Reflects exact schema columns, constraints, and types from Migration 1.
  */
-export interface CardRecord {
-  id: string; // Server-generated UUID
-  slug: string; // Unique public short identifier (e.g. suprilo.com/s/{slug})
-  userId: string; // Authenticated owner user ID
-  templateId: string | null;
-  status: CardStatus;
-  content: CardContentPayload;
-  revealThreshold: number; // e.g. 0.65
-  soundEnabled: boolean;
-  viewsCount?: number;
-  revealsCount?: number;
-  createdAt: string; // ISO 8601 string
-  updatedAt: string; // ISO 8601 string
-  publishedAt?: string | null;
+export interface DbCard {
+  id: string; // uuid PRIMARY KEY
+  user_id: string; // uuid REFERENCES auth.users(id)
+  slug: string; // text UNIQUE, format ^[2-9a-hj-km-np-z]{12}$
+  status: CardStatus; // 'draft' | 'published' | 'archived'
+  creation_mode: CreationMode; // 'scratch' | 'template'
+  draft_slot: number | null; // integer 1..3 when draft, null when published/archived
+  template_id: string | null; // Approved catalog ID or null
+  recipient_name: string; // 1..30 chars
+  sender_name: string; // 1..30 chars
+  occasion_tag: string; // 1..25 chars
+  primary_message: string; // 1..160 chars
+  secondary_message: string | null; // null or <= 90 chars
+  foil_style: CoverStyle; // 'lavender-pink' | 'golden-foil' | 'cosmic-purple' | 'mint-fresh'
+  cover_text: string; // 1..60 chars
+  bg_palette: BgPaletteId; // 'soft-pink' | 'warm-sunshine' | 'royal-amethyst' | 'mint-fresh' | 'pure-ivory'
+  sticker: StickerId; // 'heart' | 'sparkles' | 'cake' | 'flower' | 'gift' | 'confetti' | 'trophy' | 'star'
+  font_family: string | null; // null or <= 50 chars
+  photo_path: string | null; // {user_id}/{card_id}/{filename} or null
+  reveal_threshold: number; // numeric(3, 2), 0.10..0.95
+  sound_enabled: boolean; // boolean
+  published_at: string | null; // timestamptz
+  created_at: string; // timestamptz
+  updated_at: string; // timestamptz
+}
+
+/**
+ * Application-level card record model.
+ * Direct alias to DbCard with optional telemetry metrics fields from public.card_metrics.
+ */
+export interface CardRecord extends DbCard {
+  views_count?: number;
+  reveals_count?: number;
+}
+
+/**
+ * Exact parameter signature for public.create_card_draft stored procedure.
+ * Matches Migration 2: supabase/migrations/20261102000002_functions_triggers.sql
+ */
+export interface CreateCardDraftRpcParams {
+  p_slug: string;
+  p_creation_mode?: string;
+  p_template_id?: string | null;
+  p_recipient_name?: string;
+  p_sender_name?: string;
+  p_occasion_tag?: string;
+  p_primary_message?: string;
+  p_secondary_message?: string | null;
+  p_foil_style?: string;
+  p_cover_text?: string;
+  p_bg_palette?: string;
+  p_sticker?: string;
+  p_font_family?: string | null;
+  p_photo_path?: string | null;
+  p_reveal_threshold?: number;
+  p_sound_enabled?: boolean;
+}
+
+/**
+ * Input arguments for creating a new card draft via the createCardDraft helper.
+ */
+export interface CreateCardDraftInput {
+  slug?: string; // Optional: auto-generated via generateCardSlug() if omitted
+  creation_mode?: CreationMode;
+  template_id?: string | null;
+  recipient_name?: string;
+  sender_name?: string;
+  occasion_tag?: string;
+  primary_message?: string;
+  secondary_message?: string | null;
+  foil_style?: CoverStyle;
+  cover_text?: string;
+  bg_palette?: BgPaletteId;
+  sticker?: StickerId;
+  font_family?: string | null;
+  photo_path?: string | null;
+  reveal_threshold?: number;
+  sound_enabled?: boolean;
+}
+
+/**
+ * Editable columns permitted for UPDATE operations by authenticated owners.
+ * Strictly matches the column-level GRANT UPDATE list in Migration 3:
+ * recipient_name, sender_name, occasion_tag, primary_message, secondary_message,
+ * foil_style, cover_text, bg_palette, sticker, font_family, photo_path,
+ * reveal_threshold, sound_enabled.
+ *
+ * System columns (id, user_id, status, draft_slot, slug, created_at, published_at,
+ * updated_at, creation_mode, template_id) are intentionally excluded.
+ */
+export interface UpdateCardDraftFields {
+  recipient_name?: string;
+  sender_name?: string;
+  occasion_tag?: string;
+  primary_message?: string;
+  secondary_message?: string | null;
+  foil_style?: CoverStyle;
+  cover_text?: string;
+  bg_palette?: BgPaletteId;
+  sticker?: StickerId;
+  font_family?: string | null;
+  photo_path?: string | null;
+  reveal_threshold?: number;
+  sound_enabled?: boolean;
 }
 
 /**
@@ -144,4 +258,3 @@ export const TEMPLATE_PALETTE_MAP: Record<string, BgPaletteId> = {
   "just-because-virtual-hug": "soft-pink",
   "custom-scratch": "pure-ivory",
 };
-

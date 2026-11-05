@@ -1,4 +1,4 @@
-import { CoverStyle } from "@/components/scratch/ScratchCard";
+import type { CoverStyle } from "@/types/card";
 
 export type TemplateCategory =
   | "birthday"

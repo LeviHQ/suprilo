@@ -2,19 +2,21 @@
 
 import * as React from "react";
 import {
+  CARD_LIMITS,
+  TEMPLATE_PALETTE_MAP,
+} from "@/types/card";
+import type {
   CardEditorState,
   StoredCardDraft,
   BgPaletteId,
   StickerId,
-  CARD_LIMITS,
-  TEMPLATE_PALETTE_MAP,
+  CoverStyle,
 } from "@/types/card";
-import { CoverStyle } from "@/components/scratch/ScratchCard";
 import {
-  TemplateDefinition,
   getTemplateById,
   DEFAULT_SCRATCH_TEMPLATE,
 } from "@/data/templates";
+import type { TemplateDefinition } from "@/data/templates";
 
 const DRAFT_STORAGE_KEY = "suprilo_card_draft_v1";
 
