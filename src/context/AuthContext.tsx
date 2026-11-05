@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -78,6 +79,7 @@ export interface AuthContextType {
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = React.useState<SupriloUser | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isSigningIn, setIsSigningIn] = React.useState(false);
@@ -158,7 +160,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Google OAuth 2.0 Sign-In via Supabase PKCE Authorization Flow.
-   * Redirects user through /auth/callback with the sanitized destination.
+   * Prioritizes a clean popup window so Google authentication URLs never pollute
+   * the main browser tab history stack (preventing the back-button account chooser trap).
+   * Gracefully falls back to standard full-page redirect if popups are blocked by the browser.
    */
   const signInWithGoogle = React.useCallback(
     async (returnUrl: string = "/create"): Promise<SupriloUser | null> => {
@@ -190,16 +194,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ? returnUrl
             : "/create";
 
-        const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeDestination)}`;
+        // 1. Request popup authorization URL from Supabase with popup=true
+        const popupRedirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeDestination)}&popup=true`;
 
-        const { error: oauthError } = await supabaseClient.auth.signInWithOAuth({
+        const { data, error: oauthError } = await supabaseClient.auth.signInWithOAuth({
           provider: "google",
           options: {
-            redirectTo,
+            redirectTo: popupRedirectTo,
             queryParams: {
               access_type: "offline",
               prompt: "select_account",
             },
+            skipBrowserRedirect: true,
           },
         });
 
@@ -209,8 +215,135 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return null;
         }
 
-        // Browser redirects to Google OAuth screen; return null during redirect
-        return null;
+        if (!data?.url) {
+          setError("Failed to generate Google Sign-In link.");
+          setIsSigningIn(false);
+          return null;
+        }
+
+        // 2. Open centered popup window
+        const width = 500;
+        const height = 620;
+        const screenLeft = typeof window.screenLeft !== "undefined" ? window.screenLeft : window.screenX;
+        const screenTop = typeof window.screenTop !== "undefined" ? window.screenTop : window.screenY;
+        const innerWidth = window.innerWidth || document.documentElement.clientWidth || screen.width;
+        const innerHeight = window.innerHeight || document.documentElement.clientHeight || screen.height;
+        const left = screenLeft + Math.max(0, Math.floor((innerWidth - width) / 2));
+        const top = screenTop + Math.max(0, Math.floor((innerHeight - height) / 2));
+
+        let popup: Window | null = null;
+        try {
+          popup = window.open(
+            data.url,
+            "SupriloAuthPopup",
+            `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes,scrollbars=yes`
+          );
+        } catch {
+          popup = null;
+        }
+
+        // 3. Fallback: If browser blocked popup window, perform standard full-page redirect
+        if (!popup || popup.closed || typeof popup.closed === "undefined") {
+          const fallbackRedirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeDestination)}`;
+          await supabaseClient.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: fallbackRedirectTo,
+              queryParams: {
+                access_type: "offline",
+                prompt: "select_account",
+              },
+            },
+          });
+          return null;
+        }
+
+        // 4. Await completion signal from popup or user cancellation
+        return await new Promise<SupriloUser | null>((resolve) => {
+          let isDone = false;
+          let pollTimer: ReturnType<typeof setInterval> | null = null;
+          let authChannel: BroadcastChannel | null = null;
+
+          const finishAuth = async (success: boolean, errorMsg?: string) => {
+            if (isDone) return;
+            isDone = true;
+
+            if (pollTimer) clearInterval(pollTimer);
+            if (authChannel) {
+              try { authChannel.close(); } catch {
+                // Ignore channel closure errors
+              }
+            }
+            window.removeEventListener("message", messageHandler);
+            setIsSigningIn(false);
+
+            if (popup && !popup.closed) {
+              try { popup.close(); } catch {
+                // Ignore popup closure errors
+              }
+            }
+
+            if (!success) {
+              if (errorMsg) setError(errorMsg);
+              resolve(null);
+              return;
+            }
+
+            try {
+              const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
+              const normalized = normalizeSupabaseUser(currentUser);
+              setUser(normalized);
+              closeAuthModal();
+
+              if (safeDestination && window.location.pathname !== safeDestination) {
+                router.push(safeDestination);
+              }
+              router.refresh();
+              resolve(normalized);
+            } catch {
+              resolve(null);
+            }
+          };
+
+          // A. Cross-window communication via BroadcastChannel
+          try {
+            if (typeof BroadcastChannel !== "undefined") {
+              authChannel = new BroadcastChannel("suprilo_auth_channel");
+              authChannel.onmessage = (event) => {
+                if (event.data?.success) {
+                  finishAuth(true);
+                } else if (event.data?.error) {
+                  finishAuth(false, "Authentication was cancelled or failed.");
+                }
+              };
+            }
+          } catch {
+            // BroadcastChannel unavailable in this browser environment
+          }
+
+          // B. Cross-window communication via postMessage
+          const messageHandler = (event: MessageEvent) => {
+            if (event.origin !== origin) return;
+            if (event.data?.success) {
+              finishAuth(true);
+            } else if (event.data?.error) {
+              finishAuth(false, "Authentication was cancelled or failed.");
+            }
+          };
+          window.addEventListener("message", messageHandler);
+
+          // C. Detect user manually closing the popup window before completing OAuth
+          pollTimer = setInterval(() => {
+            if (popup.closed) {
+              if (pollTimer) clearInterval(pollTimer);
+              setTimeout(() => {
+                if (!isDone) {
+                  finishAuth(false);
+                }
+              }, 400);
+            }
+          }, 500);
+        });
       } catch (err: unknown) {
         const message =
           err instanceof Error
@@ -221,7 +354,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     },
-    [isSigningIn]
+    [isSigningIn, closeAuthModal, router]
   );
 
   /**

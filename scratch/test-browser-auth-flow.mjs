@@ -370,22 +370,29 @@ async function runBrowserVerification() {
     // TEST 4: OAuth Callback Route (/auth/callback)
     // ========================================================================
     console.log('\n--- Test 4: OAuth Callback Route Handler Validation ---');
-    // 4a. Missing code query
+    // 4a. Missing code query (full-page redirect)
     const resNoCode = await fetch('http://localhost:3000/auth/callback', { redirect: 'manual' });
     const locNoCode = resNoCode.headers.get('location');
     const noCodeHandled = locNoCode && locNoCode.includes('auth_error=missing_code');
 
-    // 4b. Invalid code query
+    // 4b. Invalid code query (full-page redirect)
     const resBadCode = await fetch('http://localhost:3000/auth/callback?code=invalid_dummy_code', { redirect: 'manual' });
     const locBadCode = resBadCode.headers.get('location');
     const badCodeHandled = locBadCode && locBadCode.includes('auth_error=exchange_failed');
 
-    if (noCodeHandled && badCodeHandled) {
+    // 4c. Popup completion handler validation (popup=true)
+    const resPopupBridge = await fetch('http://localhost:3000/auth/callback?popup=true');
+    const htmlPopupBridge = await resPopupBridge.text();
+    const popupBridgeHandled = resPopupBridge.status === 200 &&
+      htmlPopupBridge.includes('suprilo_auth_channel') &&
+      htmlPopupBridge.includes('missing_code');
+
+    if (noCodeHandled && badCodeHandled && popupBridgeHandled) {
       testResults['4_auth_callback_handler'] = 'PASS';
-      console.log('  [PASS] /auth/callback route handler validated (safely handles missing and malformed authorization codes).');
+      console.log('  [PASS] /auth/callback route handler validated (safely handles missing/malformed codes for both redirect & popup flows).');
     } else {
       testResults['4_auth_callback_handler'] = 'FAIL';
-      console.error(`  [FAIL] /auth/callback unexpected redirects: noCode=${locNoCode}, badCode=${locBadCode}`);
+      console.error(`  [FAIL] /auth/callback unexpected responses: noCode=${locNoCode}, badCode=${locBadCode}, popup=${popupBridgeHandled}`);
     }
 
     // ========================================================================
