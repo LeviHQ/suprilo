@@ -33,5 +33,17 @@ export async function resolve(specifier, context, nextResolve) {
     }
   }
 
+  // Handle next/server and next package subpaths
+  if (specifier === "next/server" || specifier.startsWith("next/")) {
+    const subpath = specifier.slice("next/".length);
+    const candidate = path.resolve(process.cwd(), "node_modules", "next", `${subpath}.js`);
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+      return {
+        shortCircuit: true,
+        url: pathToFileURL(candidate).href,
+      };
+    }
+  }
+
   return nextResolve(specifier, context);
 }

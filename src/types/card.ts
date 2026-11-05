@@ -41,6 +41,12 @@ export type CreationMode = "template" | "scratch";
 export type CardStatus = "draft" | "published" | "archived";
 
 /**
+ * Event types supported by the server-side card telemetry logging system.
+ * Strictly aligned with Migration 2 public.record_card_telemetry(p_slug, p_event_type, p_visitor_hash).
+ */
+export type CardTelemetryEventType = "view" | "reveal";
+
+/**
  * Supported interior card background palette identifiers.
  */
 export type BgPaletteId =
@@ -162,6 +168,74 @@ export interface DbCard {
 export interface CardRecord extends DbCard {
   views_count?: number;
   reveals_count?: number;
+}
+
+/**
+ * Public recipient-facing card projection returned by public.get_published_card_by_slug RPC.
+ * Strictly excludes owner identification (user_id), draft slots, creation mode,
+ * and unpublished/internal system columns.
+ */
+export interface PublishedCard {
+  id: string; // uuid
+  slug: string; // 12-char slug
+  recipient_name: string;
+  sender_name: string;
+  occasion_tag: string;
+  primary_message: string;
+  secondary_message: string | null;
+  foil_style: CoverStyle;
+  cover_text: string;
+  bg_palette: BgPaletteId;
+  sticker: StickerId;
+  font_family: string | null;
+  photo_path: string | null;
+  has_photo: boolean;
+  reveal_threshold: number;
+  sound_enabled: boolean;
+  published_at: string; // timestamptz
+}
+
+/**
+ * Sanitized client-facing DTO for recipient scratch card viewing.
+ * Strictly excludes owner identification (user_id), internal card UUID (id),
+ * Storage photo path (photo_path), internal status, draft slots, and timestamps.
+ */
+export interface RecipientCardDto {
+  slug: string;
+  recipient_name: string;
+  sender_name: string;
+  occasion_tag: string;
+  primary_message: string;
+  secondary_message: string | null;
+  foil_style: CoverStyle;
+  cover_text: string;
+  bg_palette: BgPaletteId;
+  sticker: StickerId;
+  font_family: string | null;
+  reveal_threshold: number;
+  sound_enabled: boolean;
+}
+
+/**
+ * Projects a server-side PublishedCard into a sanitized recipient client DTO.
+ * Explicitly strips card UUID, photo_path, has_photo, published_at, and internal fields.
+ */
+export function toRecipientCardDto(card: PublishedCard): RecipientCardDto {
+  return {
+    slug: card.slug,
+    recipient_name: card.recipient_name,
+    sender_name: card.sender_name,
+    occasion_tag: card.occasion_tag,
+    primary_message: card.primary_message,
+    secondary_message: card.secondary_message || null,
+    foil_style: card.foil_style,
+    cover_text: card.cover_text,
+    bg_palette: card.bg_palette,
+    sticker: card.sticker,
+    font_family: card.font_family || null,
+    reveal_threshold: card.reveal_threshold,
+    sound_enabled: card.sound_enabled,
+  };
 }
 
 /**

@@ -2,12 +2,32 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { generateCardSlug, isValidCardSlug, SLUG_ALPHABET } from "@/lib/slug";
 import type {
+  BgPaletteId,
   CardStatus,
+  CoverStyle,
   CreateCardDraftInput,
   CreateCardDraftRpcParams,
   DbCard,
+  PublishedCard,
+  StickerId,
   UpdateCardDraftFields,
 } from "@/types/card";
+import { toRecipientCardDto } from "@/types/card";
+
+/**
+ * Sanitized custom error indicating unexpected database or RPC failure
+ * during published card retrieval. Distinguishes backend errors from 404 Not Found.
+ */
+export class CardBackendError extends Error {
+  readonly code = "BACKEND_SERVICE_ERROR";
+  constructor(
+    message = "Unable to retrieve published card due to a temporary service error.",
+    options?: { cause?: unknown }
+  ) {
+    super(message, options);
+    this.name = "CardBackendError";
+  }
+}
 
 /**
  * Whitelist of columns permitted for client-initiated draft updates.
@@ -247,6 +267,118 @@ export function buildCardShareUrl(slug: string, origin?: string): string {
 }
 
 /**
+ * Retrieves a published card by its slug using the restricted public.get_published_card_by_slug RPC.
+ *
+ * Security & Projection:
+ * - Validates the slug upfront via isValidCardSlug(). Returns null immediately for invalid slugs.
+ * - Invokes public.get_published_card_by_slug(p_slug) stored procedure.
+ * - Does NOT query public.cards table directly for public recipient views.
+ * - Never returns draft or archived cards (filtered inside the RPC).
+ * - Never exposes user_id, email, draft_slot, or internal system columns.
+ * - Returns null if the card does not exist, is not published, or is archived.
+ */
+export async function getPublishedCardBySlug(
+  slug: string,
+  client?: SupabaseClient
+): Promise<PublishedCard | null> {
+  if (!slug || typeof slug !== "string") {
+    return null;
+  }
+
+  const cleanSlug = slug.trim();
+  if (!isValidCardSlug(cleanSlug)) {
+    return null;
+  }
+
+  let supabase: SupabaseClient;
+  try {
+    supabase = client || createClient();
+  } catch (err: unknown) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[getPublishedCardBySlug] Supabase client initialization failed for slug "${cleanSlug}":`,
+        err instanceof Error ? err.message : String(err)
+      );
+    }
+    throw new CardBackendError(
+      "Unable to retrieve published card due to a temporary service initialization error.",
+      { cause: err }
+    );
+  }
+
+  let data: unknown;
+  let error: { message: string } | null = null;
+
+  try {
+    const result = await supabase.rpc("get_published_card_by_slug", {
+      p_slug: cleanSlug,
+    });
+    data = result.data;
+    error = result.error;
+  } catch (err: unknown) {
+    if (err instanceof CardBackendError) {
+      throw err;
+    }
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[getPublishedCardBySlug] RPC network/transport exception for slug "${cleanSlug}":`,
+        err instanceof Error ? err.message : String(err)
+      );
+    }
+    throw new CardBackendError(
+      "Unable to retrieve published card due to a temporary network or transport error.",
+      { cause: err }
+    );
+  }
+
+  if (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[getPublishedCardBySlug] RPC error for slug "${cleanSlug}":`,
+        error.message
+      );
+    }
+    throw new CardBackendError(
+      "Unable to retrieve published card due to a temporary database error.",
+      { cause: error }
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  // Supabase RPC returning TABLE(...) returns an array of records
+  const record = Array.isArray(data) ? data[0] : data;
+  if (!record || !record.id) {
+    return null;
+  }
+
+  return {
+    id: record.id,
+    slug: record.slug,
+    recipient_name: record.recipient_name,
+    sender_name: record.sender_name,
+    occasion_tag: record.occasion_tag,
+    primary_message: record.primary_message,
+    secondary_message: record.secondary_message || null,
+    foil_style: record.foil_style as CoverStyle,
+    cover_text: record.cover_text,
+    bg_palette: record.bg_palette as BgPaletteId,
+    sticker: record.sticker as StickerId,
+    font_family: record.font_family || null,
+    photo_path: record.photo_path || null,
+    has_photo: Boolean(record.has_photo),
+    reveal_threshold:
+      typeof record.reveal_threshold === "number"
+        ? record.reveal_threshold
+        : Number(record.reveal_threshold) || 0.65,
+    sound_enabled: Boolean(record.sound_enabled),
+    published_at: record.published_at,
+  };
+}
+
+/**
  * Archives a card via the atomic public.archive_card stored procedure.
  *
  * Behavior:
@@ -355,3 +487,5 @@ export type {
   UploadCardPhotoResult,
   PhotoUploadStatus,
 } from "./card-storage";
+export type { PublishedCard, RecipientCardDto } from "@/types/card";
+export { toRecipientCardDto };
