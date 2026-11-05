@@ -62,6 +62,7 @@ export function getInitialCardState(defaultSender: string = "Alex"): CardEditorS
     sticker: (DEFAULT_SCRATCH_TEMPLATE.sticker as StickerId) || "sparkles",
     fontFamily: undefined,
     photoUrl: null,
+    photoPath: null,
     soundEnabled: true,
   };
 }
@@ -95,6 +96,7 @@ export function buildStateFromTemplate(
     sticker: mappedSticker,
     fontFamily: currentFont,
     photoUrl: null, // Clear uploaded photo when switching templates
+    photoPath: null,
     soundEnabled,
   };
 }
@@ -374,6 +376,13 @@ export function useCardEditor({
     [remountCanvas]
   );
 
+  const setPhotoPath = React.useCallback(
+    (photoPath: string | null) => {
+      dispatch({ type: "SET_FIELD", field: "photoPath", value: photoPath });
+    },
+    []
+  );
+
   const setFoilStyle = React.useCallback(
     (foil: CoverStyle) => {
       dispatch({ type: "SET_FIELD", field: "foilStyle", value: foil });
@@ -448,6 +457,7 @@ export function useCardEditor({
     limits: CARD_LIMITS,
     setField,
     setPhotoUrl,
+    setPhotoPath,
     setFoilStyle,
     setBgPalette,
     setSticker,

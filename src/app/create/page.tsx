@@ -21,6 +21,9 @@ import {
   Trash2,
   RotateCcw,
   Wand2,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { ScratchCard, CoverStyle } from "@/components/scratch/ScratchCard";
 import { Button } from "@/components/ui/Button";
@@ -31,8 +34,9 @@ import { CreationFlightStage } from "@/components/create/CreationFlightStage";
 import { getTemplateById } from "@/data/templates";
 import { useCardEditor } from "@/hooks/useCardEditor";
 import { useCardDraftSync } from "@/hooks/useCardDraftSync";
+import { useCardAutosave } from "@/hooks/useCardAutosave";
+import { useCardPhotoUpload } from "@/hooks/useCardPhotoUpload";
 import { BgPaletteId, StickerId } from "@/types/card";
-import { validatePhotoFile, PhotoUploadStatus } from "@/lib/photo-validation";
 import { cn } from "@/lib/utils";
 
 // Foil Finishes
@@ -194,14 +198,50 @@ function CreateCardStudio() {
     templateParam,
   });
 
+  // Supabase Draft Autosave (Task 2C-5.3.2)
+  const {
+    saveStatus,
+    saveError,
+    retryAutosave,
+    savePhotoPath,
+  } = useCardAutosave({
+    draftId,
+    isDraftReady: syncStatus === "created",
+    user,
+    isActive: viewState === "editor",
+    editorState: state,
+  });
+
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Photo validation and upload lifecycle state
-  const [photoError, setPhotoError] = React.useState<string | null>(null);
-  // Upload status lifecycle: idle | uploading | uploaded | error (prepared for Phase 2C-5.3 remote draft sync)
-  const [uploadStatus, setUploadStatus] = React.useState<PhotoUploadStatus>("idle");
+  // Supabase Photo Upload Integration (Task 2C-5.3.3)
+  const {
+    uploadStatus,
+    uploadError,
+    handleFileSelect,
+    retryUpload,
+    removePhoto,
+    clearUploadError,
+  } = useCardPhotoUpload({
+    draftId,
+    isDraftReady: syncStatus === "created",
+    user,
+    isActive: viewState === "editor",
+    currentPhotoPath: state.photoPath,
+    savePhotoPath,
+    onPhotoUploaded: (uploadedPath) => {
+      setField("photoPath", uploadedPath);
+    },
+    onPhotoRemoved: () => {
+      setField("photoPath", null);
+      setPhotoUrl(null);
+    },
+    onPreviewReady: (previewUrl) => {
+      setPhotoUrl(previewUrl);
+    },
+  });
 
   // Sync viewState when search parameters change externally
   React.useEffect(() => {
@@ -210,37 +250,17 @@ function CreateCardStudio() {
     }
   }, [templateParam, modeParam]);
 
-  // Handle Photo upload (validated against 2MB & JPEG/PNG/WebP constraints; kept in-memory for preview)
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhotoError(null);
+  // Handle Photo selection from file input
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const validation = validatePhotoFile(file);
-      if (!validation.valid) {
-        setPhotoError(validation.error || "Please select a valid image file.");
-        setUploadStatus("error");
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        return;
-      }
-
-      setUploadStatus("idle");
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setPhotoUrl(event.target?.result as string);
-      };
-      reader.onerror = () => {
-        setPhotoError("Failed to read image file. Please try another image.");
-        setUploadStatus("error");
-      };
-      reader.readAsDataURL(file);
+      await handleFileSelect(file);
     }
   };
 
-  const handleRemovePhoto = () => {
-    setPhotoUrl(null);
-    setPhotoError(null);
-    setUploadStatus("idle");
+  const handleRemovePhoto = async () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
+    await removePhoto();
   };
 
   const handleBack = () => {
@@ -560,9 +580,37 @@ function CreateCardStudio() {
                       </span>
                     )}
                     {syncStatus === "created" && draftId && (
-                      <Badge variant="neutral" className="text-[10px] py-0 bg-emerald-50 text-emerald-700 border-emerald-200">
-                        Draft Synced
-                      </Badge>
+                      <>
+                        {saveStatus === "saving" && (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-brand-muted animate-pulse font-medium">
+                            <RefreshCw className="w-3 h-3 animate-spin text-brand-pink" />
+                            <span>Saving...</span>
+                          </span>
+                        )}
+                        {(saveStatus === "saved" || saveStatus === "idle") && (
+                          <Badge variant="neutral" className="text-[10px] py-0 bg-emerald-50 text-emerald-700 border-emerald-200">
+                            Saved
+                          </Badge>
+                        )}
+                        {saveStatus === "error" && (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Badge
+                              variant="neutral"
+                              className="text-[10px] py-0 bg-rose-50 text-rose-700 border-rose-200"
+                              title={saveError || "Autosave failed"}
+                            >
+                              Save failed
+                            </Badge>
+                            <button
+                              type="button"
+                              onClick={() => void retryAutosave()}
+                              className="text-[11px] font-semibold text-brand-pink hover:text-brand-pink-dark underline cursor-pointer"
+                            >
+                              Retry
+                            </button>
+                          </span>
+                        )}
+                      </>
                     )}
                     {syncStatus === "error" && (
                       <Badge variant="neutral" className="text-[10px] py-0 bg-rose-50 text-rose-700 border-rose-200">
@@ -889,13 +937,25 @@ function CreateCardStudio() {
                       id="photo-upload-input"
                     />
 
-                    {photoError && (
+                    {uploadError && (
                       <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between shadow-xs">
-                        <span>{photoError}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
+                          <span className="truncate">{uploadError}</span>
+                          {uploadStatus === "error" && (
+                            <button
+                              type="button"
+                              onClick={() => void retryUpload()}
+                              className="text-xs font-bold underline hover:text-rose-900 shrink-0 cursor-pointer"
+                            >
+                              Retry
+                            </button>
+                          )}
+                        </div>
                         <button
                           type="button"
-                          onClick={() => setPhotoError(null)}
-                          className="text-rose-500 hover:text-rose-700 font-bold ml-2 text-sm leading-none"
+                          onClick={clearUploadError}
+                          className="text-rose-500 hover:text-rose-700 font-bold ml-2 text-sm leading-none cursor-pointer"
                           aria-label="Dismiss error"
                         >
                           ✕
@@ -909,28 +969,63 @@ function CreateCardStudio() {
                           <Image src={state.photoUrl} alt="Preview" fill className="object-cover" unoptimized />
                         </div>
                         <div className="min-w-0 flex-1 text-xs">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             <p className="font-bold text-brand-dark truncate">Custom Photo Attached</p>
                             {uploadStatus === "uploading" && (
-                              <span className="text-[10px] text-brand-pink animate-pulse font-semibold">Uploading...</span>
+                              <span className="text-[10px] text-brand-pink animate-pulse font-semibold flex items-center gap-1">
+                                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                <span>Uploading...</span>
+                              </span>
+                            )}
+                            {uploadStatus === "uploaded" && (
+                              <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                                <CheckCircle2 className="w-2.5 h-2.5" />
+                                <span>Photo uploaded</span>
+                              </span>
+                            )}
+                            {uploadStatus === "error" && (
+                              <span className="text-[10px] text-rose-600 font-semibold flex items-center gap-1">
+                                <AlertCircle className="w-2.5 h-2.5" />
+                                <span>Upload failed</span>
+                              </span>
                             )}
                           </div>
                           <p className="text-[10px] text-brand-muted">Appears beneath the scratch foil</p>
                         </div>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="text-xs shrink-0"
-                        >
-                          Replace
-                        </Button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {uploadStatus === "error" && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => void retryUpload()}
+                              className="text-xs text-rose-700 border-rose-200 hover:bg-rose-50"
+                            >
+                              Retry
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              if (fileInputRef.current) fileInputRef.current.value = "";
+                              fileInputRef.current?.click();
+                            }}
+                            className="text-xs"
+                            disabled={uploadStatus === "uploading"}
+                          >
+                            Replace
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => {
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                          fileInputRef.current?.click();
+                        }}
                         className="w-full p-4 rounded-2xl border-2 border-dashed border-brand-warm-border hover:border-brand-pink/40 bg-brand-warm-subtle/40 flex items-center justify-center gap-2 text-xs font-semibold text-brand-muted hover:text-brand-dark transition-colors"
                       >
                         <Camera className="w-4 h-4 text-brand-pink" />

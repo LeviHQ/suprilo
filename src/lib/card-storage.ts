@@ -186,3 +186,35 @@ export async function uploadCardPhoto(
     bucket: CARD_PHOTOS_BUCKET,
   };
 }
+
+/**
+ * Safely removes a photo object from the private `card-photos` Supabase Storage bucket.
+ * Does not throw an error if the object does not exist or has already been removed.
+ */
+export async function deleteCardPhoto(
+  photoPath: string,
+  client?: SupabaseClient
+): Promise<void> {
+  if (typeof photoPath !== "string" || !photoPath.trim()) {
+    return;
+  }
+  const cleanPath = photoPath.trim();
+  const segments = cleanPath.split("/");
+  if (segments.length !== 3 || cleanPath.includes("..")) {
+    return;
+  }
+
+  const supabase = client || createClient();
+  const { error } = await supabase.storage
+    .from(CARD_PHOTOS_BUCKET)
+    .remove([cleanPath]);
+
+  if (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[deleteCardPhoto] Failed to remove photo at "${cleanPath}":`,
+        error.message
+      );
+    }
+  }
+}
