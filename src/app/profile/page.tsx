@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   ArrowRight,
   Clock,
+  Trophy,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
@@ -25,6 +27,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { MySurpriseCards, CardFilterType } from "@/components/dashboard/MySurpriseCards";
 import { getUserCardsWithMetrics } from "@/lib/cards";
 import { getUserBadgesSummary } from "@/lib/badges/service";
+import { getLevelProgress, type UserBadgeSummary } from "@/types/badges";
 import type { CardRecord } from "@/types/card";
 
 export default function ProfileHomePage() {
@@ -34,7 +37,7 @@ export default function ProfileHomePage() {
   const [cards, setCards] = React.useState<CardRecord[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [fetchError, setFetchError] = React.useState<string | null>(null);
-  const [unlockedBadgesCount, setUnlockedBadgesCount] = React.useState<number | null>(null);
+  const [badgeSummary, setBadgeSummary] = React.useState<UserBadgeSummary | null>(null);
 
   // Controlled card filter to allow clicking StatCard to switch view
   const [cardFilter, setCardFilter] = React.useState<CardFilterType>("all");
@@ -69,7 +72,7 @@ export default function ProfileHomePage() {
       getUserBadgesSummary(user.id)
         .then((summary) => {
           if (summary) {
-            setUnlockedBadgesCount(summary.total_badges);
+            setBadgeSummary(summary);
           }
         })
         .catch(() => {});
@@ -108,6 +111,10 @@ export default function ProfileHomePage() {
       totalReveals,
     };
   }, [cards]);
+
+  // Gamification & Level computations from user summary
+  const totalXp = badgeSummary?.total_xp ?? 0;
+  const levelInfo = React.useMemo(() => getLevelProgress(totalXp), [totalXp]);
 
   if (!user) return null;
 
@@ -225,6 +232,17 @@ export default function ProfileHomePage() {
                   <span>Google Verified</span>
                 </span>
               ) : null}
+
+              {/* Creator Level Pill */}
+              <Link
+                href="/profile/badges"
+                className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition-colors shadow-2xs group"
+                title="View Creator Badges & Level Progress"
+              >
+                <Trophy className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
+                <span>Level {badgeSummary?.current_level ?? levelInfo.currentLevel.level}</span>
+                <span className="text-amber-700 font-semibold">• {levelInfo.currentLevel.title}</span>
+              </Link>
             </div>
 
             <p className="text-xs sm:text-sm text-brand-muted truncate max-w-md">
@@ -252,7 +270,61 @@ export default function ProfileHomePage() {
                   </span>
                 </div>
               ) : null}
+
+              {/* XP Counter Pill in metadata row */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
+                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                <span>
+                  Experience: <strong className="text-brand-dark">{totalXp.toLocaleString()} XP</strong>
+                </span>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Level & XP Progression Strip */}
+        <div className="mt-6 pt-5 border-t border-brand-warm-border/70 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2.5 py-0.5 rounded-full">
+                Level {levelInfo.currentLevel.level} • {levelInfo.currentLevel.title}
+              </span>
+              <span className="text-xs text-brand-muted">
+                {levelInfo.nextLevel
+                  ? `${(levelInfo.nextLevel.requiredXp - totalXp).toLocaleString()} XP to Level ${levelInfo.nextLevel.level}`
+                  : "Maximum Level Mastered 🎉"}
+              </span>
+            </div>
+            <Link
+              href="/profile/badges"
+              className="inline-flex items-center gap-1 text-xs font-bold text-brand-pink hover:text-brand-pink/80 transition-colors"
+            >
+              <span>View Badges & Perks</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden relative shadow-inner">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-brand-pink via-rose-500 to-amber-500 transition-all duration-700 ease-out"
+              style={{ width: `${levelInfo.progressPercent}%` }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] text-brand-muted px-0.5">
+            <span>
+              {levelInfo.nextLevel ? (
+                <>
+                  <strong className="text-brand-dark">{levelInfo.xpInCurrentLevel.toLocaleString()}</strong> /{" "}
+                  {levelInfo.currentLevel.deltaToNext?.toLocaleString() || 0} XP in current level
+                </>
+              ) : (
+                "Hall of Fame Immortal"
+              )}
+            </span>
+            <span className="font-semibold text-brand-dark">
+              {totalXp.toLocaleString()} XP Total
+            </span>
           </div>
         </div>
       </div>
@@ -286,7 +358,7 @@ export default function ProfileHomePage() {
 
         <StatCard
           label="Badges Unlocked"
-          value={unlockedBadgesCount !== null ? `${unlockedBadgesCount} / 50` : "0 / 50"}
+          value={`${badgeSummary?.unlocked_count ?? 0} / 50`}
           subtext="Achievement catalogue"
           icon={Award}
           iconBgColor="bg-amber-50"
