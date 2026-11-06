@@ -458,6 +458,8 @@ export type UserCardsMetricsMap = Record<
   {
     views_count: number;
     reveals_count: number;
+    last_viewed_at?: string | null;
+    last_revealed_at?: string | null;
   }
 >;
 
@@ -472,7 +474,7 @@ export async function getUserCardMetrics(
 
   const { data, error } = await supabase
     .from("card_metrics")
-    .select("card_id, views_count, reveals_count");
+    .select("card_id, views_count, reveals_count, last_viewed_at, last_revealed_at");
 
   if (error) {
     if (process.env.NODE_ENV !== "production") {
@@ -488,6 +490,8 @@ export async function getUserCardMetrics(
         map[item.card_id] = {
           views_count: Number(item.views_count) || 0,
           reveals_count: Number(item.reveals_count) || 0,
+          last_viewed_at: item.last_viewed_at || null,
+          last_revealed_at: item.last_revealed_at || null,
         };
       }
     }
@@ -516,6 +520,8 @@ export async function getUserCardsWithMetrics(
       ...card,
       views_count: metrics?.views_count ?? 0,
       reveals_count: metrics?.reveals_count ?? 0,
+      last_viewed_at: metrics?.last_viewed_at ?? null,
+      last_revealed_at: metrics?.last_revealed_at ?? null,
     };
   });
 }

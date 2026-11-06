@@ -168,6 +168,8 @@ export interface DbCard {
 export interface CardRecord extends DbCard {
   views_count?: number;
   reveals_count?: number;
+  last_viewed_at?: string | null;
+  last_revealed_at?: string | null;
 }
 
 /**
