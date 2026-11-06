@@ -1,0 +1,502 @@
+[
+  {
+    "index": 1,
+    "slug": "first-step",
+    "name": "Welcome Creator",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 27556,
+    "kb": "26.9",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 2,
+    "slug": "first-draft",
+    "name": "First Draft",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 29262,
+    "kb": "28.6",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 3,
+    "slug": "first-card",
+    "name": "First Spark",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 29226,
+    "kb": "28.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 4,
+    "slug": "named-recipient",
+    "name": "Name in Lights",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 27160,
+    "kb": "26.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 5,
+    "slug": "secret-note",
+    "name": "Secret Note",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 27750,
+    "kb": "27.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 6,
+    "slug": "custom-cover",
+    "name": "Custom Cover",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 27760,
+    "kb": "27.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 7,
+    "slug": "music-lover",
+    "name": "Soundtrack",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 29306,
+    "kb": "28.6",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 8,
+    "slug": "photo-memory",
+    "name": "Picture Perfect",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 28414,
+    "kb": "27.7",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 9,
+    "slug": "first-archive",
+    "name": "Curator",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 26748,
+    "kb": "26.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 10,
+    "slug": "palette-pioneer",
+    "name": "Style Pioneer",
+    "rarity": "common",
+    "category": "getting-started",
+    "size": 29206,
+    "kb": "28.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 11,
+    "slug": "trio-creator",
+    "name": "Triple Threat",
+    "rarity": "common",
+    "category": "creator-journey",
+    "size": 28792,
+    "kb": "28.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 12,
+    "slug": "five-cards",
+    "name": "High Five",
+    "rarity": "rare",
+    "category": "creator-journey",
+    "size": 31226,
+    "kb": "30.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 13,
+    "slug": "ten-cards",
+    "name": "Deck Builder",
+    "rarity": "rare",
+    "category": "creator-journey",
+    "size": 32868,
+    "kb": "32.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 14,
+    "slug": "twenty-five-cards",
+    "name": "Card Smith",
+    "rarity": "epic",
+    "category": "creator-journey",
+    "size": 30790,
+    "kb": "30.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 15,
+    "slug": "fifty-cards",
+    "name": "Studio Master",
+    "rarity": "legendary",
+    "category": "creator-journey",
+    "size": 33554,
+    "kb": "32.8",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 16,
+    "slug": "hundred-cards",
+    "name": "Century Crafter",
+    "rarity": "legendary",
+    "category": "creator-journey",
+    "size": 34840,
+    "kb": "34.0",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 17,
+    "slug": "weekend-publish",
+    "name": "Weekend Warrior",
+    "rarity": "common",
+    "category": "creator-journey",
+    "size": 28402,
+    "kb": "27.7",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 18,
+    "slug": "night-owl",
+    "name": "Midnight Artisan",
+    "rarity": "common",
+    "category": "creator-journey",
+    "size": 28952,
+    "kb": "28.3",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 19,
+    "slug": "card-refinement",
+    "name": "Polished Craft",
+    "rarity": "common",
+    "category": "creator-journey",
+    "size": 29174,
+    "kb": "28.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 20,
+    "slug": "multi-style",
+    "name": "Style Explorer",
+    "rarity": "rare",
+    "category": "creator-journey",
+    "size": 31194,
+    "kb": "30.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 21,
+    "slug": "five-recipients",
+    "name": "Inner Circle",
+    "rarity": "rare",
+    "category": "creator-journey",
+    "size": 32652,
+    "kb": "31.9",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 22,
+    "slug": "tidy-studio",
+    "name": "Tidy Studio",
+    "rarity": "common",
+    "category": "creator-journey",
+    "size": 27782,
+    "kb": "27.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 23,
+    "slug": "first-view",
+    "name": "First Impression",
+    "rarity": "common",
+    "category": "sharing-impact",
+    "size": 28698,
+    "kb": "28.0",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 24,
+    "slug": "first-reveal",
+    "name": "First Reveal",
+    "rarity": "common",
+    "category": "sharing-impact",
+    "size": 28730,
+    "kb": "28.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 25,
+    "slug": "ten-views",
+    "name": "Spotted",
+    "rarity": "rare",
+    "category": "sharing-impact",
+    "size": 32664,
+    "kb": "31.9",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 26,
+    "slug": "fifty-views",
+    "name": "Crowd Gatherer",
+    "rarity": "rare",
+    "category": "sharing-impact",
+    "size": 30162,
+    "kb": "29.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 27,
+    "slug": "hundred-views",
+    "name": "Centurion View",
+    "rarity": "epic",
+    "category": "sharing-impact",
+    "size": 29238,
+    "kb": "28.6",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 28,
+    "slug": "five-hundred-views",
+    "name": "Audience Magnet",
+    "rarity": "legendary",
+    "category": "sharing-impact",
+    "size": 34090,
+    "kb": "33.3",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 29,
+    "slug": "ten-reveals",
+    "name": "Party Starter",
+    "rarity": "rare",
+    "category": "sharing-impact",
+    "size": 32442,
+    "kb": "31.7",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 30,
+    "slug": "fifty-reveals",
+    "name": "Crowd Pleaser",
+    "rarity": "epic",
+    "category": "sharing-impact",
+    "size": 30992,
+    "kb": "30.3",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 31,
+    "slug": "hundred-reveals",
+    "name": "Golden Joy",
+    "rarity": "legendary",
+    "category": "sharing-impact",
+    "size": 32360,
+    "kb": "31.6",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 32,
+    "slug": "viral-card",
+    "name": "Viral Sensation",
+    "rarity": "epic",
+    "category": "sharing-impact",
+    "size": 32860,
+    "kb": "32.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 33,
+    "slug": "seven-day-veteran",
+    "name": "Week One",
+    "rarity": "common",
+    "category": "milestones",
+    "size": 28610,
+    "kb": "27.9",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 34,
+    "slug": "month-veteran",
+    "name": "Monthly Regular",
+    "rarity": "rare",
+    "category": "milestones",
+    "size": 32726,
+    "kb": "32.0",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 35,
+    "slug": "ninety-day-veteran",
+    "name": "Quarter Master",
+    "rarity": "epic",
+    "category": "milestones",
+    "size": 36272,
+    "kb": "35.4",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 36,
+    "slug": "one-year-veteran",
+    "name": "Perennial Legend",
+    "rarity": "legendary",
+    "category": "milestones",
+    "size": 36948,
+    "kb": "36.1",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 37,
+    "slug": "speedy-scratch",
+    "name": "Fast Scratch",
+    "rarity": "rare",
+    "category": "milestones",
+    "size": 31720,
+    "kb": "31.0",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 38,
+    "slug": "perfect-reveal-trio",
+    "name": "Triple Delight",
+    "rarity": "rare",
+    "category": "milestones",
+    "size": 31714,
+    "kb": "31.0",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 39,
+    "slug": "ten-card-reveals",
+    "name": "Ten-Fold Reveal",
+    "rarity": "epic",
+    "category": "milestones",
+    "size": 33314,
+    "kb": "32.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 40,
+    "slug": "high-affinity",
+    "name": "Heart Magnet",
+    "rarity": "epic",
+    "category": "milestones",
+    "size": 31320,
+    "kb": "30.6",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 41,
+    "slug": "badge-shared",
+    "name": "Showcase",
+    "rarity": "common",
+    "category": "milestones",
+    "size": 29694,
+    "kb": "29.0",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 42,
+    "slug": "card-shared",
+    "name": "Postman",
+    "rarity": "common",
+    "category": "milestones",
+    "size": 28248,
+    "kb": "27.6",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 43,
+    "slug": "sticker-fanatic",
+    "name": "Sticker Maestro",
+    "rarity": "common",
+    "category": "creative-mastery",
+    "size": 29348,
+    "kb": "28.7",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 44,
+    "slug": "sensory-delight",
+    "name": "Full Sensory",
+    "rarity": "rare",
+    "category": "creative-mastery",
+    "size": 32474,
+    "kb": "31.7",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 45,
+    "slug": "epic-surprise",
+    "name": "Master Storyteller",
+    "rarity": "rare",
+    "category": "creative-mastery",
+    "size": 31246,
+    "kb": "30.5",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 46,
+    "slug": "photo-album-card",
+    "name": "Memory Vault",
+    "rarity": "rare",
+    "category": "creative-mastery",
+    "size": 32102,
+    "kb": "31.3",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 47,
+    "slug": "scratch-explorer",
+    "name": "Scratch Connoisseur",
+    "rarity": "rare",
+    "category": "creative-mastery",
+    "size": 31592,
+    "kb": "30.9",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 48,
+    "slug": "double-polish",
+    "name": "Master of Detail",
+    "rarity": "rare",
+    "category": "creative-mastery",
+    "size": 32032,
+    "kb": "31.3",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 49,
+    "slug": "legendary-creator",
+    "name": "Legendary Creator",
+    "rarity": "epic",
+    "category": "creative-mastery",
+    "size": 31036,
+    "kb": "30.3",
+    "compliant": "PASS (<45KB)"
+  },
+  {
+    "index": 50,
+    "slug": "suprilo-hall-of-fame",
+    "name": "Hall of Fame",
+    "rarity": "legendary",
+    "category": "creative-mastery",
+    "size": 33650,
+    "kb": "32.9",
+    "compliant": "PASS (<45KB)"
+  }
+]
