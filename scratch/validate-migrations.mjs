@@ -5,7 +5,8 @@ const files = [
   'supabase/migrations/20261102000001_core_schema.sql',
   'supabase/migrations/20261102000002_functions_triggers.sql',
   'supabase/migrations/20261102000003_rls_security.sql',
-  'supabase/migrations/20261102000004_storage_policies.sql'
+  'supabase/migrations/20261102000004_storage_policies.sql',
+  'supabase/migrations/20261102000005_badge_system.sql'
 ];
 
 let allPassed = true;
