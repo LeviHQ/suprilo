@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { headers } from "next/headers";
+import crypto from "crypto";
 import { Sparkles, HelpCircle, AlertTriangle, ArrowRight, RefreshCw } from "lucide-react";
 import { isValidCardSlug } from "@/lib/slug";
 import { getPublishedCardBySlug, CardBackendError, toRecipientCardDto } from "@/lib/cards";
-import {
-  computeVisitorHash,
-  recordCardTelemetry,
-} from "@/lib/server/card-recipient";
+import { createHandshakeToken } from "@/lib/server/visitor-identity";
 import { RecipientCardExperience } from "@/components/scratch/RecipientCardExperience";
 import { Button } from "@/components/ui/Button";
 
@@ -200,6 +197,11 @@ function CardBackendErrorState() {
 /**
  * Public Recipient Scratch Card Page
  * Route: /c/[slug]
+ *
+ * Adheres strictly to SPEC-2C-5.6.1-FINAL v3.0.0:
+ * - Zero view receipts inserted during initial SSR request.
+ * - Generates ephemeral pageSessionId and cryptographically signed handshakeToken.
+ * - Passes credentials to client RecipientCardExperience for post-mount telemetry handshake.
  */
 export default async function RecipientCardPage({ params }: PageProps) {
   const { slug } = await params;
@@ -225,13 +227,16 @@ export default async function RecipientCardPage({ params }: PageProps) {
     return <CardNotFoundState reason="not_found" />;
   }
 
-  // 3. Safe server-side view telemetry logging
+  // 3. Cryptographically Authorized Handshake Preparation (SPEC-2C-5.6.1-FINAL Section 7.1)
+  // Ephemeral page_session_id generated per server render; handshake_token signed with HMAC-SHA256 (300s TTL)
+  const pageSessionId = crypto.randomUUID();
+  let handshakeToken = "";
   try {
-    const headersList = await headers();
-    const visitorHash = computeVisitorHash(headersList);
-    await recordCardTelemetry(slug, "view", visitorHash);
-  } catch {
-    // Telemetry failure must never disrupt recipient viewing
+    handshakeToken = createHandshakeToken(card.id, pageSessionId);
+  } catch (err: unknown) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[RecipientCardPage] Failed to generate handshake token:", err);
+    }
   }
 
   // 4. Sanitize DTO for client component (strips card UUID, photo_path, has_photo, user_id, published_at)
@@ -270,6 +275,9 @@ export default async function RecipientCardPage({ params }: PageProps) {
         <RecipientCardExperience
           card={clientDto}
           hasPhoto={Boolean(card.has_photo)}
+          cardId={card.id}
+          pageSessionId={pageSessionId}
+          handshakeToken={handshakeToken}
         />
       </main>
 

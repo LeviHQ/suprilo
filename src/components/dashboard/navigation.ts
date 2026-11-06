@@ -47,7 +47,7 @@ export const DASHBOARD_NAV_ITEMS: NavItem[] = [
     label: "Badges",
     href: "/profile/badges",
     icon: Award,
-    badge: "30",
+    badge: "50",
   },
   {
     id: "billing",

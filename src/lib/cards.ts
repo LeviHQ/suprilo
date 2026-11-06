@@ -14,6 +14,7 @@ import type {
   UpdateCardDraftFields,
 } from "@/types/card";
 import { toRecipientCardDto } from "@/types/card";
+import { evaluateUserAchievements } from "@/lib/badges/service";
 
 /**
  * Sanitized custom error indicating unexpected database or RPC failure
@@ -246,7 +247,14 @@ export async function publishCardDraft(
     throw new Error(`Failed to publish card "${cardId}": No card record returned.`);
   }
 
-  return data as DbCard;
+  const card = data as DbCard;
+
+  // Non-blocking gamification evaluation on card publication
+  if (card?.user_id) {
+    evaluateUserAchievements(card.user_id, supabase).catch(() => {});
+  }
+
+  return card;
 }
 
 /**
@@ -410,7 +418,14 @@ export async function archiveCard(
     throw new Error(`Failed to archive card "${cardId}": No card record returned.`);
   }
 
-  return data as DbCard;
+  const card = data as DbCard;
+
+  // Non-blocking gamification evaluation on card status change
+  if (card?.user_id) {
+    evaluateUserAchievements(card.user_id, supabase).catch(() => {});
+  }
+
+  return card;
 }
 
 /**

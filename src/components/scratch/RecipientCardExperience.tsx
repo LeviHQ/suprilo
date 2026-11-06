@@ -24,6 +24,9 @@ import { cn } from "@/lib/utils";
 export interface RecipientCardExperienceProps {
   card: RecipientCardDto;
   hasPhoto?: boolean;
+  cardId?: string;
+  pageSessionId?: string;
+  handshakeToken?: string;
 }
 
 // Background palette configurations for the interior revealed card
@@ -77,13 +80,66 @@ const PALETTE_CONFIGS: Record<
 export function RecipientCardExperience({
   card,
   hasPhoto = false,
+  cardId,
+  pageSessionId,
+  handshakeToken,
 }: RecipientCardExperienceProps) {
   const [photoError, setPhotoError] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
   const revealLoggedRef = React.useRef(false);
+  const receiptIdRef = React.useRef<string | null>(null);
+  const handshakePromiseRef = React.useRef<Promise<string | null> | null>(null);
 
   // Palette styling
   const palette = PALETTE_CONFIGS[card.bg_palette] || PALETTE_CONFIGS["pure-ivory"];
+
+  // Post-mount Telemetry Handshake execution (SPEC-2C-5.6.1-FINAL v3.0.0 Section 7.1)
+  React.useEffect(() => {
+    if (!cardId || !pageSessionId || !handshakeToken) {
+      return;
+    }
+
+    const storageKey = `suprilo_receipt_${cardId}`;
+
+    // Read existing receipt from isolated tab sessionStorage if available
+    try {
+      const cached = sessionStorage.getItem(storageKey);
+      if (cached) {
+        receiptIdRef.current = cached;
+        handshakePromiseRef.current = Promise.resolve(cached);
+        return;
+      }
+    } catch {
+      // Ignore sessionStorage access errors
+    }
+
+    // Execute authorized telemetry handshake
+    handshakePromiseRef.current = fetch("/api/telemetry/handshake", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        card_id: cardId,
+        page_session_id: pageSessionId,
+        handshake_token: handshakeToken,
+      }),
+      keepalive: true,
+    })
+      .then(async (res) => {
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data?.success && data?.view_receipt_id) {
+          receiptIdRef.current = data.view_receipt_id;
+          try {
+            sessionStorage.setItem(storageKey, data.view_receipt_id);
+          } catch {
+            // Storage quota or permission error
+          }
+          return data.view_receipt_id as string;
+        }
+        return null;
+      })
+      .catch(() => null);
+  }, [cardId, pageSessionId, handshakeToken]);
 
   // Sticker component renderer
   const renderStickerIcon = () => {
@@ -109,23 +165,53 @@ export function RecipientCardExperience({
     }
   };
 
-  // Safe reveal telemetry logger
-  const handleReveal = React.useCallback(() => {
+  // Synchronized reveal telemetry logger (awaits handshake resolution, falls back safely)
+  const handleReveal = React.useCallback(async () => {
     if (revealLoggedRef.current) return;
     revealLoggedRef.current = true;
 
     try {
-      fetch(`/api/cards/${encodeURIComponent(card.slug)}/reveal`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        keepalive: true,
-      }).catch(() => {
-        // Safe non-blocking fallback
-      });
+      let receiptId = receiptIdRef.current;
+
+      // If receipt is not yet resolved, await pending handshake promise (bounded timeout)
+      if (!receiptId && handshakePromiseRef.current) {
+        const timeoutPromise = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), 2500)
+        );
+        receiptId = await Promise.race([handshakePromiseRef.current, timeoutPromise]);
+      }
+
+      if (cardId && receiptId) {
+        // Primary path: Verified reveal telemetry with Fast Scratch qualification
+        await fetch("/api/telemetry/reveal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            card_id: cardId,
+            view_receipt_id: receiptId,
+            slug: card.slug,
+          }),
+          keepalive: true,
+        }).catch(() => {
+          // Safe fallback
+          fetch(`/api/cards/${encodeURIComponent(card.slug)}/reveal`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+          }).catch(() => {});
+        });
+      } else {
+        // Fallback path: Legacy cooldown reveal telemetry
+        fetch(`/api/cards/${encodeURIComponent(card.slug)}/reveal`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          keepalive: true,
+        }).catch(() => {});
+      }
     } catch {
-      // Ignore network errors
+      // Telemetry errors must never disrupt the recipient experience
     }
-  }, [card.slug]);
+  }, [card.slug, cardId]);
 
   // Share link copy
   const handleCopyLink = () => {
@@ -296,4 +382,3 @@ export function RecipientCardExperience({
     </div>
   );
 }
-
