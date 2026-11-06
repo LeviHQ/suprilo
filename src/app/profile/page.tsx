@@ -124,7 +124,6 @@ export default function ProfileHomePage() {
       desc: "Track reveal rates & scratch engagement metrics",
       icon: BarChart3,
       color: "text-blue-600 bg-blue-50 border-blue-200",
-      badge: "Beta",
     },
     {
       label: "Badges",

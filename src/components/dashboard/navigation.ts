@@ -41,7 +41,6 @@ export const DASHBOARD_NAV_ITEMS: NavItem[] = [
     label: "Analytics",
     href: "/profile/analytics",
     icon: BarChart3,
-    badge: "Beta",
   },
   {
     id: "badges",
