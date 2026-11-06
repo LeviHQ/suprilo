@@ -24,6 +24,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { MySurpriseCards, CardFilterType } from "@/components/dashboard/MySurpriseCards";
 import { getUserCardsWithMetrics } from "@/lib/cards";
+import { getUserBadgesSummary } from "@/lib/badges/service";
 import type { CardRecord } from "@/types/card";
 
 export default function ProfileHomePage() {
@@ -33,6 +34,7 @@ export default function ProfileHomePage() {
   const [cards, setCards] = React.useState<CardRecord[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [fetchError, setFetchError] = React.useState<string | null>(null);
+  const [unlockedBadgesCount, setUnlockedBadgesCount] = React.useState<number | null>(null);
 
   // Controlled card filter to allow clicking StatCard to switch view
   const [cardFilter, setCardFilter] = React.useState<CardFilterType>("all");
@@ -63,7 +65,16 @@ export default function ProfileHomePage() {
 
   React.useEffect(() => {
     loadCards();
-  }, [loadCards]);
+    if (user?.id) {
+      getUserBadgesSummary(user.id)
+        .then((summary) => {
+          if (summary) {
+            setUnlockedBadgesCount(summary.total_badges);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [loadCards, user?.id]);
 
   // Card mutation callbacks
   const handleCardArchived = React.useCallback((cardId: string) => {
@@ -128,10 +139,10 @@ export default function ProfileHomePage() {
     {
       label: "Badges",
       href: "/profile/badges",
-      desc: "Unlock 30 creator milestones & impact rewards",
+      desc: "Unlock 50 creator milestones & impact rewards",
       icon: Award,
       color: "text-amber-600 bg-amber-50 border-amber-200",
-      badge: "30 Total",
+      badge: "50 Total",
     },
     {
       label: "Billing & Usage",
@@ -275,13 +286,13 @@ export default function ProfileHomePage() {
 
         <StatCard
           label="Badges Unlocked"
-          value="0 / 30"
+          value={unlockedBadgesCount !== null ? `${unlockedBadgesCount} / 50` : "0 / 50"}
           subtext="Achievement catalogue"
           icon={Award}
           iconBgColor="bg-amber-50"
           iconColor="text-amber-600"
-          badge="30 Total"
-          badgeVariant="warning"
+          badge="50 Total"
+          badgeVariant="default"
           href="/profile/badges"
         />
 
