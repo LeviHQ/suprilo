@@ -37,6 +37,7 @@ import { useCardDraftSync } from "@/hooks/useCardDraftSync";
 import { useCardAutosave } from "@/hooks/useCardAutosave";
 import { useCardPhotoUpload } from "@/hooks/useCardPhotoUpload";
 import { useCardPublish } from "@/hooks/useCardPublish";
+import { recordStudioVisit } from "@/lib/badges/service";
 import { BgPaletteId, StickerId } from "@/types/card";
 import { cn } from "@/lib/utils";
 
@@ -208,6 +209,13 @@ function CreateCardStudio() {
   React.useEffect(() => {
     setIsPublished(false);
   }, [draftId, user?.id]);
+
+  // Record Studio visit for Badge #1 ('first-step': Welcome Creator)
+  React.useEffect(() => {
+    if (user?.id) {
+      recordStudioVisit(user.id).catch(() => {});
+    }
+  }, [user?.id]);
 
   // Supabase Draft Autosave (Task 2C-5.3.2)
   const {
