@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import { generateCardSlug, isValidCardSlug, SLUG_ALPHABET } from "@/lib/slug";
 import type {
   BgPaletteId,
+  CardRecord,
   CardStatus,
   CoverStyle,
   CreateCardDraftInput,
@@ -422,7 +423,7 @@ export async function archiveCard(
  * - Orders results by creation date descending.
  */
 export async function getUserCards(
-  filter?: { status?: CardStatus },
+  filter?: { status?: CardStatus; limit?: number },
   client?: SupabaseClient
 ): Promise<DbCard[]> {
   const supabase = client || createClient();
@@ -436,6 +437,10 @@ export async function getUserCards(
     query = query.eq("status", filter.status);
   }
 
+  if (filter?.limit && filter.limit > 0) {
+    query = query.limit(filter.limit);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -443,6 +448,109 @@ export async function getUserCards(
   }
 
   return (data || []) as DbCard[];
+}
+
+/**
+ * Metrics map keyed by card UUID.
+ */
+export type UserCardsMetricsMap = Record<
+  string,
+  {
+    views_count: number;
+    reveals_count: number;
+  }
+>;
+
+/**
+ * Retrieves telemetry metrics (views and reveals) for cards owned by the authenticated user.
+ * Protected by Row Level Security policy card_metrics_owner_select.
+ */
+export async function getUserCardMetrics(
+  client?: SupabaseClient
+): Promise<UserCardsMetricsMap> {
+  const supabase = client || createClient();
+
+  const { data, error } = await supabase
+    .from("card_metrics")
+    .select("card_id, views_count, reveals_count");
+
+  if (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[getUserCardMetrics] Failed to fetch card metrics:", error.message);
+    }
+    return {};
+  }
+
+  const map: UserCardsMetricsMap = {};
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      if (item && item.card_id) {
+        map[item.card_id] = {
+          views_count: Number(item.views_count) || 0,
+          reveals_count: Number(item.reveals_count) || 0,
+        };
+      }
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Retrieves cards owned by the authenticated user along with their telemetry metrics (views and reveals).
+ * Ensures resilient execution: if metrics query fails, cards are still returned with 0 defaults.
+ */
+export async function getUserCardsWithMetrics(
+  filter?: { status?: CardStatus; limit?: number },
+  client?: SupabaseClient
+): Promise<CardRecord[]> {
+  const supabase = client || createClient();
+  const [cards, metricsMap] = await Promise.all([
+    getUserCards(filter, supabase),
+    getUserCardMetrics(supabase).catch(() => ({} as UserCardsMetricsMap)),
+  ]);
+
+  return cards.map((card) => {
+    const metrics = metricsMap[card.id];
+    return {
+      ...card,
+      views_count: metrics?.views_count ?? 0,
+      reveals_count: metrics?.reveals_count ?? 0,
+    };
+  });
+}
+
+/**
+ * Deletes an active card draft owned by the authenticated user.
+ *
+ * Safety & Lifecycle:
+ * - Strictly restricted to cards with status = 'draft'.
+ * - Authenticated user ownership enforced via RLS policy cards_owner_delete (auth.uid() = user_id).
+ * - Trigger process_cards_before_delete() automatically acquires advisory lock on draft_slot,
+ *   releases the user's draft slot, permanently retires the slug, and cleans up any photo references.
+ * - Does NOT allow deleting published or archived cards through this function.
+ */
+export async function deleteCardDraft(
+  cardId: string,
+  client?: SupabaseClient
+): Promise<boolean> {
+  if (!cardId || typeof cardId !== "string" || !cardId.trim()) {
+    throw new Error("Card ID is required to delete a draft.");
+  }
+
+  const supabase = client || createClient();
+
+  const { error } = await supabase
+    .from("cards")
+    .delete()
+    .eq("id", cardId.trim())
+    .eq("status", "draft");
+
+  if (error) {
+    throw error;
+  }
+
+  return true;
 }
 
 /**
@@ -487,5 +595,5 @@ export type {
   UploadCardPhotoResult,
   PhotoUploadStatus,
 } from "./card-storage";
-export type { PublishedCard, RecipientCardDto } from "@/types/card";
+export type { PublishedCard, RecipientCardDto, CardRecord } from "@/types/card";
 export { toRecipientCardDto };

@@ -21,16 +21,87 @@ import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/Button";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { EmptyState } from "@/components/dashboard/EmptyState";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { MySurpriseCards, CardFilterType } from "@/components/dashboard/MySurpriseCards";
+import { getUserCardsWithMetrics } from "@/lib/cards";
+import type { CardRecord } from "@/types/card";
 
 export default function ProfileHomePage() {
   const { user } = useAuth();
 
+  // Cards data state
+  const [cards, setCards] = React.useState<CardRecord[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [fetchError, setFetchError] = React.useState<string | null>(null);
+
+  // Controlled card filter to allow clicking StatCard to switch view
+  const [cardFilter, setCardFilter] = React.useState<CardFilterType>("all");
+
+  // Fetch user cards with metrics
+  const loadCards = React.useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setFetchError(null);
+
+    try {
+      const data = await getUserCardsWithMetrics();
+      setCards(data);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Unable to retrieve your scratch cards. Please check your connection.";
+      setFetchError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    loadCards();
+  }, [loadCards]);
+
+  // Card mutation callbacks
+  const handleCardArchived = React.useCallback((cardId: string) => {
+    setCards((prev) =>
+      prev.map((c) => (c.id === cardId ? { ...c, status: "archived" as const, draft_slot: null } : c))
+    );
+  }, []);
+
+  const handleCardDeleted = React.useCallback((cardId: string) => {
+    setCards((prev) => prev.filter((c) => c.id !== cardId));
+  }, []);
+
+  // Compute stats from real card records
+  const stats = React.useMemo(() => {
+    let publishedCount = 0;
+    let draftsCount = 0;
+    let totalReveals = 0;
+
+    for (const card of cards) {
+      if (card.status === "published") {
+        publishedCount++;
+        totalReveals += card.reveals_count || 0;
+      } else if (card.status === "draft") {
+        draftsCount++;
+      }
+    }
+
+    return {
+      publishedCount,
+      draftsCount,
+      totalReveals,
+    };
+  }, [cards]);
+
   if (!user) return null;
 
-  // Real timestamps from user session metadata
-  const memberSince = user.metadata.creationTime
+  // Real timestamps from authenticated session metadata
+  const memberSince = user.metadata?.creationTime
     ? new Date(user.metadata.creationTime).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -38,13 +109,13 @@ export default function ProfileHomePage() {
       })
     : "Recently joined";
 
-  const lastActive = user.metadata.lastSignInTime
+  const lastActive = user.metadata?.lastSignInTime
     ? new Date(user.metadata.lastSignInTime).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
       })
-    : "Active now";
+    : null;
 
   const quickNav = [
     {
@@ -95,13 +166,21 @@ export default function ProfileHomePage() {
     },
   ];
 
+  const handlePublishedStatClick = () => {
+    setCardFilter("published");
+    const el = document.getElementById("my-cards");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* Page Title & Breadcrumbs */}
+      {/* 1. Creator Hub Header */}
       <PageHeader
         title="Creator Hub"
         description="Welcome to your personal Suprilo Control Center. Craft surprises, monitor engagement, and personalize your experience."
-        badge="Active Account"
+        badge={user.isGoogleVerified ? "Active Account" : undefined}
         badgeVariant="pink"
         breadcrumbs={[{ label: "Control Center", href: "/profile" }, { label: "Home" }]}
         actions={
@@ -114,7 +193,7 @@ export default function ProfileHomePage() {
         }
       />
 
-      {/* User Welcome Banner */}
+      {/* 2. Profile Overview */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-card relative overflow-hidden">
         <div
           className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-gradient-to-br from-brand-pink/15 via-brand-orange/10 to-brand-purple/15 rounded-full blur-3xl pointer-events-none"
@@ -129,10 +208,13 @@ export default function ProfileHomePage() {
               <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
                 {user.displayName || "Suprilo Creator"}
               </h2>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Google Verified</span>
-              </span>
+
+              {user.isGoogleVerified ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Google Verified</span>
+                </span>
+              ) : null}
             </div>
 
             <p className="text-xs sm:text-sm text-brand-muted truncate max-w-md">
@@ -147,39 +229,51 @@ export default function ProfileHomePage() {
             <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-brand-muted">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
                 <Clock className="w-3.5 h-3.5 text-brand-pink" />
-                <span>Member since: <strong className="text-brand-dark">{memberSince}</strong></span>
+                <span>
+                  Member since: <strong className="text-brand-dark">{memberSince}</strong>
+                </span>
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
-                <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-                <span>Last active: <strong className="text-brand-dark">{lastActive}</strong></span>
-              </div>
+
+              {lastActive ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+                  <span>
+                    Last active: <strong className="text-brand-dark">{lastActive}</strong>
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Overview Stat Cards (Honest data, no fabricated metrics) */}
+      {/* 3. Four Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Active Cards"
-          value="0"
-          subtext="Free Starter Plan"
+          label="Published Cards"
+          value={stats.publishedCount}
+          subtext="Live surprise cards"
           icon={Layers}
           iconBgColor="bg-brand-pink-light"
           iconColor="text-brand-pink"
-          badge="3 Allowance"
+          badge={`${stats.publishedCount} Active`}
           badgeVariant="default"
+          isLoading={isLoading}
+          onClick={handlePublishedStatClick}
         />
+
         <StatCard
           label="Total Reveals"
-          value="0"
+          value={stats.totalReveals.toLocaleString()}
           subtext="Across published cards"
           icon={Eye}
           iconBgColor="bg-blue-50"
           iconColor="text-blue-600"
           badge="Live Tracker"
           badgeVariant="muted"
+          isLoading={isLoading}
         />
+
         <StatCard
           label="Badges Unlocked"
           value="0 / 30"
@@ -187,22 +281,26 @@ export default function ProfileHomePage() {
           icon={Award}
           iconBgColor="bg-amber-50"
           iconColor="text-amber-600"
-          badge="Catalog Ready"
+          badge="30 Total"
           badgeVariant="warning"
+          href="/profile/badges"
         />
+
         <StatCard
-          label="Current Tier"
+          label="Current Plan"
           value="Starter"
-          subtext="Pay-as-you-go enabled"
+          subtext={`${stats.draftsCount} of 3 Draft Slots Used`}
           icon={CreditCard}
           iconBgColor="bg-purple-50"
           iconColor="text-purple-600"
-          badge="Free"
+          badge={`${Math.max(0, 3 - stats.draftsCount)} Slots Free`}
           badgeVariant="success"
+          isLoading={isLoading}
+          href="/profile/billing"
         />
       </div>
 
-      {/* Quick Navigation Section Shortcuts */}
+      {/* 4. Control Center Shortcuts */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-brand-dark tracking-tight">Control Center Shortcuts</h3>
@@ -248,35 +346,17 @@ export default function ProfileHomePage() {
         </div>
       </div>
 
-      {/* My Cards Section with Honest Empty State */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-brand-dark tracking-tight">My Surprise Cards</h3>
-            <p className="text-xs text-brand-muted">Cards you have crafted and shared</p>
-          </div>
-          <Link href="/create">
-            <Button variant="secondary" size="sm" className="text-xs gap-1.5">
-              <PlusCircle className="w-3.5 h-3.5 text-brand-pink" />
-              <span>Studio</span>
-            </Button>
-          </Link>
-        </div>
-
-        <EmptyState
-          icon={Layers}
-          title="No Cards Created Yet"
-          description="You haven't published any surprise scratch cards yet. Head over to the Card Studio to create your first surprise!"
-          action={
-            <Link href="/create">
-              <Button variant="primary" size="md" className="gap-2">
-                <PlusCircle className="w-4 h-4" />
-                <span>Create Your First Card</span>
-              </Button>
-            </Link>
-          }
-        />
-      </div>
+      {/* 5. My Surprise Cards Section */}
+      <MySurpriseCards
+        cards={cards}
+        isLoading={isLoading}
+        error={fetchError}
+        onRetry={loadCards}
+        onCardArchived={handleCardArchived}
+        onCardDeleted={handleCardDeleted}
+        activeFilter={cardFilter}
+        onFilterChange={setCardFilter}
+      />
     </div>
   );
 }
