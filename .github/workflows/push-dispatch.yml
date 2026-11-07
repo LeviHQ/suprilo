@@ -1,0 +1,28 @@
+name: Push Dispatch & Recovery Automation
+
+on:
+  schedule:
+    # Runs every 5 minutes (free GitHub Actions cron frequency)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
+
+jobs:
+  cron:
+    name: Trigger Notification Push Dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dispatcher & Recovery Endpoints
+        env:
+          APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL || 'https://suprilo.vercel.app' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -n "$CRON_SECRET" ]; then
+            echo "Invoking /api/cron/push-dispatch..."
+            curl -s -f -X GET -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/push-dispatch" || echo "Push dispatch returned non-200"
+            
+            echo "Invoking /api/cron/recover-push..."
+            curl -s -f -X GET -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/recover-push" || echo "Recover push returned non-200"
+          else
+            echo "Notice: CRON_SECRET not set in GitHub repository secrets. Add CRON_SECRET to GitHub Secrets to enable automatic 5-minute dispatch pings."
+          fi
+
