@@ -48,10 +48,16 @@ export async function GET(request: Request) {
       .select("id", { count: "exact", head: true })
       .eq("user_id", authResult.user.id);
 
+    const isConfigured = Boolean(infra.vapidConfigured && publicKey);
+
     return NextResponse.json(
       {
         success: true,
+        configured: isConfigured,
+        vapid_configured: infra.vapidConfigured,
+        public_key: publicKey,
         data: {
+          configured: isConfigured,
           push_enabled: Boolean(pref?.push_enabled),
           active_subscriptions_count: subsCount ?? 0,
           vapid_configured: infra.vapidConfigured,

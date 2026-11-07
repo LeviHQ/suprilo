@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Eye,
-  Bell,
   Trash2,
   Camera,
   X,
@@ -208,41 +207,6 @@ export default function AccountSettingsPage() {
             <Lock className="w-3.5 h-3.5 text-amber-600" />
             <span>Currently, all creator accounts are private by default.</span>
           </div>
-        </div>
-      </div>
-
-      {/* Group C: Preferences */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-card space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-brand-dark tracking-tight">Notification Preferences</h3>
-              <span className="text-[10px] font-bold uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                Coming Soon
-              </span>
-            </div>
-            <p className="text-xs text-brand-muted">Manage email alerts and instant reveal notifications</p>
-          </div>
-
-          <Bell className="w-5 h-5 text-brand-muted" />
-        </div>
-
-        <div className="space-y-3 pt-2">
-          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-brand-warm-border/60 bg-brand-warm/20 opacity-70 cursor-not-allowed">
-            <input type="checkbox" disabled defaultChecked className="mt-0.5 rounded text-brand-pink" />
-            <div className="text-xs">
-              <strong className="text-brand-dark">Scratch Reveal Instant Alerts</strong>
-              <p className="text-brand-muted">Get an email notification the moment a recipient reveals your surprise card.</p>
-            </div>
-          </label>
-
-          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-brand-warm-border/60 bg-brand-warm/20 opacity-70 cursor-not-allowed">
-            <input type="checkbox" disabled className="mt-0.5 rounded text-brand-pink" />
-            <div className="text-xs">
-              <strong className="text-brand-dark">Weekly Creator Digest</strong>
-              <p className="text-brand-muted">Receive a weekly summary of card views, love notes, and badge progress.</p>
-            </div>
-          </label>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyUserAuth } from "@/lib/server/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/server/card-recipient";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +27,10 @@ export async function GET(request: Request) {
       );
     }
 
-    const supabase = await createClient();
+    const admin = getSupabaseAdminClient();
+    const client = admin || (await createClient());
 
-    const { data: pref, error } = await supabase
+    const { data: pref, error } = await client
       .from("notification_preferences")
       .select("in_app_enabled, push_enabled, notify_on_reveal, notify_on_badge, notify_on_level, updated_at")
       .eq("user_id", authResult.user.id)
@@ -185,10 +187,11 @@ export async function PATCH(request: Request) {
       updates.notify_on_level = payload.notify_on_level;
     }
 
-    const supabase = await createClient();
+    const admin = getSupabaseAdminClient();
+    const client = admin || (await createClient());
 
     // Upsert preferences for the authenticated user
-    const { data: updatedPref, error } = await supabase
+    const { data: updatedPref, error } = await client
       .from("notification_preferences")
       .upsert(
         {

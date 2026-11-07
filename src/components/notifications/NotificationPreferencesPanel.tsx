@@ -90,8 +90,17 @@ export function NotificationPreferencesPanel() {
       const pushRes = await fetch("/api/push/status", { credentials: "same-origin" });
       if (pushRes.ok) {
         const pushJson = await pushRes.json();
-        setPushConfiguredOnServer(Boolean(pushJson.configured && pushJson.public_key));
-        setServerVapidKey(pushJson.public_key || null);
+        const pubKey =
+          pushJson?.data?.public_key ??
+          pushJson?.public_key ??
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ??
+          null;
+        const isConfigured = Boolean(
+          (pushJson?.data?.vapid_configured ?? pushJson?.data?.configured ?? pushJson?.configured ?? pushJson?.vapid_configured) &&
+            pubKey
+        );
+        setPushConfiguredOnServer(isConfigured);
+        setServerVapidKey(pubKey);
       }
 
       // 3. Check if current device has an active push subscription
@@ -158,7 +167,12 @@ export function NotificationPreferencesPanel() {
       return;
     }
 
-    if (!pushConfiguredOnServer || !serverVapidKey) {
+    const activeVapidKey =
+      serverVapidKey ||
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+      null;
+
+    if (!activeVapidKey) {
       setFeedback({
         type: "error",
         message: "Push notifications are currently unavailable in this environment (server VAPID keys not configured).",
@@ -187,7 +201,7 @@ export function NotificationPreferencesPanel() {
       await navigator.serviceWorker.ready;
 
       // 3. Subscribe to PushManager
-      const appServerKey = urlBase64ToUint8Array(serverVapidKey);
+      const appServerKey = urlBase64ToUint8Array(activeVapidKey);
       let sub = await reg.pushManager.getSubscription();
       if (!sub) {
         sub = await reg.pushManager.subscribe({
@@ -307,37 +321,39 @@ export function NotificationPreferencesPanel() {
       )}
 
       {/* 1. Browser Push Notifications Section */}
-      <div className="bg-white rounded-2xl border border-brand-warm-border p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-brand-pink-light flex items-center justify-center text-brand-pink">
+      <div className="bg-white rounded-2xl border border-brand-warm-border p-6 sm:p-7 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 sm:gap-8">
+          <div className="space-y-2 flex-1 min-w-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-brand-pink-light flex items-center justify-center text-brand-pink shrink-0 shadow-xs">
                 <Smartphone className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-bold text-brand-dark">Browser Push Notifications</h3>
+              <h3 className="text-base font-bold text-brand-dark tracking-tight">
+                Browser Push Notifications
+              </h3>
             </div>
-            <p className="text-xs text-brand-muted leading-relaxed max-w-xl">
+            <p className="text-xs text-brand-muted leading-relaxed max-w-xl pl-0 sm:pl-12">
               Receive immediate alerts in your browser when someone scratches your card or when you unlock badges, even when Suprilo isn&apos;t open.
             </p>
           </div>
 
-          <div className="shrink-0">
+          <div className="shrink-0 pt-0.5">
             {isDeviceSubscribed ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Active on this device
               </span>
             ) : browserPermission === "denied" ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                 <AlertCircle className="w-3.5 h-3.5" />
                 Blocked in browser
               </span>
             ) : browserPermission === "unsupported" ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
                 Unsupported
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-warm-subtle text-brand-muted border border-brand-warm-border">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-warm-subtle text-brand-muted border border-brand-warm-border">
                 Inactive
               </span>
             )}
@@ -345,8 +361,8 @@ export function NotificationPreferencesPanel() {
         </div>
 
         {/* Action Controls for Push */}
-        <div className="pt-2 border-t border-brand-warm-border/60 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-[11px] text-brand-muted flex items-center gap-1.5">
+        <div className="pt-4 border-t border-brand-warm-border/60 flex flex-wrap items-center justify-between gap-4">
+          <div className="text-[11px] text-brand-muted flex items-center gap-2">
             <Shield className="w-3.5 h-3.5 text-brand-pink" />
             <span>Encrypted WebPush • Zero tracking • One-click revoke</span>
           </div>
@@ -373,7 +389,7 @@ export function NotificationPreferencesPanel() {
                 size="sm"
                 onClick={handleEnablePush}
                 disabled={pushStatusLoading || browserPermission === "unsupported"}
-                className="text-xs gap-1.5"
+                className="text-xs gap-1.5 shadow-sm"
               >
                 {pushStatusLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Enable Push Notifications</span>
@@ -384,14 +400,14 @@ export function NotificationPreferencesPanel() {
       </div>
 
       {/* 2. In-App Notification Categories Section */}
-      <div className="bg-white rounded-2xl border border-brand-warm-border p-5 sm:p-6 shadow-xs space-y-5">
-        <div className="flex items-center justify-between gap-4 border-b border-brand-warm-border/60 pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-warm-subtle flex items-center justify-center text-brand-dark">
+      <div className="bg-white rounded-2xl border border-brand-warm-border p-6 sm:p-7 shadow-xs space-y-6">
+        <div className="flex items-center justify-between gap-4 border-b border-brand-warm-border/60 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brand-warm-subtle flex items-center justify-center text-brand-dark shrink-0 shadow-xs">
               <Bell className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-brand-dark">In-App Notifications</h3>
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-brand-dark tracking-tight">In-App Notifications</h3>
               <p className="text-xs text-brand-muted">Control which activity triggers notification bell updates.</p>
             </div>
           </div>
@@ -416,16 +432,16 @@ export function NotificationPreferencesPanel() {
         </div>
 
         {/* Category Specific Toggles */}
-        <div className={`space-y-4 transition-opacity ${!prefs.in_app_enabled ? "opacity-40 pointer-events-none" : ""}`}>
+        <div className={`space-y-3.5 transition-opacity ${!prefs.in_app_enabled ? "opacity-40 pointer-events-none" : ""}`}>
           {/* Card Reveal */}
-          <div className="flex items-center justify-between gap-4 py-1">
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center text-brand-pink mt-0.5 shrink-0">
-                <Sparkles className="w-3.5 h-3.5" />
+          <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-brand-warm-border/60 bg-white hover:bg-brand-warm/30 transition-colors">
+            <div className="flex items-start gap-3.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-brand-pink mt-0.5 shrink-0">
+                <Sparkles className="w-4 h-4" />
               </div>
-              <div>
+              <div className="space-y-0.5">
                 <p className="text-xs font-bold text-brand-dark">Card Reveal Alerts</p>
-                <p className="text-[11px] text-brand-muted">Notify me whenever a recipient scratches and reveals one of my cards.</p>
+                <p className="text-[11px] text-brand-muted leading-relaxed">Notify me whenever a recipient scratches and reveals one of my cards.</p>
               </div>
             </div>
 
@@ -448,14 +464,14 @@ export function NotificationPreferencesPanel() {
           </div>
 
           {/* Badge Unlocked */}
-          <div className="flex items-center justify-between gap-4 py-1 border-t border-brand-warm-border/40 pt-3">
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-brand-orange mt-0.5 shrink-0">
-                <Award className="w-3.5 h-3.5" />
+          <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-brand-warm-border/60 bg-white hover:bg-brand-warm/30 transition-colors">
+            <div className="flex items-start gap-3.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-brand-orange mt-0.5 shrink-0">
+                <Award className="w-4 h-4" />
               </div>
-              <div>
+              <div className="space-y-0.5">
                 <p className="text-xs font-bold text-brand-dark">Badge Achievements</p>
-                <p className="text-[11px] text-brand-muted">Notify me when I earn milestone badges and achievement tokens.</p>
+                <p className="text-[11px] text-brand-muted leading-relaxed">Notify me when I earn milestone badges and achievement tokens.</p>
               </div>
             </div>
 
@@ -478,14 +494,14 @@ export function NotificationPreferencesPanel() {
           </div>
 
           {/* Level Up */}
-          <div className="flex items-center justify-between gap-4 py-1 border-t border-brand-warm-border/40 pt-3">
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 mt-0.5 shrink-0">
-                <TrendingUp className="w-3.5 h-3.5" />
+          <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-brand-warm-border/60 bg-white hover:bg-brand-warm/30 transition-colors">
+            <div className="flex items-start gap-3.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 mt-0.5 shrink-0">
+                <TrendingUp className="w-4 h-4" />
               </div>
-              <div>
+              <div className="space-y-0.5">
                 <p className="text-xs font-bold text-brand-dark">Level Progression</p>
-                <p className="text-[11px] text-brand-muted">Notify me when my gamification XP advances to a new creator level.</p>
+                <p className="text-[11px] text-brand-muted leading-relaxed">Notify me when my gamification XP advances to a new creator level.</p>
               </div>
             </div>
 
