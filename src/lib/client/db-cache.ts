@@ -329,3 +329,4 @@ export function useUserBadgesData(user: SupriloUser | null) {
     refresh: () => fetchBadges(true),
   };
 }
+

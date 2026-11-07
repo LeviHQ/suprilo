@@ -37,3 +37,4 @@ ANALYZE public.cards;
 ANALYZE public.card_metrics;
 ANALYZE public.user_badges;
 ANALYZE public.user_gamification_stats;
+
