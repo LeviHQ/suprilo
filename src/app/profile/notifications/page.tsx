@@ -195,9 +195,19 @@ export default function NotificationsPage() {
     }
   }, [activeTab, fetchNotifications, fetchUnreadCount]);
 
+  const activeTabRef = React.useRef(activeTab);
+  activeTabRef.current = activeTab;
+
+  const fetchNotificationsRef = React.useRef(fetchNotifications);
+  fetchNotificationsRef.current = fetchNotifications;
+
+  const fetchUnreadCountRef = React.useRef(fetchUnreadCount);
+  fetchUnreadCountRef.current = fetchUnreadCount;
+
   // Realtime subscription for instant notification feed and unread badge updates
   React.useEffect(() => {
-    if (!user?.id) return;
+    const userId = user?.id;
+    if (!userId) return;
 
     let supabase: ReturnType<typeof createClient>;
     try {
@@ -206,29 +216,46 @@ export default function NotificationsPage() {
       return;
     }
 
-    const channel = supabase
-      .channel(`profile-notifications:${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchUnreadCount();
-          if (activeTab !== "preferences") {
-            fetchNotifications(activeTab);
+    const channelTopic = `profile-notifications:${userId}:${Math.random().toString(36).slice(2, 9)}`;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    try {
+      channel = supabase.channel(channelTopic);
+      channel
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userId}`,
+          },
+          () => {
+            fetchUnreadCountRef.current();
+            if (activeTabRef.current !== "preferences") {
+              fetchNotificationsRef.current(activeTabRef.current);
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR") {
+            console.warn("[ProfileNotifications] Realtime channel error, fallback to refresh");
+          }
+        });
+    } catch (err) {
+      console.warn("[ProfileNotifications] Error subscribing to realtime notifications:", err);
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      try {
+        if (channel) {
+          supabase.removeChannel(channel);
+        }
+      } catch {
+        // Safe ignore
+      }
     };
-  }, [user?.id, activeTab, fetchNotifications, fetchUnreadCount]);
+  }, [user?.id]);
 
   // Mark all notifications as read
   const handleMarkAllRead = async () => {

@@ -67,7 +67,32 @@ function getNotificationTypeIcon(type: NotificationItem["type"]) {
   }
 }
 
-export function NotificationBell({ className = "" }: { className?: string }) {
+class BellErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.warn("[NotificationBell] Caught exception inside boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
+
+function NotificationBellInner({ className = "" }: { className?: string }) {
   const router = useRouter();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
@@ -114,15 +139,25 @@ export function NotificationBell({ className = "" }: { className?: string }) {
     }
   }, [user]);
 
+  const isOpenRef = React.useRef(isOpen);
+  isOpenRef.current = isOpen;
+
+  const fetchUnreadCountRef = React.useRef(fetchUnreadCount);
+  fetchUnreadCountRef.current = fetchUnreadCount;
+
+  const fetchLatestNotificationsRef = React.useRef(fetchLatestNotifications);
+  fetchLatestNotificationsRef.current = fetchLatestNotifications;
+
   // Subscribe to Supabase Realtime for instant updates & unread count synchronization
   React.useEffect(() => {
-    if (!user?.id) {
+    const userId = user?.id;
+    if (!userId) {
       setUnreadCount(0);
       setNotifications([]);
       return;
     }
 
-    fetchUnreadCount();
+    fetchUnreadCountRef.current();
 
     let supabase: ReturnType<typeof createClient>;
     try {
@@ -131,39 +166,59 @@ export function NotificationBell({ className = "" }: { className?: string }) {
       return;
     }
 
-    const channel = supabase
-      .channel(`user-notifications:${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchUnreadCount();
-          fetchLatestNotifications();
-        }
-      )
-      .subscribe();
+    // Unique channel topic per subscription instance to eliminate any collision with lingering/reconnecting channels
+    const channelTopic = `user-notifications:${userId}:${Math.random().toString(36).slice(2, 9)}`;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    try {
+      channel = supabase.channel(channelTopic);
+      channel
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userId}`,
+          },
+          () => {
+            fetchUnreadCountRef.current();
+            if (isOpenRef.current) {
+              fetchLatestNotificationsRef.current();
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR") {
+            console.warn("[NotificationBell] Realtime channel error; will fallback to focus/poll");
+          }
+        });
+    } catch (err) {
+      console.warn("[NotificationBell] Error subscribing to realtime notifications:", err);
+    }
 
     // Re-synchronize when tab regains focus
     const handleFocus = () => {
-      fetchUnreadCount();
-      if (isOpen) {
-        fetchLatestNotifications();
+      fetchUnreadCountRef.current();
+      if (isOpenRef.current) {
+        fetchLatestNotificationsRef.current();
       }
     };
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleFocus);
 
     return () => {
-      supabase.removeChannel(channel);
+      try {
+        if (channel) {
+          supabase.removeChannel(channel);
+        }
+      } catch {
+        // Safe ignore
+      }
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleFocus);
     };
-  }, [user?.id, fetchUnreadCount, fetchLatestNotifications, isOpen]);
+  }, [user?.id]);
 
   // Fetch list when dropdown is opened
   const toggleDropdown = () => {
@@ -371,6 +426,14 @@ export function NotificationBell({ className = "" }: { className?: string }) {
         </div>
       )}
     </div>
+  );
+}
+
+export function NotificationBell({ className = "" }: { className?: string }) {
+  return (
+    <BellErrorBoundary>
+      <NotificationBellInner className={className} />
+    </BellErrorBoundary>
   );
 }
 
