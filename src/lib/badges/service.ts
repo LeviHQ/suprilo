@@ -171,8 +171,15 @@ export async function recordCreatorShareEvent(
 }
 
 /**
+ * Tracks users whose studio visits have already been recorded in the current session.
+ * Prevents repeating expensive upsert and PL/pgSQL evaluation queries on every route change.
+ */
+const recordedStudioVisits = new Set<string>();
+
+/**
  * Records a Studio visit to satisfy the criteria for Badge #1 ('first-step').
  * Sets studio_visited_at if currently null and triggers an achievement evaluation.
+ * Session-guarded to execute at most once per user session.
  */
 export async function recordStudioVisit(
   userId: string,
@@ -180,6 +187,32 @@ export async function recordStudioVisit(
 ): Promise<void> {
   const sb = resolveClient(client);
   if (!sb || !userId) return;
+
+  // Once recorded in memory or sessionStorage during this session, skip redundant writes
+  if (recordedStudioVisits.has(userId)) {
+    return;
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const key = `suprilo_visited_${userId}`;
+      if (sessionStorage.getItem(key)) {
+        recordedStudioVisits.add(userId);
+        return;
+      }
+    } catch {
+      // Safe ignore storage access errors
+    }
+  }
+
+  recordedStudioVisits.add(userId);
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.setItem(`suprilo_visited_${userId}`, "1");
+    } catch {
+      // Safe ignore
+    }
+  }
 
   try {
     // Upsert or update studio_visited_at

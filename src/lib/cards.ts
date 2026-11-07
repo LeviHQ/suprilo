@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { generateCardSlug, isValidCardSlug, SLUG_ALPHABET } from "@/lib/slug";
 import type {
@@ -286,10 +287,8 @@ export function buildCardShareUrl(slug: string, origin?: string): string {
  * - Never exposes user_id, email, draft_slot, or internal system columns.
  * - Returns null if the card does not exist, is not published, or is archived.
  */
-export async function getPublishedCardBySlug(
-  slug: string,
-  client?: SupabaseClient
-): Promise<PublishedCard | null> {
+export const getPublishedCardBySlug = cache(
+  async (slug: string, client?: SupabaseClient): Promise<PublishedCard | null> => {
   if (!slug || typeof slug !== "string") {
     return null;
   }
@@ -385,7 +384,7 @@ export async function getPublishedCardBySlug(
     sound_enabled: Boolean(record.sound_enabled),
     published_at: record.published_at,
   };
-}
+});
 
 /**
  * Archives a card via the atomic public.archive_card stored procedure.
@@ -481,15 +480,23 @@ export type UserCardsMetricsMap = Record<
 /**
  * Retrieves telemetry metrics (views and reveals) for cards owned by the authenticated user.
  * Protected by Row Level Security policy card_metrics_owner_select.
+ * Accepts optional cardIds to perform an indexed primary key lookup instead of an unbounded scan.
  */
 export async function getUserCardMetrics(
+  cardIds?: string[],
   client?: SupabaseClient
 ): Promise<UserCardsMetricsMap> {
   const supabase = client || createClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("card_metrics")
     .select("card_id, views_count, reveals_count, last_viewed_at, last_revealed_at");
+
+  if (cardIds && cardIds.length > 0) {
+    query = query.in("card_id", cardIds);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     if (process.env.NODE_ENV !== "production") {
@@ -517,17 +524,69 @@ export async function getUserCardMetrics(
 
 /**
  * Retrieves cards owned by the authenticated user along with their telemetry metrics (views and reveals).
- * Ensures resilient execution: if metrics query fails, cards are still returned with 0 defaults.
+ * Optimizations:
+ * 1. Leverages PostgREST embedded resource join to fetch cards + metrics in a single database roundtrip.
+ * 2. Gracefully falls back to targeted card-id lookups if embedded query is unavailable.
  */
 export async function getUserCardsWithMetrics(
   filter?: { status?: CardStatus; limit?: number },
   client?: SupabaseClient
 ): Promise<CardRecord[]> {
   const supabase = client || createClient();
-  const [cards, metricsMap] = await Promise.all([
-    getUserCards(filter, supabase),
-    getUserCardMetrics(supabase).catch(() => ({} as UserCardsMetricsMap)),
-  ]);
+
+  try {
+    // 1. Single database round-trip via PostgREST embedded resource join
+    let query = supabase
+      .from("cards")
+      .select(`
+        ${CARD_SELECT_COLUMNS},
+        card_metrics (
+          views_count,
+          reveals_count,
+          last_viewed_at,
+          last_revealed_at
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (filter?.status) {
+      query = query.eq("status", filter.status);
+    }
+    if (filter?.limit && filter.limit > 0) {
+      query = query.limit(filter.limit);
+    }
+
+    const { data, error } = await query;
+
+    if (!error && Array.isArray(data)) {
+      return data.map((row: Record<string, unknown>) => {
+        const rawMetrics = Array.isArray(row.card_metrics)
+          ? row.card_metrics[0]
+          : (row.card_metrics as Record<string, unknown> | null);
+
+        // Strip embedded relation object to preserve clean CardRecord interface
+        const cardFields = { ...row };
+        delete cardFields.card_metrics;
+
+        return {
+          ...cardFields,
+          views_count: Number(rawMetrics?.views_count) || 0,
+          reveals_count: Number(rawMetrics?.reveals_count) || 0,
+          last_viewed_at: (rawMetrics?.last_viewed_at as string) || null,
+          last_revealed_at: (rawMetrics?.last_revealed_at as string) || null,
+        } as unknown as CardRecord;
+      });
+    }
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[getUserCardsWithMetrics] Embedded join fallback:", err);
+    }
+  }
+
+  // 2. Resilient fallback: fetch cards first, then fetch metrics strictly for those card IDs
+  const cards = await getUserCards(filter, supabase);
+  const cardIds = cards.map((c) => c.id).filter(Boolean);
+  const metricsMap = await getUserCardMetrics(cardIds, supabase).catch(() => ({} as UserCardsMetricsMap));
 
   return cards.map((card) => {
     const metrics = metricsMap[card.id];

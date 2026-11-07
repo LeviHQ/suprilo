@@ -17,14 +17,9 @@ import type {
   BadgeCategory,
   BadgeDefinition,
   UserBadgeRecord,
-  UserBadgeSummary,
 } from "@/types/badges";
-import { createClient } from "@/lib/supabase/client";
-import {
-  getUserBadgesSummary,
-  getUserUnlockedBadges,
-  recordStudioVisit,
-} from "@/lib/badges/service";
+import { useAuth } from "@/context/AuthContext";
+import { useUserBadgesData } from "@/lib/client/db-cache";
 import { LevelProgressBar } from "@/components/badges/LevelProgressBar";
 import { BadgeCard } from "@/components/badges/BadgeCard";
 import { BadgeDetailModal } from "@/components/badges/BadgeDetailModal";
@@ -51,56 +46,25 @@ export default function BadgesPage() {
   const [selectedBadge, setSelectedBadge] = React.useState<BadgeDefinition | null>(null);
   const [storyBadge, setStoryBadge] = React.useState<BadgeDefinition | null>(null);
 
-  const [loading, setLoading] = React.useState(true);
+  const { user } = useAuth();
+  const {
+    summary,
+    unlockedBadges,
+    isLoading: loading,
+    refresh: refreshBadges,
+  } = useUserBadgesData(user);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [summary, setSummary] = React.useState<UserBadgeSummary | null>(null);
-  const [unlockedBadges, setUnlockedBadges] = React.useState<UserBadgeRecord[]>([]);
-  const [creatorName, setCreatorName] = React.useState<string>("Suprilo Creator");
 
-  // Load user data and gamification stats
-  const loadBadgeData = React.useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  const creatorName =
+    user?.displayName ||
+    user?.email?.split("@")[0] ||
+    "Suprilo Creator";
 
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const metaName =
-          user.user_metadata?.full_name ||
-          user.user_metadata?.name ||
-          user.email?.split("@")[0] ||
-          "Suprilo Creator";
-        setCreatorName(metaName);
-
-        // Record studio visit for Badge #1 ('first-step') on page mount
-        await recordStudioVisit(user.id, supabase);
-
-        // Fetch user summary and unlocked badges
-        const [userSummary, badges] = await Promise.all([
-          getUserBadgesSummary(user.id, supabase),
-          getUserUnlockedBadges(user.id, supabase),
-        ]);
-
-        if (userSummary) setSummary(userSummary);
-        if (badges) setUnlockedBadges(badges);
-      }
-    } catch (err: unknown) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("[BadgesPage] Error loading badges:", err);
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    loadBadgeData();
-  }, [loadBadgeData]);
+  const handleRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await refreshBadges();
+    setRefreshing(false);
+  }, [refreshBadges]);
 
   // Auto-open badge detail modal if ?badge=<id> is present in the URL
   React.useEffect(() => {
@@ -153,7 +117,7 @@ export default function BadgesPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => loadBadgeData(true)}
+            onClick={handleRefresh}
             disabled={refreshing || loading}
             className="gap-1.5 shadow-xs"
           >

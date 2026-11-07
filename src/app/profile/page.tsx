@@ -21,77 +21,27 @@ import { Button } from "@/components/ui/Button";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { MySurpriseCards, CardFilterType } from "@/components/dashboard/MySurpriseCards";
-import { getUserCardsWithMetrics } from "@/lib/cards";
-import { getUserBadgesSummary, recordStudioVisit } from "@/lib/badges/service";
-import { getLevelProgress, type UserBadgeSummary } from "@/types/badges";
-import type { CardRecord } from "@/types/card";
+import { getLevelProgress } from "@/types/badges";
+import { useUserCardsData, useUserBadgesData } from "@/lib/client/db-cache";
 
 export default function ProfileHomePage() {
   const { user } = useAuth();
-
-  // Cards data state
-  const [cards, setCards] = React.useState<CardRecord[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [fetchError, setFetchError] = React.useState<string | null>(null);
-  const [badgeSummary, setBadgeSummary] = React.useState<UserBadgeSummary | null>(null);
+  const { cards, isLoading, error: fetchError, mutate: mutateCards, refresh: refreshCards } = useUserCardsData(user);
+  const { summary: badgeSummary } = useUserBadgesData(user);
 
   // Controlled card filter to allow clicking StatCard to switch view
   const [cardFilter, setCardFilter] = React.useState<CardFilterType>("all");
 
-  // Fetch user cards with metrics
-  const loadCards = React.useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setFetchError(null);
-
-    try {
-      const data = await getUserCardsWithMetrics();
-      setCards(data);
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Unable to retrieve your scratch cards. Please check your connection.";
-      setFetchError(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  React.useEffect(() => {
-    loadCards();
-    if (user?.id) {
-      recordStudioVisit(user.id)
-        .then(() => getUserBadgesSummary(user.id))
-        .then((summary) => {
-          if (summary) {
-            setBadgeSummary(summary);
-          }
-        })
-        .catch(() => {
-          getUserBadgesSummary(user.id)
-            .then((summary) => {
-              if (summary) setBadgeSummary(summary);
-            })
-            .catch(() => {});
-        });
-    }
-  }, [loadCards, user?.id]);
-
-  // Card mutation callbacks
+  // Card mutation callbacks with instant optimistic cache updates
   const handleCardArchived = React.useCallback((cardId: string) => {
-    setCards((prev) =>
+    mutateCards((prev) =>
       prev.map((c) => (c.id === cardId ? { ...c, status: "archived" as const, draft_slot: null } : c))
     );
-  }, []);
+  }, [mutateCards]);
 
   const handleCardDeleted = React.useCallback((cardId: string) => {
-    setCards((prev) => prev.filter((c) => c.id !== cardId));
-  }, []);
+    mutateCards((prev) => prev.filter((c) => c.id !== cardId));
+  }, [mutateCards]);
 
   // Compute stats from real card records
   const stats = React.useMemo(() => {
@@ -342,7 +292,7 @@ export default function ProfileHomePage() {
         cards={cards}
         isLoading={isLoading}
         error={fetchError}
-        onRetry={loadCards}
+        onRetry={refreshCards}
         onCardArchived={handleCardArchived}
         onCardDeleted={handleCardDeleted}
         activeFilter={cardFilter}

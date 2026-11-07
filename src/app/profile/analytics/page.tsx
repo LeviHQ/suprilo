@@ -28,8 +28,9 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Button } from "@/components/ui/Button";
-import { getUserCardsWithMetrics, buildCardShareUrl } from "@/lib/cards";
-import type { CardRecord, CoverStyle } from "@/types/card";
+import { buildCardShareUrl } from "@/lib/cards";
+import { useUserCardsData } from "@/lib/client/db-cache";
+import type { CoverStyle } from "@/types/card";
 import { cn } from "@/lib/utils";
 
 type AnalyticsTab = "overview" | "creation" | "reveals" | "engagement" | "history";
@@ -45,39 +46,17 @@ export default function AnalyticsPage() {
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = React.useState<AnalyticsTab>("overview");
-  const [cards, setCards] = React.useState<CardRecord[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [lastSyncedAt, setLastSyncedAt] = React.useState<Date | null>(null);
+  const { cards, isLoading, error, refresh: refreshCards } = useUserCardsData(user);
+  const [lastSyncedAt, setLastSyncedAt] = React.useState<Date | null>(() => new Date());
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const loadData = React.useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await getUserCardsWithMetrics();
-      setCards(data);
-      setLastSyncedAt(new Date());
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Unable to retrieve analytics. Please check your connection.";
-      setError(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  React.useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const handleRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await refreshCards();
+    setLastSyncedAt(new Date());
+    setRefreshing(false);
+  }, [refreshCards]);
 
   // Tab definitions
   const tabs: { id: AnalyticsTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -329,11 +308,11 @@ export default function AnalyticsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={loadData}
-              disabled={isLoading}
+              onClick={handleRefresh}
+              disabled={isLoading || refreshing}
               className="gap-2 text-xs"
             >
-              <RotateCw className={cn("w-3.5 h-3.5", isLoading && "animate-spin")} />
+              <RotateCw className={cn("w-3.5 h-3.5", (isLoading || refreshing) && "animate-spin")} />
               <span>Refresh Data</span>
             </Button>
           </div>
@@ -376,7 +355,7 @@ export default function AnalyticsPage() {
             <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={loadData} className="text-xs text-rose-700 bg-white">
+          <Button variant="outline" size="sm" onClick={handleRefresh} className="text-xs text-rose-700 bg-white">
             Retry Connection
           </Button>
         </div>

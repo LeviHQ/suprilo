@@ -1,10 +1,14 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+let browserClientInstance: SupabaseClient | null = null;
 
 /**
- * Creates a reusable Supabase client for browser (Client Component) execution.
- * Reads public-safe environment variables and manages browser cookies automatically.
+ * Creates or retrieves the singleton Supabase client for browser execution.
+ * Reusing a single client instance maintains persistent HTTP keep-alive connections,
+ * avoids memory leaks, and prevents duplicate auth listeners.
  */
-export function createClient() {
+export function createClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -16,6 +20,14 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient(supabaseUrl, supabaseKey);
-}
+  // Guard against SSR hydration mismatches
+  if (typeof window === "undefined") {
+    return createBrowserClient(supabaseUrl, supabaseKey);
+  }
 
+  if (!browserClientInstance) {
+    browserClientInstance = createBrowserClient(supabaseUrl, supabaseKey);
+  }
+
+  return browserClientInstance;
+}
