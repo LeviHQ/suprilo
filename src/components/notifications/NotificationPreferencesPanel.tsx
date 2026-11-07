@@ -53,7 +53,6 @@ export function NotificationPreferencesPanel() {
   // Browser Push State
   const [browserPermission, setBrowserPermission] = React.useState<NotificationPermission | "unsupported">("default");
   const [isDeviceSubscribed, setIsDeviceSubscribed] = React.useState<boolean>(false);
-  const [pushConfiguredOnServer, setPushConfiguredOnServer] = React.useState<boolean>(false);
   const [serverVapidKey, setServerVapidKey] = React.useState<string | null>(null);
 
   // Check initial browser capability and permission
@@ -95,11 +94,6 @@ export function NotificationPreferencesPanel() {
           pushJson?.public_key ??
           process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ??
           null;
-        const isConfigured = Boolean(
-          (pushJson?.data?.vapid_configured ?? pushJson?.data?.configured ?? pushJson?.configured ?? pushJson?.vapid_configured) &&
-            pubKey
-        );
-        setPushConfiguredOnServer(isConfigured);
         setServerVapidKey(pubKey);
       }
 
