@@ -127,6 +127,21 @@ export default function PrivacyPolicyPage() {
               </ul>
             </div>
 
+            <div className="space-y-1">
+              <h3 className="font-bold text-[#17152A]">D. Web Push Notifications & Device Encryption Keys</h3>
+              <p className="leading-relaxed">
+                If you choose to enable browser push notifications in your Control Center settings, we collect and store:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600 pt-1">
+                <li>Your browser-generated Web Push subscription endpoint URL</li>
+                <li>Your device-specific cryptographic public key (P-256 curve ECDH key / p256dh)</li>
+                <li>Your device authentication secret (auth) required to encrypt push notification payloads end-to-end</li>
+              </ul>
+              <p className="text-xs text-slate-500 pt-1">
+                These cryptographic keys are used exclusively to deliver encrypted transactional alerts directly to your browser instance (RFC 8291 / RFC 8292). We never use push subscription identifiers for advertising, tracking, or cross-site profiling.
+              </p>
+            </div>
+
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
               <span className="font-bold text-[#17152A]">What We Do NOT Collect: </span>
               Suprilo does not collect financial bank details, credit card numbers, government IDs, biometric data, precise GPS geolocation, or sensitive personal data.
@@ -152,6 +167,10 @@ export default function PrivacyPolicyPage() {
             <li>
               <span className="font-bold text-[#17152A]">Recipient Experience: </span>
               To display the card, message, and secret photo to intended recipients when they open a shared card link.
+            </li>
+            <li>
+              <span className="font-bold text-[#17152A]">Deliver Platform Notifications: </span>
+              To send in-app and browser push notifications alerting you when a recipient reveals your scratch card, when you unlock an achievement badge, or when your creator gamification level advances, strictly in accordance with your notification preferences.
             </li>
             <li>
               <span className="font-bold text-[#17152A]">Customer Assistance: </span>
@@ -236,6 +255,19 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <h4 className="font-bold text-[#17152A]">Browser Vendor Push Notification Gateways</h4>
+              <p className="mt-1">
+                <span className="font-semibold">Providers: </span>Apple Inc. (Apple Push Notification service / APNs), Google LLC (Firebase Cloud Messaging / FCM), Mozilla Corporation (Autopush), and Microsoft Corporation (Windows Push Notification Services / WNS).
+              </p>
+              <p className="mt-0.5">
+                <span className="font-semibold">Role: </span>Operating the standardized Web Push protocol relay to wake your device browser and display authorized notifications.
+              </p>
+              <p className="mt-0.5">
+                <span className="font-semibold">Data Shared: </span>Encrypted message ciphertext and subscription endpoints. Push payloads are cryptographically encrypted using your browser’s unique public key before transmission, preventing vendor gateways from reading message titles, body text, or card details.
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
               <h4 className="font-bold text-[#17152A]">Planned Database & Storage (Supabase)</h4>
               <p className="mt-1">
                 <span className="font-semibold">Role: </span>Planned cloud database and secure object storage for cards and assets upon launch.
@@ -263,6 +295,10 @@ export default function PrivacyPolicyPage() {
             <li>
               <span className="font-bold text-[#17152A]">Cards & Uploaded Media: </span>
               Retained while your account remains active or until deleted by the creator.
+            </li>
+            <li>
+              <span className="font-bold text-[#17152A]">In-App Notifications & Preference Records: </span>
+              In-app notification records and category opt-out suppression tombstones are retained for a rolling 30-day window, after which they are automatically pruned by scheduled database maintenance tasks. Web Push subscription tokens remain stored until you explicitly unsubscribe in your Control Center notification settings, revoke browser permissions, or the vendor gateway indicates the endpoint has expired or been decommissioned (HTTP 410 Gone).
             </li>
             <li>
               <span className="font-bold text-[#17152A]">Inactive Card Lifespans: </span>
@@ -318,6 +354,10 @@ export default function PrivacyPolicyPage() {
             <li>
               <span className="font-bold text-[#17152A]">Right to Erasure / Deletion: </span>
               You may request deletion of your account and associated card records.
+            </li>
+            <li>
+              <span className="font-bold text-[#17152A]">Right to Manage & Revoke Notifications: </span>
+              You have full autonomy to customize category alerts (card reveals, badges, level-ups) or disable browser push notifications at any time via your Control Center (`/profile/notifications`) or through your browser’s native site permission settings.
             </li>
             <li>
               <span className="font-bold text-[#17152A]">Right to Grievance Redressal: </span>

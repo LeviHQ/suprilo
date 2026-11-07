@@ -4,6 +4,7 @@ import {
   Award,
   CreditCard,
   Users,
+  Bell,
   Settings,
   LifeBuoy,
   LucideIcon,
@@ -59,6 +60,12 @@ export const DASHBOARD_NAV_ITEMS: NavItem[] = [
     label: "Referral",
     href: "/profile/referral",
     icon: Users,
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    href: "/profile/notifications",
+    icon: Bell,
   },
   {
     id: "settings",

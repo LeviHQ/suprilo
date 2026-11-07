@@ -8,6 +8,7 @@ import { Menu, X, Sparkles, LogOut, User as UserIcon, PlusCircle, ChevronDown } 
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -222,6 +223,9 @@ export function Navbar() {
               </button>
             )}
 
+            {/* Notification Bell (Between Auth/Profile and Create CTA) */}
+            {user && <NotificationBell />}
+
             {/* Primary Action Button (Create Card) */}
             <Button
               variant="primary"
@@ -236,6 +240,7 @@ export function Navbar() {
 
           {/* Mobile menu toggle button */}
           <div className="flex md:hidden items-center gap-2">
+            {user && <NotificationBell />}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -308,13 +313,22 @@ export function Navbar() {
                 </a>
               ))}
               {user && (
-                <Link
-                  href="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-brand-dark hover:bg-brand-pink-light hover:text-brand-pink transition-colors"
-                >
-                  My Profile Dashboard
-                </Link>
+                <>
+                  <Link
+                    href="/profile/notifications"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-2.5 rounded-xl text-sm font-medium text-brand-dark hover:bg-brand-pink-light hover:text-brand-pink transition-colors"
+                  >
+                    Notifications
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-2.5 rounded-xl text-sm font-medium text-brand-dark hover:bg-brand-pink-light hover:text-brand-pink transition-colors"
+                  >
+                    My Profile Dashboard
+                  </Link>
+                </>
               )}
             </nav>
 

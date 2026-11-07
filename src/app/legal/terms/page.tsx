@@ -70,6 +70,9 @@ export default function TermsOfServicePage() {
           <p className="text-sm text-slate-600 leading-relaxed">
             Suprilo provides a creative digital platform that allows users to create interactive digital scratch cards. The service includes customizable metallic foil coatings, occasion-themed greeting templates, secret text reveal areas, and photo upload capabilities for celebratory sharing.
           </p>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            The platform also includes in-app notification feeds and opt-in browser Web Push alerts (e.g. notifying card creators in real time when a recipient scratches open their surprise card or celebrating gamification achievement badges).
+          </p>
           <p className="text-xs text-slate-500 leading-relaxed">
             Current functionality represents our Phase 3 development milestone. Advanced features such as multi-image collages, detailed analytics histories, and automated payment checkouts are planned for subsequent releases.
           </p>
@@ -214,6 +217,12 @@ export default function TermsOfServicePage() {
           <p className="text-sm text-slate-600 leading-relaxed">
             We strive to provide reliable and delightful service, but Suprilo is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. We do not guarantee that the service will be uninterrupted, bug-free, or entirely error-free. We reserve the right to modify or discontinue features with reasonable notice where practical.
           </p>
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
+            <span className="font-bold text-[#17152A]">Best-Effort Delivery for Notifications: </span>
+            <p>
+              In-app notifications and browser Web Push alerts are delivered strictly on an informational, best-effort basis without delivery warranties or service level agreements (SLAs). Delivery timing and receipt may be affected by device power-saving modes, operating system background execution limits, network connectivity, browser notification permissions, or third-party push relay gateway downtime (such as Apple APNs, Google FCM, Mozilla Autopush, or Microsoft WNS). Suprilo shall have no liability for delayed, dropped, or unreceived notification alerts.
+            </p>
+          </div>
         </section>
 
         {/* ========================================================================= */}

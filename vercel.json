@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/push-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/recover-push",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/reconcile-notifications",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}
+
