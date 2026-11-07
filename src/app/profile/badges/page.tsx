@@ -102,6 +102,22 @@ export default function BadgesPage() {
     loadBadgeData();
   }, [loadBadgeData]);
 
+  // Auto-open badge detail modal if ?badge=<id> is present in the URL
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && !loading) {
+      const params = new URLSearchParams(window.location.search);
+      const badgeParam = params.get("badge");
+      if (badgeParam) {
+        const match = (BADGE_DEFINITIONS as readonly BadgeDefinition[]).find(
+          (b) => b.id === badgeParam
+        );
+        if (match) {
+          setSelectedBadge(match);
+        }
+      }
+    }
+  }, [loading]);
+
   // Index unlocked records by badge_id for O(1) lookup
   const unlockedMap = React.useMemo(() => {
     const map = new Map<string, UserBadgeRecord>();

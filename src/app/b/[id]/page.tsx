@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import {
   Sparkles,
   ShieldCheck,
@@ -35,6 +36,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
 
   if (!isValidShareToken(id)) {
+    const badgeDef = getBadgeById(id);
+    if (badgeDef) {
+      return {
+        title: `${badgeDef.name} Badge | Suprilo`,
+        description: badgeDef.description,
+      };
+    }
     return {
       title: "Badge Not Found | Suprilo",
       robots: { index: false, follow: false },
@@ -91,6 +99,10 @@ export default async function PublicBadgePage({ params }: PageProps) {
   const { id } = await params;
 
   if (!isValidShareToken(id)) {
+    const badgeDef = getBadgeById(id);
+    if (badgeDef) {
+      redirect(`/profile/badges?badge=${id}`);
+    }
     return <BadgeNotFoundState />;
   }
 

@@ -14,6 +14,26 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOutUser } = useAuth();
+  const [unreadCount, setUnreadCount] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (!user) return;
+    const fetchCount = async () => {
+      try {
+        const res = await fetch("/api/notifications/unread-count", { credentials: "same-origin" });
+        if (res.ok) {
+          const json = await res.json();
+          const count = json?.data?.unread_count ?? json?.unread_count ?? 0;
+          setUnreadCount(count);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchCount();
+    window.addEventListener("focus", fetchCount);
+    return () => window.removeEventListener("focus", fetchCount);
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -59,6 +79,13 @@ export function Sidebar() {
             ? pathname === item.href
             : pathname.startsWith(item.href);
 
+          const badgeValue =
+            item.id === "notifications" && unreadCount > 0
+              ? unreadCount > 99
+                ? "99+"
+                : String(unreadCount)
+              : item.badge;
+
           return (
             <Link
               key={item.id}
@@ -80,16 +107,18 @@ export function Sidebar() {
                 <span className="truncate">{item.label}</span>
               </div>
 
-              {item.badge && (
+              {badgeValue && (
                 <span
                   className={cn(
                     "text-[10px] px-2 py-0.5 rounded-full font-bold",
-                    isActive
+                    item.id === "notifications"
+                      ? "bg-brand-pink text-white animate-in zoom-in-75 duration-150"
+                      : isActive
                       ? "bg-brand-pink text-white"
                       : "bg-brand-warm-border text-brand-muted"
                   )}
                 >
-                  {item.badge}
+                  {badgeValue}
                 </span>
               )}
             </Link>

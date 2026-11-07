@@ -7,6 +7,7 @@ import { Menu, PlusCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/Button";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface DashboardHeaderProps {
   onOpenMobileNav: () => void;
@@ -50,6 +51,9 @@ export function DashboardHeader({ onOpenMobileNav }: DashboardHeaderProps) {
             <span className="sm:hidden">Create</span>
           </Button>
         </Link>
+
+        {/* Notifications Bell */}
+        {user && <NotificationBell />}
 
         <Link
           href="/profile/settings"

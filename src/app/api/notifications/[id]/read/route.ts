@@ -33,6 +33,16 @@ export async function PATCH(request: Request, context: RouteContext) {
       );
     }
 
+    let isRead = true;
+    try {
+      const body = await request.json();
+      if (typeof body?.read === "boolean") {
+        isRead = body.read;
+      }
+    } catch {
+      // Defaults to true if empty or invalid JSON
+    }
+
     const supabase = await createClient();
     const readAt = new Date().toISOString();
 
@@ -40,8 +50,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { data: updatedRows, error } = await supabase
       .from("notifications")
       .update({
-        is_read: true,
-        read_at: readAt,
+        is_read: isRead,
+        read_at: isRead ? readAt : null,
       })
       .eq("id", id)
       .eq("user_id", authResult.user.id)

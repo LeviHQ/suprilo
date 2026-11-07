@@ -114,8 +114,9 @@ export default function NotificationsPage() {
       const res = await fetch("/api/notifications/unread-count", { credentials: "same-origin" });
       if (res.ok) {
         const data = await res.json();
-        if (typeof data.unread_count === "number") {
-          setUnreadCount(data.unread_count);
+        const count = data?.data?.unread_count ?? data?.unread_count;
+        if (typeof count === "number") {
+          setUnreadCount(count);
         }
       }
     } catch {
