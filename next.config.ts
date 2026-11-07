@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  async redirects() {
+    return [
+      {
+        source: "/profile/redeem",
+        destination: "/profile/referral",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

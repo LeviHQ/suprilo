@@ -3,7 +3,7 @@ import {
   BarChart3,
   Award,
   CreditCard,
-  Gift,
+  Users,
   Settings,
   LifeBuoy,
   LucideIcon,
@@ -24,7 +24,7 @@ export interface NavItem {
  * 2. Analytics
  * 3. Badges
  * 4. Billing & Usage
- * 5. Redeem
+ * 5. Referral
  * 6. Account Settings
  * 7. Support Tickets (MUST remain the final sidebar item, directly after Account Settings)
  */
@@ -47,7 +47,6 @@ export const DASHBOARD_NAV_ITEMS: NavItem[] = [
     label: "Badges",
     href: "/profile/badges",
     icon: Award,
-    badge: "50",
   },
   {
     id: "billing",
@@ -56,10 +55,10 @@ export const DASHBOARD_NAV_ITEMS: NavItem[] = [
     icon: CreditCard,
   },
   {
-    id: "redeem",
-    label: "Redeem",
-    href: "/profile/redeem",
-    icon: Gift,
+    id: "referral",
+    label: "Referral",
+    href: "/profile/referral",
+    icon: Users,
   },
   {
     id: "settings",
