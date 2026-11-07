@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
+import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
 export interface NotificationItem {
   id: string;
@@ -95,7 +96,7 @@ class BellErrorBoundary extends React.Component<
 function NotificationBellInner({ className = "" }: { className?: string }) {
   const router = useRouter();
   const { user } = useAuth();
-  const [unreadCount, setUnreadCount] = React.useState<number>(0);
+  const { unreadCount, setCount: setGlobalCount, refresh: refreshCount } = useUnreadNotificationsCount();
   const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -103,21 +104,11 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
   const [error, setError] = React.useState<string | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Fetch unread count from API
-  const fetchUnreadCount = React.useCallback(async () => {
+  // Fetch unread count from API (queries /api/notifications/unread-count via centralized deduplicated cache)
+  const fetchUnreadCount = React.useCallback(async (force = false) => {
     if (!user) return;
-    try {
-      const res = await fetch("/api/notifications/unread-count", { credentials: "same-origin" });
-      if (!res.ok) return;
-      const data = await res.json();
-      const count = data?.data?.unread_count ?? data?.unread_count;
-      if (typeof count === "number") {
-        setUnreadCount(count);
-      }
-    } catch {
-      // Quiet fail on network hiccups
-    }
-  }, [user]);
+    await refreshCount(force);
+  }, [user, refreshCount]);
 
   // Fetch latest 3 notifications for dropdown
   const fetchLatestNotifications = React.useCallback(async () => {
@@ -153,7 +144,7 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
   React.useEffect(() => {
     const userId = user?.id;
     if (!userId) {
-      setUnreadCount(0);
+      setGlobalCount(0);
       setNotifications([]);
       return;
     }
@@ -183,7 +174,7 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
             filter: `user_id=eq.${userId}`,
           },
           () => {
-            fetchUnreadCountRef.current();
+            fetchUnreadCountRef.current(true);
             if (isOpenRef.current) {
               fetchLatestNotificationsRef.current();
             }
@@ -198,16 +189,6 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
       console.warn("[NotificationBell] Error subscribing to realtime notifications:", err);
     }
 
-    // Re-synchronize when tab regains focus
-    const handleFocus = () => {
-      fetchUnreadCountRef.current();
-      if (isOpenRef.current) {
-        fetchLatestNotificationsRef.current();
-      }
-    };
-    window.addEventListener("focus", handleFocus);
-    document.addEventListener("visibilitychange", handleFocus);
-
     return () => {
       try {
         if (channel) {
@@ -216,10 +197,8 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
       } catch {
         // Safe ignore
       }
-      window.removeEventListener("focus", handleFocus);
-      document.removeEventListener("visibilitychange", handleFocus);
     };
-  }, [user?.id]);
+  }, [user?.id, setGlobalCount]);
 
   // Fetch list when dropdown is opened
   const toggleDropdown = () => {
@@ -262,7 +241,7 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
         credentials: "same-origin",
       });
       if (res.ok) {
-        setUnreadCount(0);
+        setGlobalCount(0);
         setNotifications((prev) =>
           prev.map((item) => ({ ...item, is_read: true, read_at: new Date().toISOString() }))
         );
@@ -281,7 +260,7 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
       setNotifications((prev) =>
         prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+      setGlobalCount(Math.max(0, unreadCount - 1));
 
       try {
         await fetch(`/api/notifications/${item.id}/read`, {

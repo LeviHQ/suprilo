@@ -9,6 +9,7 @@ import { DASHBOARD_NAV_ITEMS } from "./navigation";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { cn } from "@/lib/utils";
+import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -19,26 +20,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOutUser } = useAuth();
-  const [unreadCount, setUnreadCount] = React.useState<number>(0);
-
-  React.useEffect(() => {
-    if (!user) return;
-    const fetchCount = async () => {
-      try {
-        const res = await fetch("/api/notifications/unread-count", { credentials: "same-origin" });
-        if (res.ok) {
-          const json = await res.json();
-          const count = json?.data?.unread_count ?? json?.unread_count ?? 0;
-          setUnreadCount(count);
-        }
-      } catch {
-        // ignore
-      }
-    };
-    fetchCount();
-    window.addEventListener("focus", fetchCount);
-    return () => window.removeEventListener("focus", fetchCount);
-  }, [user]);
+  const { unreadCount } = useUnreadNotificationsCount();
 
   const prevPathnameRef = React.useRef(pathname);
 

@@ -9,31 +9,19 @@ import { DASHBOARD_NAV_ITEMS } from "./navigation";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { cn } from "@/lib/utils";
+import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOutUser } = useAuth();
-  const [unreadCount, setUnreadCount] = React.useState<number>(0);
+  const { unreadCount, refresh: refreshCount } = useUnreadNotificationsCount();
 
   React.useEffect(() => {
-    if (!user) return;
-    const fetchCount = async () => {
-      try {
-        const res = await fetch("/api/notifications/unread-count", { credentials: "same-origin" });
-        if (res.ok) {
-          const json = await res.json();
-          const count = json?.data?.unread_count ?? json?.unread_count ?? 0;
-          setUnreadCount(count);
-        }
-      } catch {
-        // ignore
-      }
-    };
-    fetchCount();
-    window.addEventListener("focus", fetchCount);
-    return () => window.removeEventListener("focus", fetchCount);
-  }, [user]);
+    if (user) {
+      refreshCount();
+    }
+  }, [user, refreshCount]);
 
   const handleSignOut = async () => {
     await signOutUser();

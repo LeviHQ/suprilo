@@ -23,6 +23,7 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { NotificationPreferencesPanel } from "@/components/notifications/NotificationPreferencesPanel";
 import { createClient } from "@/lib/supabase/client";
+import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
 interface NotificationItem {
   id: string;
@@ -98,7 +99,7 @@ export default function NotificationsPage() {
 
   const [activeTab, setActiveTab] = React.useState<TabType>("all");
   const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = React.useState<number>(0);
+  const { unreadCount, setCount: setGlobalCount, refresh: refreshCount } = useUnreadNotificationsCount();
   const [nextCursor, setNextCursor] = React.useState<string | null>(null);
   const [hasMore, setHasMore] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
@@ -106,23 +107,6 @@ export default function NotificationsPage() {
   const [isMarkingAll, setIsMarkingAll] = React.useState<boolean>(false);
   const [togglingId, setTogglingId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-
-  // Fetch unread count
-  const fetchUnreadCount = React.useCallback(async () => {
-    if (!user) return;
-    try {
-      const res = await fetch("/api/notifications/unread-count", { credentials: "same-origin" });
-      if (res.ok) {
-        const data = await res.json();
-        const count = data?.data?.unread_count ?? data?.unread_count;
-        if (typeof count === "number") {
-          setUnreadCount(count);
-        }
-      }
-    } catch {
-      // Quiet fail
-    }
-  }, [user]);
 
   // Fetch notifications for the selected filter tab
   const fetchNotifications = React.useCallback(async (tab: TabType) => {
@@ -190,11 +174,11 @@ export default function NotificationsPage() {
 
   // Initial load and tab changes
   React.useEffect(() => {
-    fetchUnreadCount();
+    refreshCount();
     if (activeTab !== "preferences") {
       fetchNotifications(activeTab);
     }
-  }, [activeTab, fetchNotifications, fetchUnreadCount]);
+  }, [activeTab, fetchNotifications, refreshCount]);
 
   const activeTabRef = React.useRef(activeTab);
   activeTabRef.current = activeTab;
@@ -202,8 +186,8 @@ export default function NotificationsPage() {
   const fetchNotificationsRef = React.useRef(fetchNotifications);
   fetchNotificationsRef.current = fetchNotifications;
 
-  const fetchUnreadCountRef = React.useRef(fetchUnreadCount);
-  fetchUnreadCountRef.current = fetchUnreadCount;
+  const refreshCountRef = React.useRef(refreshCount);
+  refreshCountRef.current = refreshCount;
 
   // Realtime subscription for instant notification feed and unread badge updates
   React.useEffect(() => {
@@ -232,7 +216,7 @@ export default function NotificationsPage() {
             filter: `user_id=eq.${userId}`,
           },
           () => {
-            fetchUnreadCountRef.current();
+            refreshCountRef.current(true);
             if (activeTabRef.current !== "preferences") {
               fetchNotificationsRef.current(activeTabRef.current);
             }
@@ -268,7 +252,7 @@ export default function NotificationsPage() {
         credentials: "same-origin",
       });
       if (res.ok) {
-        setUnreadCount(0);
+        setGlobalCount(0);
         setNotifications((prev) =>
           prev.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
         );
@@ -293,7 +277,7 @@ export default function NotificationsPage() {
     setNotifications((prev) =>
       prev.map((n) => (n.id === item.id ? { ...n, is_read: nextReadState } : n))
     );
-    setUnreadCount((prev) => (nextReadState ? Math.max(0, prev - 1) : prev + 1));
+    setGlobalCount(nextReadState ? Math.max(0, unreadCount - 1) : unreadCount + 1);
 
     try {
       await fetch(`/api/notifications/${item.id}/read`, {
@@ -307,7 +291,7 @@ export default function NotificationsPage() {
       setNotifications((prev) =>
         prev.map((n) => (n.id === item.id ? { ...n, is_read: item.is_read } : n))
       );
-      setUnreadCount((prev) => (nextReadState ? prev + 1 : Math.max(0, prev - 1)));
+      setGlobalCount(nextReadState ? unreadCount + 1 : Math.max(0, unreadCount - 1));
     } finally {
       setTogglingId(null);
     }
@@ -317,6 +301,7 @@ export default function NotificationsPage() {
   const handleItemNavigation = async (item: NotificationItem) => {
     if (!item.is_read) {
       // Mark as read in background
+      setGlobalCount(Math.max(0, unreadCount - 1));
       fetch(`/api/notifications/${item.id}/read`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

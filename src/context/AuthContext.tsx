@@ -23,11 +23,26 @@ export interface AuthContextType {
   clearError: () => void;
 }
 
+function areUsersEqual(a: SupriloUser | null, b: SupriloUser | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.uid === b.uid &&
+    a.email === b.email &&
+    a.displayName === b.displayName &&
+    a.photoURL === b.photoURL
+  );
+}
+
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = React.useState<SupriloUser | null>(null);
+
+  const updateSafeUser = React.useCallback((next: SupriloUser | null) => {
+    setUser((prev) => (areUsersEqual(prev, next) ? prev : next));
+  }, []);
   const [loading, setLoading] = React.useState(true);
   const [isSigningIn, setIsSigningIn] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -73,15 +88,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then(({ data: { user: initialUser }, error: getUserError }) => {
         if (!isMounted) return;
         if (!getUserError && initialUser) {
-          setUser(normalizeSupabaseUser(initialUser));
+          updateSafeUser(normalizeSupabaseUser(initialUser));
         } else {
-          setUser(null);
+          updateSafeUser(null);
         }
         setLoading(false);
       })
       .catch(() => {
         if (!isMounted) return;
-        setUser(null);
+        updateSafeUser(null);
         setLoading(false);
       });
 
@@ -91,9 +106,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       if (!isMounted) return;
       if (session?.user) {
-        setUser(normalizeSupabaseUser(session.user));
+        updateSafeUser(normalizeSupabaseUser(session.user));
       } else {
-        setUser(null);
+        updateSafeUser(null);
       }
       setLoading(false);
     });
@@ -103,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [updateSafeUser]);
 
   /**
    * Google OAuth 2.0 Sign-In via Supabase PKCE Authorization Flow.
@@ -239,7 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
               const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
               const normalized = normalizeSupabaseUser(currentUser);
-              setUser(normalized);
+              updateSafeUser(normalized);
               closeAuthModal();
 
               if (safeDestination && window.location.pathname !== safeDestination) {
@@ -301,7 +316,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     },
-    [isSigningIn, closeAuthModal, router]
+    [isSigningIn, closeAuthModal, router, updateSafeUser]
   );
 
   /**
