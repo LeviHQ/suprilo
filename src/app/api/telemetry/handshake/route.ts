@@ -114,7 +114,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Creator self-view exclusion check
+    // 6. Creator self-view detection
+    let isCreatorSelfView = false;
     try {
       const authClient = await createAuthClient();
       const {
@@ -122,14 +123,7 @@ export async function POST(request: Request) {
       } = await authClient.auth.getUser();
 
       if (user && user.id === card.user_id) {
-        return NextResponse.json(
-          {
-            success: true,
-            creator_self_view: true,
-            view_receipt_id: null,
-          },
-          { status: 200 }
-        );
+        isCreatorSelfView = true;
       }
     } catch {
       // Unauthenticated visitor is the expected standard case; ignore auth resolution errors
@@ -169,6 +163,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
+        creator_self_view: isCreatorSelfView,
         view_receipt_id: row?.view_receipt_id || null,
         is_untracked: Boolean(row?.is_untracked),
       },

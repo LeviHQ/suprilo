@@ -3,6 +3,7 @@ import { isValidCardSlug } from "@/lib/slug";
 import {
   computeVisitorHash,
   recordCardTelemetry,
+  getSupabaseAdminClient,
 } from "@/lib/server/card-recipient";
 import { dispatchPendingPushDeliveries } from "@/lib/server/push-dispatcher";
 
@@ -33,8 +34,38 @@ export async function POST(
     const visitorHash = computeVisitorHash(request.headers);
     const recorded = await recordCardTelemetry(slug, "reveal", visitorHash);
 
-    // If a reveal was newly recorded, trigger immediate push dispatch in background via Next.js after()
+    // If a reveal was newly recorded, enqueue notification and trigger immediate push dispatch
     if (recorded) {
+      const adminClient = getSupabaseAdminClient();
+      if (adminClient) {
+        try {
+          const { data: cardRow } = await adminClient
+            .from("cards")
+            .select("id, user_id, recipient_name")
+            .eq("slug", slug)
+            .maybeSingle();
+
+          if (cardRow?.user_id) {
+            await adminClient.rpc("enqueue_notification_safe", {
+              p_user_id: cardRow.user_id,
+              p_type: "CARD_REVEAL",
+              p_title: "Card Scratched!",
+              p_body: `Someone just revealed your scratch card for ${cardRow.recipient_name || "a friend"}!`,
+              p_dedup_key: `reveal:${cardRow.id}:${visitorHash.slice(0, 16)}:${Math.floor(Date.now() / 60000)}`,
+              p_metadata: { card_id: cardRow.id, slug, url: `/c/${slug}` },
+            });
+
+            await adminClient.rpc("evaluate_user_achievements", {
+              p_user_id: cardRow.user_id,
+            });
+          }
+        } catch (enqueueErr) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[api/cards/[slug]/reveal] Notification enqueue warning:", enqueueErr);
+          }
+        }
+      }
+
       after(async () => {
         try {
           await dispatchPendingPushDeliveries(20);

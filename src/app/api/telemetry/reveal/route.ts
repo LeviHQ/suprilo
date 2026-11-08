@@ -67,9 +67,36 @@ export async function POST(request: Request) {
         const recorded = await recordCardTelemetry(slug, "reveal", visitorHash, adminClient);
 
         if (recorded) {
+          try {
+            const { data: cardRow } = await adminClient
+              .from("cards")
+              .select("id, user_id, recipient_name")
+              .eq("slug", slug)
+              .maybeSingle();
+
+            if (cardRow?.user_id) {
+              await adminClient.rpc("enqueue_notification_safe", {
+                p_user_id: cardRow.user_id,
+                p_type: "CARD_REVEAL",
+                p_title: "Card Scratched!",
+                p_body: `Someone just revealed your scratch card for ${cardRow.recipient_name || "a friend"}!`,
+                p_dedup_key: `reveal:${cardRow.id}:${visitorHash.slice(0, 16)}:${Math.floor(Date.now() / 60000)}`,
+                p_metadata: { card_id: cardRow.id, slug, url: `/c/${slug}` },
+              });
+
+              await adminClient.rpc("evaluate_user_achievements", {
+                p_user_id: cardRow.user_id,
+              });
+            }
+          } catch (enqueueErr) {
+            if (process.env.NODE_ENV !== "production") {
+              console.warn("[api/telemetry/reveal] Fallback enqueue warning:", enqueueErr);
+            }
+          }
+
           after(async () => {
             try {
-              await dispatchPendingPushDeliveries(10);
+              await dispatchPendingPushDeliveries(20);
             } catch {
               // Safe ignore
             }
