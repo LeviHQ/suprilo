@@ -660,3 +660,4 @@ export function NotificationDetailModal({
     </div>
   );
 }
+
