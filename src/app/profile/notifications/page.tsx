@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCheck,
@@ -10,18 +9,19 @@ import {
   Award,
   TrendingUp,
   Info,
-  ExternalLink,
   Loader2,
   Sliders,
   Check,
   Eye,
   RefreshCw,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { NotificationPreferencesPanel } from "@/components/notifications/NotificationPreferencesPanel";
+import { NotificationDetailModal } from "@/components/notifications/NotificationDetailModal";
 import { createClient } from "@/lib/supabase/client";
 import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
@@ -94,7 +94,6 @@ function getNotificationBadge(type: NotificationItem["type"]) {
 }
 
 export default function NotificationsPage() {
-  const router = useRouter();
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = React.useState<TabType>("all");
@@ -105,6 +104,8 @@ export default function NotificationsPage() {
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = React.useState<boolean>(false);
   const [isMarkingAll, setIsMarkingAll] = React.useState<boolean>(false);
+  const [selectedNotification, setSelectedNotification] = React.useState<NotificationItem | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = React.useState<boolean>(false);
   const [togglingId, setTogglingId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -297,22 +298,30 @@ export default function NotificationsPage() {
     }
   };
 
-  // Handle clicking a notification card to navigate
+  // Handle clicking a notification card to view full details in modal without redirecting
   const handleItemNavigation = async (item: NotificationItem) => {
     if (!item.is_read) {
-      // Mark as read in background
+      // Optimistic mark as read in local list and global counter
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === item.id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n))
+      );
       setGlobalCount(Math.max(0, unreadCount - 1));
-      fetch(`/api/notifications/${item.id}/read`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ read: true }),
-      }).catch(() => {});
+
+      try {
+        fetch(`/api/notifications/${item.id}/read`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ read: true }),
+        }).catch(() => {});
+      } catch {
+        // Safe ignore
+      }
     }
 
-    if (item.action_url) {
-      router.push(item.action_url);
-    }
+    // Open detail modal with full metadata
+    setSelectedNotification(item);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -499,12 +508,10 @@ export default function NotificationsPage() {
                       {item.body}
                     </p>
 
-                    {item.action_url && (
-                      <div className="pt-1.5 flex items-center gap-1 text-xs font-bold text-brand-pink hover:underline">
-                        <span>View details</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </div>
-                    )}
+                    <div className="pt-1.5 flex items-center gap-1 text-xs font-bold text-brand-pink hover:underline">
+                      <span>View details</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </div>
                   </div>
 
                   {/* Mark Read/Unread Action Button */}
@@ -556,6 +563,16 @@ export default function NotificationsPage() {
           )}
         </div>
       )}
+
+      {/* Full Detail Popup Modal */}
+      <NotificationDetailModal
+        notification={selectedNotification}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedNotification(null);
+        }}
+      />
     </div>
   );
 }

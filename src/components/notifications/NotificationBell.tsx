@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCheck,
@@ -16,6 +15,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
+import { NotificationDetailModal } from "@/components/notifications/NotificationDetailModal";
 
 export interface NotificationItem {
   id: string;
@@ -94,13 +94,14 @@ class BellErrorBoundary extends React.Component<
 }
 
 function NotificationBellInner({ className = "" }: { className?: string }) {
-  const router = useRouter();
   const { user } = useAuth();
   const { unreadCount, setCount: setGlobalCount, refresh: refreshCount } = useUnreadNotificationsCount();
   const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isMarkingAll, setIsMarkingAll] = React.useState<boolean>(false);
+  const [selectedNotification, setSelectedNotification] = React.useState<NotificationItem | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   const dropdownRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -253,28 +254,31 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
     }
   };
 
-  // Handle clicking a single notification
+  // Handle clicking a single notification to open full detail popup modal
   const handleItemClick = async (item: NotificationItem) => {
     if (!item.is_read) {
       // Optimistic update
       setNotifications((prev) =>
-        prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
+        prev.map((n) => (n.id === item.id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n))
       );
       setGlobalCount(Math.max(0, unreadCount - 1));
 
       try {
         await fetch(`/api/notifications/${item.id}/read`, {
           method: "PATCH",
+          headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
+          body: JSON.stringify({ read: true }),
         });
       } catch {
         // Optimistic update retained
       }
     }
 
+    // Close dropdown and open rich detail popup without redirecting
     setIsOpen(false);
-    const destination = item.action_url || "/profile/notifications";
-    router.push(destination);
+    setSelectedNotification(item);
+    setIsDetailModalOpen(true);
   };
 
   if (!user) return null;
@@ -405,6 +409,16 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
           </div>
         </div>
       )}
+
+      {/* Rich Detail Popup Modal */}
+      <NotificationDetailModal
+        notification={selectedNotification}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedNotification(null);
+        }}
+      />
     </div>
   );
 }
