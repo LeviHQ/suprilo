@@ -179,6 +179,11 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
             if (isOpenRef.current) {
               fetchLatestNotificationsRef.current();
             }
+            // Trigger instant push dispatch to ensure all user devices (phone, laptop) receive the alert in real time
+            fetch("/api/push/dispatch", {
+              method: "POST",
+              credentials: "same-origin",
+            }).catch(() => {});
           }
         )
         .subscribe((status) => {

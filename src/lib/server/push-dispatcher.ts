@@ -187,7 +187,11 @@ export async function dispatchPendingPushDeliveries(batchSize = 50): Promise<Dis
             auth: task.auth,
           },
         },
-        payloadString
+        payloadString,
+        {
+          TTL: 86400,
+          urgency: "high",
+        }
       );
 
       httpStatus = response?.statusCode || 200;

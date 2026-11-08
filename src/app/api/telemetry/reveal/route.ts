@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { cookies, headers } from "next/headers";
 import {
   getSupabaseAdminClient,
@@ -10,6 +10,7 @@ import {
   isValidUuid,
   SB_VID_COOKIE_NAME,
 } from "@/lib/server/visitor-identity";
+import { dispatchPendingPushDeliveries } from "@/lib/server/push-dispatcher";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,17 @@ export async function POST(request: Request) {
         const headersList = await headers();
         const visitorHash = computeVisitorHash(headersList);
         const recorded = await recordCardTelemetry(slug, "reveal", visitorHash, adminClient);
+
+        if (recorded) {
+          after(async () => {
+            try {
+              await dispatchPendingPushDeliveries(10);
+            } catch {
+              // Safe ignore
+            }
+          });
+        }
+
         return NextResponse.json(
           {
             success: true,
@@ -128,6 +140,37 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Trigger instant background push dispatch and achievement evaluation (real-time push to phone & laptop)
+    after(async () => {
+      try {
+        // Also evaluate any achievements (e.g. reveal milestones) for the card creator
+        const { data: cardRow } = await adminClient
+          .from("cards")
+          .select("user_id")
+          .eq("id", card_id)
+          .maybeSingle();
+
+        if (cardRow?.user_id) {
+          await adminClient.rpc("evaluate_user_achievements", {
+            p_user_id: cardRow.user_id,
+          });
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[api/telemetry/reveal] Background achievement evaluation warning:", err);
+        }
+      }
+
+      // Real-time instant push dispatch to creator's devices (phone & laptop)
+      try {
+        await dispatchPendingPushDeliveries(20);
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[api/telemetry/reveal] Immediate push dispatch warning:", err);
+        }
+      }
+    });
 
     return NextResponse.json(
       {

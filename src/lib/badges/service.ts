@@ -59,7 +59,17 @@ export async function evaluateUserAchievements(
       return null;
     }
 
-    return data as AchievementEvaluationResult;
+    const result = data as AchievementEvaluationResult;
+
+    // If new badges were awarded, trigger immediate push dispatch to user devices (phone & laptop)
+    if (result && result.new_badges_awarded > 0 && typeof window !== "undefined") {
+      fetch("/api/push/dispatch", {
+        method: "POST",
+        credentials: "same-origin",
+      }).catch(() => {});
+    }
+
+    return result;
   } catch (err: unknown) {
     if (process.env.NODE_ENV !== "production") {
       console.warn("[evaluateUserAchievements] Exception:", err);

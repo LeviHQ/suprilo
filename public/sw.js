@@ -130,6 +130,7 @@ self.addEventListener("push", (event) => {
     badge: "/brand/favicon.png",
     tag: notificationId,
     renotify: true,
+    vibrate: [200, 100, 200],
     data: {
       url: safeUrl,
       timestamp: Date.now(),

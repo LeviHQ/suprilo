@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { isValidCardSlug } from "@/lib/slug";
 import {
   computeVisitorHash,
@@ -33,11 +33,15 @@ export async function POST(
     const visitorHash = computeVisitorHash(request.headers);
     const recorded = await recordCardTelemetry(slug, "reveal", visitorHash);
 
-    // If a reveal was newly recorded, trigger immediate push dispatch in background (fire-and-forget)
+    // If a reveal was newly recorded, trigger immediate push dispatch in background via Next.js after()
     if (recorded) {
-      dispatchPendingPushDeliveries(5).catch((err) => {
-        if (process.env.NODE_ENV !== "production") {
-          console.warn("[api/cards/[slug]/reveal] Immediate push dispatch warning:", err);
+      after(async () => {
+        try {
+          await dispatchPendingPushDeliveries(20);
+        } catch (err) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[api/cards/[slug]/reveal] Immediate push dispatch warning:", err);
+          }
         }
       });
     }
