@@ -52,13 +52,13 @@ export function CreatorMetaOverviewCard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-warm-border/60 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-brand-dark tracking-tight">Creator Meta & Overview</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span>Creator Meta & Overview</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 whitespace-nowrap shrink-0">
               Verified Account
             </span>
-          </div>
-          <p className="text-xs text-brand-muted">
+          </h3>
+          <p className="text-xs text-brand-muted mt-1">
             Your unique cryptographic identifier, membership timeline, and gamification tier standings.
           </p>
         </div>

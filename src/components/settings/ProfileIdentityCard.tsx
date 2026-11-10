@@ -163,13 +163,13 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
 
       {/* Header */}
       <div className="border-b border-brand-warm-border/60 pb-4">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-bold text-brand-dark tracking-tight">Creator Identity</h3>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+        <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <span>Creator Identity</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
             Public Info
           </span>
-        </div>
-        <p className="text-xs text-brand-muted">
+        </h3>
+        <p className="text-xs text-brand-muted mt-1">
           Your public display name and creator bio visible across cards, scratch animations, and showcases.
         </p>
       </div>

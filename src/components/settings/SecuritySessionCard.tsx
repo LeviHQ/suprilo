@@ -74,13 +74,13 @@ export function SecuritySessionCard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-warm-border/60 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-brand-dark tracking-tight">Security & Active Session</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span>Security & Active Session</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 whitespace-nowrap shrink-0">
               Authenticated
             </span>
-          </div>
-          <p className="text-xs text-brand-muted">
+          </h3>
+          <p className="text-xs text-brand-muted mt-1">
             Manage your authenticated session, verified authentication provider, and sign-out actions.
           </p>
         </div>
@@ -101,7 +101,7 @@ export function SecuritySessionCard() {
               <span>Authentication Provider</span>
             </span>
             {user?.isGoogleVerified && (
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 whitespace-nowrap shrink-0">
                 Verified
               </span>
             )}

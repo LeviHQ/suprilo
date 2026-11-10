@@ -218,13 +218,13 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-warm-border/60 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-brand-dark tracking-tight">Avatar Studio</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2.5 py-0.5 rounded-full border border-pink-200">
+          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span>Avatar Studio</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2.5 py-0.5 rounded-full border border-pink-200 whitespace-nowrap shrink-0">
               Personalize
             </span>
-          </div>
-          <p className="text-xs text-brand-muted">
+          </h3>
+          <p className="text-xs text-brand-muted mt-1">
             Choose your Google photo, select a curated character preset, or upload a custom avatar.
           </p>
         </div>
@@ -294,7 +294,7 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
         <div className="space-y-1.5 text-center sm:text-left flex-1 min-w-0">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <h4 className="text-sm font-bold text-brand-dark">Active Avatar</h4>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 whitespace-nowrap shrink-0">
               {activeTab === "google"
                 ? "Google Profile"
                 : activeTab === "preset"

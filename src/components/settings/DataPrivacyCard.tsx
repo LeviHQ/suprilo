@@ -124,13 +124,13 @@ export function DataPrivacyCard({ profile, onProfileUpdated }: DataPrivacyCardPr
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-warm-border/60 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-brand-dark tracking-tight">Data & Privacy Center</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span>Data & Privacy Center</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 whitespace-nowrap shrink-0">
               Control
             </span>
-          </div>
-          <p className="text-xs text-brand-muted">
+          </h3>
+          <p className="text-xs text-brand-muted mt-1">
             Manage your card telemetry privacy preferences and export an authoritative backup of your creator records.
           </p>
         </div>

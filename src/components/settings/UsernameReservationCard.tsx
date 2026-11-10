@@ -174,15 +174,13 @@ export function UsernameReservationCard({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-warm-border/60 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-brand-dark tracking-tight">
-              Creator Handle Reservation
-            </h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span>Creator Handle Reservation</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 whitespace-nowrap shrink-0">
               Unique Handle
             </span>
-          </div>
-          <p className="text-xs text-brand-muted">
+          </h3>
+          <p className="text-xs text-brand-muted mt-1">
             Reserve your unique @handle for your upcoming public creator showcase.
           </p>
         </div>
@@ -333,14 +331,14 @@ export function UsernameReservationCard({
 
       {/* Future Showcase Roadmap Card */}
       <div className="p-4 rounded-2xl bg-brand-warm-subtle border border-brand-warm-border space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-brand-pink" />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Sparkles className="w-4 h-4 text-brand-pink shrink-0" />
             <h4 className="text-xs font-bold text-brand-dark">Public Showcase URL (Coming Soon)</h4>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
+              Roadmap
+            </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-            Roadmap
-          </span>
         </div>
 
         <p className="text-xs text-brand-muted leading-relaxed">
