@@ -260,3 +260,24 @@ export function getUsernameEligibility(usernameUpdatedAt: string | null): {
   };
 }
 
+/**
+ * Resolves the displayable image URL from profile avatar preferences.
+ */
+export function getResolvedAvatarUrl(
+  profile: Pick<CreatorProfile, "avatar_type" | "avatar_preset_id" | "custom_avatar_url"> | null,
+  fallbackGooglePhotoUrl?: string | null
+): string | null {
+  if (!profile) return fallbackGooglePhotoUrl || null;
+
+  if (profile.avatar_type === "preset" && profile.avatar_preset_id) {
+    const preset = PRESET_AVATARS.find((p) => p.id === profile.avatar_preset_id);
+    return preset ? preset.src : `/avatars/presets/${profile.avatar_preset_id}.svg`;
+  }
+
+  if (profile.avatar_type === "custom" && profile.custom_avatar_url) {
+    return profile.custom_avatar_url;
+  }
+
+  return fallbackGooglePhotoUrl || null;
+}
+

@@ -13,6 +13,7 @@ export interface AuthenticatedUser {
   uid: string; // Backward-compatible alias of id
   email: string | null;
   emailVerified: boolean;
+  user_metadata?: Record<string, unknown> | null;
 }
 
 export type AuthErrorCode =
@@ -58,6 +59,7 @@ function normalizeServerUser(user: {
     uid: user.id,
     email: user.email || null,
     emailVerified,
+    user_metadata: user.user_metadata || null,
   };
 }
 

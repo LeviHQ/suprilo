@@ -16,6 +16,10 @@ interface UserAvatarProps {
 export function UserAvatar({ user, size = "md", className = "" }: UserAvatarProps) {
   const [imageError, setImageError] = React.useState(false);
 
+  React.useEffect(() => {
+    setImageError(false);
+  }, [user?.photoURL]);
+
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
     md: "w-9 h-9 text-sm",

@@ -21,6 +21,8 @@ export interface AuthContextType {
   signOutUser: () => Promise<void>;
   getIdToken: (forceRefresh?: boolean) => Promise<string | null>;
   clearError: () => void;
+  setOptimisticProfile: (updates: { displayName?: string; photoURL?: string | null }) => void;
+  refreshUser: () => Promise<void>;
 }
 
 function areUsersEqual(a: SupriloUser | null, b: SupriloUser | null): boolean {
@@ -348,6 +350,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const setOptimisticProfile = React.useCallback(
+    (updates: { displayName?: string; photoURL?: string | null }) => {
+      setUser((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          displayName: updates.displayName !== undefined ? updates.displayName : prev.displayName,
+          photoURL: updates.photoURL !== undefined ? updates.photoURL : prev.photoURL,
+        };
+      });
+    },
+    []
+  );
+
+  const refreshUser = React.useCallback(async () => {
+    try {
+      const supabaseClient = createClient();
+      const {
+        data: { user: latestUser },
+      } = await supabaseClient.auth.getUser();
+      if (latestUser) {
+        updateSafeUser(normalizeSupabaseUser(latestUser));
+      }
+    } catch {
+      // Safe fallback
+    }
+  }, [updateSafeUser]);
+
   const value = React.useMemo(
     () => ({
       user,
@@ -361,6 +391,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOutUser,
       getIdToken,
       clearError,
+      setOptimisticProfile,
+      refreshUser,
     }),
     [
       user,
@@ -374,6 +406,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOutUser,
       getIdToken,
       clearError,
+      setOptimisticProfile,
+      refreshUser,
     ]
   );
 

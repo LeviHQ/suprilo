@@ -7,7 +7,7 @@ import {
   notifyBioUpdated,
   notifyAvatarUpdated,
 } from "@/lib/server/settings-notifications";
-import { AvatarType, AvatarSource, PresetAvatarId } from "@/types/profile";
+import { AvatarType, AvatarSource, PresetAvatarId, getResolvedAvatarUrl } from "@/types/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -194,6 +194,22 @@ export async function PATCH(request: Request) {
     }
 
     if (avatarChanged) {
+      const resolvedAvatarUrl = getResolvedAvatarUrl(
+        updatedProfile,
+        (authResult.user.user_metadata?.avatar_url as string) ||
+        (authResult.user.user_metadata?.picture as string) ||
+        null
+      );
+      try {
+        await adminClient.auth.admin.updateUserById(userId, {
+          user_metadata: {
+            avatar_url: resolvedAvatarUrl,
+            custom_avatar: updatedProfile.avatar_type !== "google",
+          },
+        });
+      } catch {
+        // Safe fallback; database profiles is authoritative
+      }
       await notifyAvatarUpdated(userId);
     }
 
