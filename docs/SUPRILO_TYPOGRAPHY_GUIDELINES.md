@@ -53,3 +53,37 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   </h3>
   ```
 
+---
+
+## 3. Long Unbroken Strings & Bio Text Overflow Protection
+
+### A. Root Cause of Horizontal Overflow
+When users enter long continuous strings or URLs (e.g. 50-100 unbroken test characters without spaces):
+- Standard Tailwind `break-words` (`overflow-wrap: break-word`) does not prevent flexbox `min-content` intrinsic width expansion.
+- The flex column expands to the intrinsic width of the longest word (~400px), causing the parent card container to stretch horizontally beyond the mobile viewport (e.g. 360px).
+- Because the card container expands, flex items (like `Member since` and `Last active` pills) stay on one line instead of wrapping, and the overflowing edge gets clipped by `overflow-hidden`, cutting off dates (e.g. `Nov 10, 20[26]`).
+
+### B. Mandatory Layout Rules for User Bios & Dynamic Text
+1. **Bio Paragraph Classes**: Always use:
+   ```tsx
+   <p className="text-xs sm:text-sm text-brand-dark/80 font-medium pt-1 max-w-lg leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
+     {bio}
+   </p>
+   ```
+   `[overflow-wrap:anywhere]` forces soft wrap opportunities at every character, preventing the intrinsic `min-content` width from ever exceeding the container.
+
+2. **Flex Parent Constraints**: Flex column wrappers holding dynamic text must always include:
+   ```tsx
+   className="space-y-2 flex-1 min-w-0 w-full max-w-full"
+   ```
+
+3. **Metadata Pill Groups**: Always ensure pill wrappers have `w-full max-w-full flex-wrap` and pills have `max-w-full shrink-0`:
+   ```tsx
+   <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-brand-muted w-full max-w-full">
+     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border max-w-full shrink-0">
+       ...
+     </div>
+   </div>
+   ```
+
+

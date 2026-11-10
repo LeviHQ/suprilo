@@ -119,18 +119,18 @@ export default function ProfileHomePage() {
       />
 
       {/* 2. Profile Overview */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-card relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-card relative overflow-hidden w-full min-w-0">
         <div
           className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-gradient-to-br from-brand-pink/15 via-brand-orange/10 to-brand-purple/15 rounded-full blur-3xl pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left w-full min-w-0">
           <UserAvatar user={user} size="xl" className="ring-4 ring-brand-pink/20 shadow-md shrink-0" />
 
-          <div className="space-y-2 flex-1 min-w-0">
+          <div className="space-y-2 flex-1 min-w-0 w-full max-w-full">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-normal">
                 {user.displayName || "Suprilo Creator"}
               </h2>
 
@@ -158,23 +158,23 @@ export default function ProfileHomePage() {
             </p>
 
             {bio ? (
-              <p className="text-xs sm:text-sm text-brand-dark/80 font-medium pt-1 max-w-lg leading-relaxed break-words">
+              <p className="text-xs sm:text-sm text-brand-dark/80 font-medium pt-1 max-w-lg leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
                 {bio}
               </p>
             ) : null}
 
             {/* Account Metadata Pills */}
-            <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-brand-muted">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
-                <Clock className="w-3.5 h-3.5 text-brand-pink" />
+            <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-brand-muted w-full max-w-full">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border max-w-full shrink-0">
+                <Clock className="w-3.5 h-3.5 text-brand-pink shrink-0" />
                 <span>
                   Member since: <strong className="text-brand-dark">{memberSince}</strong>
                 </span>
               </div>
 
               {lastActive ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border max-w-full shrink-0">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-orange shrink-0" />
                   <span>
                     Last active: <strong className="text-brand-dark">{lastActive}</strong>
                   </span>
@@ -182,8 +182,8 @@ export default function ProfileHomePage() {
               ) : null}
 
               {/* XP Counter Pill in metadata row */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border">
-                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-warm-subtle border border-brand-warm-border max-w-full shrink-0">
+                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400 shrink-0" />
                 <span>
                   Experience: <strong className="text-brand-dark">{totalXp.toLocaleString()} XP</strong>
                 </span>
