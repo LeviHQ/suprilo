@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-maya" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#BE123C"/>
+    </linearGradient>
+    <linearGradient id="skin-maya" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="128" fill="url(#bg-maya)"/>
+  <!-- Long Hair Back -->
+  <path d="M72 110 C65 170, 75 220, 85 240 L171 240 C181 220, 191 170, 184 110 Z" fill="#18181B"/>
+  <!-- Body/Shirt -->
+  <path d="M52 240 C60 185, 196 185, 204 240 Z" fill="#FDF2F8"/>
+  <!-- Neck -->
+  <rect x="114" y="160" width="28" height="35" rx="6" fill="#FDBA74"/>
+  <!-- Head -->
+  <ellipse cx="128" cy="125" rx="44" ry="48" fill="url(#skin-maya)"/>
+  <!-- Hair Front (Flowing Side Part) -->
+  <path d="M78 115 C75 60, 130 50, 175 65 C185 110, 180 150, 175 170 C165 130, 160 85, 130 85 C100 85, 85 98, 78 115 Z" fill="#18181B"/>
+  <!-- Eyes with Lashes -->
+  <circle cx="112" cy="125" r="4.5" fill="#18181B"/>
+  <circle cx="144" cy="125" r="4.5" fill="#18181B"/>
+  <path d="M106 122 Q112 118 118 122" stroke="#18181B" stroke-width="2" fill="none"/>
+  <path d="M138 122 Q144 118 150 122" stroke="#18181B" stroke-width="2" fill="none"/>
+  <!-- Eyebrows -->
+  <path d="M104 114 Q112 110 120 114" stroke="#18181B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M136 114 Q144 110 152 114" stroke="#18181B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- Lips -->
+  <path d="M118 152 Q128 160 138 152 Q128 157 118 152 Z" fill="#E11D48"/>
+  <!-- Blush -->
+  <ellipse cx="98" cy="136" rx="7" ry="4" fill="#FB7185" opacity="0.4"/>
+  <ellipse cx="158" cy="136" rx="7" ry="4" fill="#FB7185" opacity="0.4"/>
+</svg>

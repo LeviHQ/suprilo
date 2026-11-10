@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCheck,
@@ -94,6 +95,7 @@ function getNotificationBadge(type: NotificationItem["type"]) {
 }
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = React.useState<TabType>("all");
@@ -317,6 +319,12 @@ export default function NotificationsPage() {
       } catch {
         // Safe ignore
       }
+    }
+
+    // Direct redirection for Account Settings notifications
+    if (item.type === "SYSTEM" && item.action_url && item.action_url.startsWith("/profile/settings#")) {
+      router.push(item.action_url);
+      return;
     }
 
     // Open detail modal with full metadata

@@ -31,38 +31,61 @@ export async function POST(
       );
     }
 
+    const adminClient = getSupabaseAdminClient();
+    if (!adminClient) {
+      return NextResponse.json(
+        { success: true, recorded: false },
+        { status: 200 }
+      );
+    }
+
+    // Check creator card analytics privacy preference
+    const { data: cardRow } = await adminClient
+      .from("cards")
+      .select("id, user_id, recipient_name")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (cardRow?.user_id) {
+      const { data: creatorProfile } = await adminClient
+        .from("profiles")
+        .select("allow_card_analytics")
+        .eq("user_id", cardRow.user_id)
+        .maybeSingle();
+
+      if (creatorProfile && creatorProfile.allow_card_analytics === false) {
+        return NextResponse.json(
+          {
+            success: true,
+            recorded: false,
+            analytics_disabled: true,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     const visitorHash = computeVisitorHash(request.headers);
-    const recorded = await recordCardTelemetry(slug, "reveal", visitorHash);
+    const recorded = await recordCardTelemetry(slug, "reveal", visitorHash, adminClient);
 
     // If a reveal was newly recorded, enqueue notification and trigger immediate push dispatch
-    if (recorded) {
-      const adminClient = getSupabaseAdminClient();
-      if (adminClient) {
-        try {
-          const { data: cardRow } = await adminClient
-            .from("cards")
-            .select("id, user_id, recipient_name")
-            .eq("slug", slug)
-            .maybeSingle();
+    if (recorded && cardRow?.user_id) {
+      try {
+        await adminClient.rpc("enqueue_notification_safe", {
+          p_user_id: cardRow.user_id,
+          p_type: "CARD_REVEAL",
+          p_title: "Card Scratched!",
+          p_body: `Someone just revealed your scratch card for ${cardRow.recipient_name || "a friend"}!`,
+          p_dedup_key: `reveal:${cardRow.id}:${visitorHash.slice(0, 16)}:${Math.floor(Date.now() / 60000)}`,
+          p_metadata: { card_id: cardRow.id, slug, url: `/c/${slug}` },
+        });
 
-          if (cardRow?.user_id) {
-            await adminClient.rpc("enqueue_notification_safe", {
-              p_user_id: cardRow.user_id,
-              p_type: "CARD_REVEAL",
-              p_title: "Card Scratched!",
-              p_body: `Someone just revealed your scratch card for ${cardRow.recipient_name || "a friend"}!`,
-              p_dedup_key: `reveal:${cardRow.id}:${visitorHash.slice(0, 16)}:${Math.floor(Date.now() / 60000)}`,
-              p_metadata: { card_id: cardRow.id, slug, url: `/c/${slug}` },
-            });
-
-            await adminClient.rpc("evaluate_user_achievements", {
-              p_user_id: cardRow.user_id,
-            });
-          }
-        } catch (enqueueErr) {
-          if (process.env.NODE_ENV !== "production") {
-            console.warn("[api/cards/[slug]/reveal] Notification enqueue warning:", enqueueErr);
-          }
+        await adminClient.rpc("evaluate_user_achievements", {
+          p_user_id: cardRow.user_id,
+        });
+      } catch (enqueueErr) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[api/cards/[slug]/reveal] Notification enqueue warning:", enqueueErr);
         }
       }
 

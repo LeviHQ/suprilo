@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCheck,
@@ -94,6 +95,7 @@ class BellErrorBoundary extends React.Component<
 }
 
 function NotificationBellInner({ className = "" }: { className?: string }) {
+  const router = useRouter();
   const { user } = useAuth();
   const { unreadCount, setCount: setGlobalCount, refresh: refreshCount } = useUnreadNotificationsCount();
   const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
@@ -280,7 +282,14 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
       }
     }
 
-    // Close dropdown and open rich detail popup without redirecting
+    // Direct redirection for Account Settings notifications
+    if (item.type === "SYSTEM" && item.action_url && item.action_url.startsWith("/profile/settings#")) {
+      setIsOpen(false);
+      router.push(item.action_url);
+      return;
+    }
+
+    // Close dropdown and open rich detail popup without redirecting (for gamification & reveals)
     setIsOpen(false);
     setSelectedNotification(item);
     setIsDetailModalOpen(true);

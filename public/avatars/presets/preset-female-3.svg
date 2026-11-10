@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-aria" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="skin-aria" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="128" fill="url(#bg-aria)"/>
+  <!-- Curly Volume Back -->
+  <circle cx="85" cy="115" r="28" fill="#451A03"/>
+  <circle cx="171" cy="115" r="28" fill="#451A03"/>
+  <circle cx="78" cy="140" r="24" fill="#451A03"/>
+  <circle cx="178" cy="140" r="24" fill="#451A03"/>
+  <!-- Body/Shirt -->
+  <path d="M52 240 C60 185, 196 185, 204 240 Z" fill="#FEF3C7"/>
+  <!-- Neck -->
+  <rect x="114" y="160" width="28" height="35" rx="6" fill="#FDBA74"/>
+  <!-- Head -->
+  <ellipse cx="128" cy="125" rx="44" ry="48" fill="url(#skin-aria)"/>
+  <!-- Curly Top & Side Part -->
+  <circle cx="95" cy="80" r="22" fill="#451A03"/>
+  <circle cx="125" cy="70" r="24" fill="#451A03"/>
+  <circle cx="155" cy="78" r="22" fill="#451A03"/>
+  <!-- Eyes -->
+  <circle cx="112" cy="125" r="4.5" fill="#18181B"/>
+  <circle cx="144" cy="125" r="4.5" fill="#18181B"/>
+  <circle cx="114" cy="123" r="1.5" fill="#FFFFFF"/>
+  <circle cx="146" cy="123" r="1.5" fill="#FFFFFF"/>
+  <!-- Big Warm Smile -->
+  <path d="M114 148 Q128 165 142 148 Z" fill="#DC2626"/>
+  <path d="M117 149 Q128 155 139 149" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Blush -->
+  <ellipse cx="98" cy="136" rx="7" ry="4" fill="#F43F5E" opacity="0.4"/>
+  <ellipse cx="158" cy="136" rx="7" ry="4" fill="#F43F5E" opacity="0.4"/>
+</svg>

@@ -42,7 +42,10 @@ export function deriveSafeActionUrl(
   if (type === "SYSTEM") {
     if (meta && typeof meta.url === "string") {
       const trimmedUrl = meta.url.trim();
-      if ((SAFE_ALLOWLISTED_PATHS as readonly string[]).includes(trimmedUrl)) {
+      if (
+        trimmedUrl.startsWith("/profile/settings#") ||
+        (SAFE_ALLOWLISTED_PATHS as readonly string[]).includes(trimmedUrl)
+      ) {
         return trimmedUrl;
       }
     }

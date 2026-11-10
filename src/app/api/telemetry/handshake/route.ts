@@ -129,6 +129,28 @@ export async function POST(request: Request) {
       // Unauthenticated visitor is the expected standard case; ignore auth resolution errors
     }
 
+    // 6b. Creator card analytics privacy preference check
+    if (card.user_id) {
+      const { data: creatorProfile } = await adminClient
+        .from("profiles")
+        .select("allow_card_analytics")
+        .eq("user_id", card.user_id)
+        .maybeSingle();
+
+      if (creatorProfile && creatorProfile.allow_card_analytics === false) {
+        return NextResponse.json(
+          {
+            success: true,
+            creator_self_view: isCreatorSelfView,
+            view_receipt_id: null,
+            is_untracked: true,
+            creator_analytics_disabled: true,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     // 7. Visitor identity extraction & dual-hash derivation
     const cookieStore = await cookies();
     const sbVid = cookieStore.get(SB_VID_COOKIE_NAME)?.value;

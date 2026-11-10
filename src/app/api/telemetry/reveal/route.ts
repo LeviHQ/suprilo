@@ -62,32 +62,52 @@ export async function POST(request: Request) {
     // 1. Unified Fallback Policy: Missing or invalid view_receipt_id
     if (!view_receipt_id || !isValidUuid(view_receipt_id)) {
       if (slug) {
+        // Fetch card to check creator analytics preference
+        const { data: cardRow } = await adminClient
+          .from("cards")
+          .select("id, user_id, recipient_name")
+          .eq("slug", slug)
+          .maybeSingle();
+
+        if (cardRow?.user_id) {
+          const { data: creatorProfile } = await adminClient
+            .from("profiles")
+            .select("allow_card_analytics")
+            .eq("user_id", cardRow.user_id)
+            .maybeSingle();
+
+          if (creatorProfile && creatorProfile.allow_card_analytics === false) {
+            return NextResponse.json(
+              {
+                success: true,
+                verified: false,
+                fast_scratch: false,
+                fallback_recorded: false,
+                analytics_disabled: true,
+              },
+              { status: 200 }
+            );
+          }
+        }
+
         const headersList = await headers();
         const visitorHash = computeVisitorHash(headersList);
         const recorded = await recordCardTelemetry(slug, "reveal", visitorHash, adminClient);
 
-        if (recorded) {
+        if (recorded && cardRow?.user_id) {
           try {
-            const { data: cardRow } = await adminClient
-              .from("cards")
-              .select("id, user_id, recipient_name")
-              .eq("slug", slug)
-              .maybeSingle();
+            await adminClient.rpc("enqueue_notification_safe", {
+              p_user_id: cardRow.user_id,
+              p_type: "CARD_REVEAL",
+              p_title: "Card Scratched!",
+              p_body: `Someone just revealed your scratch card for ${cardRow.recipient_name || "a friend"}!`,
+              p_dedup_key: `reveal:${cardRow.id}:${visitorHash.slice(0, 16)}:${Math.floor(Date.now() / 60000)}`,
+              p_metadata: { card_id: cardRow.id, slug, url: `/c/${slug}` },
+            });
 
-            if (cardRow?.user_id) {
-              await adminClient.rpc("enqueue_notification_safe", {
-                p_user_id: cardRow.user_id,
-                p_type: "CARD_REVEAL",
-                p_title: "Card Scratched!",
-                p_body: `Someone just revealed your scratch card for ${cardRow.recipient_name || "a friend"}!`,
-                p_dedup_key: `reveal:${cardRow.id}:${visitorHash.slice(0, 16)}:${Math.floor(Date.now() / 60000)}`,
-                p_metadata: { card_id: cardRow.id, slug, url: `/c/${slug}` },
-              });
-
-              await adminClient.rpc("evaluate_user_achievements", {
-                p_user_id: cardRow.user_id,
-              });
-            }
+            await adminClient.rpc("evaluate_user_achievements", {
+              p_user_id: cardRow.user_id,
+            });
           } catch (enqueueErr) {
             if (process.env.NODE_ENV !== "production") {
               console.warn("[api/telemetry/reveal] Fallback enqueue warning:", enqueueErr);
@@ -129,6 +149,35 @@ export async function POST(request: Request) {
         { success: false, error: "INVALID_CARD_ID" },
         { status: 400 }
       );
+    }
+
+    // 2b. Creator analytics privacy preference check
+    const { data: verifiedCardRow } = await adminClient
+      .from("cards")
+      .select("id, user_id")
+      .eq("id", card_id)
+      .maybeSingle();
+
+    if (verifiedCardRow?.user_id) {
+      const { data: creatorProfile } = await adminClient
+        .from("profiles")
+        .select("allow_card_analytics")
+        .eq("user_id", verifiedCardRow.user_id)
+        .maybeSingle();
+
+      if (creatorProfile && creatorProfile.allow_card_analytics === false) {
+        return NextResponse.json(
+          {
+            success: true,
+            verified: true,
+            status: "verified",
+            fast_scratch: false,
+            elapsed_ms: null,
+            analytics_disabled: true,
+          },
+          { status: 200 }
+        );
+      }
     }
 
     // 3. Visitor identity extraction & dual-hash derivation

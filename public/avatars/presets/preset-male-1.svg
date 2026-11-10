@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-leo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="skin-leo" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="128" fill="url(#bg-leo)"/>
+  <!-- Body/Shirt -->
+  <path d="M48 240 C56 180, 200 180, 208 240 Z" fill="#1E293B"/>
+  <path d="M104 190 L128 215 L152 190 Z" fill="#F59E0B"/>
+  <!-- Neck -->
+  <rect x="112" y="160" width="32" height="35" rx="6" fill="#F59E0B"/>
+  <!-- Head -->
+  <ellipse cx="128" cy="125" rx="46" ry="52" fill="url(#skin-leo)"/>
+  <!-- Hair -->
+  <path d="M78 115 C75 70, 110 50, 150 52 C175 55, 182 75, 180 100 C170 85, 150 82, 130 83 C105 84, 88 95, 78 115 Z" fill="#0F172A"/>
+  <!-- Eyes -->
+  <circle cx="112" cy="125" r="5" fill="#0F172A"/>
+  <circle cx="144" cy="125" r="5" fill="#0F172A"/>
+  <circle cx="114" cy="123" r="1.5" fill="#FFFFFF"/>
+  <circle cx="146" cy="123" r="1.5" fill="#FFFFFF"/>
+  <!-- Eyebrows -->
+  <path d="M102 112 Q112 108 122 112" stroke="#0F172A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M134 112 Q144 108 154 112" stroke="#0F172A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Nose -->
+  <path d="M125 128 Q128 136 132 135" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- Smile -->
+  <path d="M116 150 Q128 158 140 150" stroke="#0F172A" stroke-width="3" stroke-linecap="round" fill="none"/>
+</svg>

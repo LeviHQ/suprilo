@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-evelyn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <linearGradient id="skin-evelyn" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="128" fill="url(#bg-evelyn)"/>
+  <!-- Elegant Silver Updo Hair Bun Back -->
+  <circle cx="128" cy="65" r="28" fill="#E2E8F0"/>
+  <!-- Body/Dress -->
+  <path d="M52 240 C60 185, 196 185, 204 240 Z" fill="#7C2D12"/>
+  <!-- Pearl Necklace -->
+  <circle cx="112" cy="188" r="4" fill="#FFFFFF"/>
+  <circle cx="120" cy="191" r="4" fill="#FFFFFF"/>
+  <circle cx="128" cy="192" r="4.5" fill="#FFFFFF"/>
+  <circle cx="136" cy="191" r="4" fill="#FFFFFF"/>
+  <circle cx="144" cy="188" r="4" fill="#FFFFFF"/>
+  <!-- Neck -->
+  <rect x="116" y="160" width="24" height="32" rx="6" fill="#FDBA74"/>
+  <!-- Head -->
+  <ellipse cx="128" cy="125" rx="42" ry="46" fill="url(#skin-evelyn)"/>
+  <!-- Silver Hair Styling Front -->
+  <path d="M78 115 C76 70, 110 65, 128 65 C146 65, 180 70, 178 115 C168 90, 148 85, 128 85 C108 85, 88 90, 78 115 Z" fill="#E2E8F0"/>
+  <!-- Cat-eye / Elegant Glasses -->
+  <path d="M98 120 Q112 114 124 122 Q120 134 104 132 Z" stroke="#7C2D12" stroke-width="2.5" fill="rgba(255,255,255,0.2)"/>
+  <path d="M132 122 Q144 114 158 120 Q152 132 136 134 Z" stroke="#7C2D12" stroke-width="2.5" fill="rgba(255,255,255,0.2)"/>
+  <line x1="124" y1="124" x2="132" y2="124" stroke="#7C2D12" stroke-width="2.5"/>
+  <!-- Eyes -->
+  <circle cx="111" cy="125" r="3" fill="#18181B"/>
+  <circle cx="145" cy="125" r="3" fill="#18181B"/>
+  <!-- Warm Smile -->
+  <path d="M118 152 Q128 160 138 152" stroke="#9A3412" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+</svg>

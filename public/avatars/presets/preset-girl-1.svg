@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-lily" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="skin-lily" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="128" fill="url(#bg-lily)"/>
+  <!-- Space Buns -->
+  <circle cx="80" cy="78" r="22" fill="#3B0764"/>
+  <circle cx="176" cy="78" r="22" fill="#3B0764"/>
+  <circle cx="80" cy="78" r="7" fill="#F472B6"/>
+  <circle cx="176" cy="78" r="7" fill="#F472B6"/>
+  <!-- Body/Shirt -->
+  <path d="M56 240 C64 190, 192 190, 200 240 Z" fill="#FDF4FF"/>
+  <!-- Neck -->
+  <rect x="116" y="160" width="24" height="35" rx="6" fill="#FBBF24"/>
+  <!-- Head -->
+  <ellipse cx="128" cy="125" rx="42" ry="46" fill="url(#skin-lily)"/>
+  <!-- Front Bangs -->
+  <path d="M86 105 C85 70, 171 70, 170 105 C158 92, 140 92, 128 94 C116 92, 98 92, 86 105 Z" fill="#3B0764"/>
+  <!-- Sparkly Large Eyes -->
+  <ellipse cx="112" cy="126" rx="5" ry="6" fill="#18181B"/>
+  <ellipse cx="144" cy="126" rx="5" ry="6" fill="#18181B"/>
+  <circle cx="114" cy="124" r="2" fill="#FFFFFF"/>
+  <circle cx="146" cy="124" r="2" fill="#FFFFFF"/>
+  <circle cx="110" cy="128" r="1" fill="#FFFFFF"/>
+  <circle cx="142" cy="128" r="1" fill="#FFFFFF"/>
+  <!-- Rosy Cheeks -->
+  <ellipse cx="98" cy="135" rx="8" ry="5" fill="#FB7185" opacity="0.6"/>
+  <ellipse cx="158" cy="135" rx="8" ry="5" fill="#FB7185" opacity="0.6"/>
+  <!-- Cheerful Smile -->
+  <path d="M120 148 Q128 156 136 148" stroke="#3B0764" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+</svg>
