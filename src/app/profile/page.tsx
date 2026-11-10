@@ -22,12 +22,15 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { MySurpriseCards, CardFilterType } from "@/components/dashboard/MySurpriseCards";
 import { getLevelProgress } from "@/types/badges";
-import { useUserCardsData, useUserBadgesData } from "@/lib/client/db-cache";
+import { useUserCardsData, useUserBadgesData, useUserProfileData } from "@/lib/client/db-cache";
 
 export default function ProfileHomePage() {
   const { user } = useAuth();
   const { cards, isLoading, error: fetchError, mutate: mutateCards, refresh: refreshCards } = useUserCardsData(user);
   const { summary: badgeSummary } = useUserBadgesData(user);
+  const { profile } = useUserProfileData(user);
+
+  const bio = (profile?.bio ?? user?.bio ?? "").trim();
 
   // Controlled card filter to allow clicking StatCard to switch view
   const [cardFilter, setCardFilter] = React.useState<CardFilterType>("all");
@@ -154,9 +157,11 @@ export default function ProfileHomePage() {
               {user.email || "No public email available"}
             </p>
 
-            <p className="text-xs sm:text-sm text-brand-dark/75 font-medium pt-1">
-              Make Every Moment a Surprise. Ready to create your next unforgettable surprise moment?
-            </p>
+            {bio ? (
+              <p className="text-xs sm:text-sm text-brand-dark/80 font-medium pt-1 max-w-lg leading-relaxed break-words">
+                {bio}
+              </p>
+            ) : null}
 
             {/* Account Metadata Pills */}
             <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-brand-muted">

@@ -11,6 +11,7 @@ export interface SupriloUser {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
+  bio?: string | null;
   isGoogleVerified?: boolean;
   metadata: {
     creationTime: string; // ISO 8601 timestamp string from created_at
@@ -41,6 +42,11 @@ export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | 
     (typeof userMeta.picture === "string" && userMeta.picture) ||
     null;
 
+  // Resolve creator bio
+  const bio =
+    (typeof userMeta.bio === "string" && userMeta.bio.trim()) ||
+    null;
+
   const creationTime = user.created_at || new Date().toISOString();
   const lastSignInTime = user.last_sign_in_at || creationTime;
 
@@ -59,6 +65,7 @@ export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | 
     email: user.email || null,
     displayName,
     photoURL,
+    bio,
     isGoogleVerified,
     metadata: {
       creationTime,

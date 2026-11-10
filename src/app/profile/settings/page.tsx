@@ -12,6 +12,7 @@ import { SecuritySessionCard } from "@/components/settings/SecuritySessionCard";
 import { DataPrivacyCard } from "@/components/settings/DataPrivacyCard";
 import { DangerZoneCard } from "@/components/settings/DangerZoneCard";
 import { Loader2 } from "lucide-react";
+import { mutateCache } from "@/lib/client/db-cache";
 
 export default function AccountSettingsPage() {
   const { user } = useAuth();
@@ -71,7 +72,10 @@ export default function AccountSettingsPage() {
 
   const handleProfileUpdated = React.useCallback((updated: CreatorProfile) => {
     setProfile(updated);
-  }, []);
+    if (user?.id) {
+      mutateCache(`profile:${user.id}`, updated);
+    }
+  }, [user?.id]);
 
   if (!user) return null;
 

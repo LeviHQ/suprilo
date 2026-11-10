@@ -21,7 +21,7 @@ export interface AuthContextType {
   signOutUser: () => Promise<void>;
   getIdToken: (forceRefresh?: boolean) => Promise<string | null>;
   clearError: () => void;
-  setOptimisticProfile: (updates: { displayName?: string; photoURL?: string | null }) => void;
+  setOptimisticProfile: (updates: { displayName?: string; photoURL?: string | null; bio?: string | null }) => void;
   refreshUser: () => Promise<void>;
 }
 
@@ -32,7 +32,8 @@ function areUsersEqual(a: SupriloUser | null, b: SupriloUser | null): boolean {
     a.uid === b.uid &&
     a.email === b.email &&
     a.displayName === b.displayName &&
-    a.photoURL === b.photoURL
+    a.photoURL === b.photoURL &&
+    a.bio === b.bio
   );
 }
 
@@ -351,13 +352,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setOptimisticProfile = React.useCallback(
-    (updates: { displayName?: string; photoURL?: string | null }) => {
+    (updates: { displayName?: string; photoURL?: string | null; bio?: string | null }) => {
       setUser((prev) => {
         if (!prev) return null;
         return {
           ...prev,
           displayName: updates.displayName !== undefined ? updates.displayName : prev.displayName,
           photoURL: updates.photoURL !== undefined ? updates.photoURL : prev.photoURL,
+          bio: updates.bio !== undefined ? updates.bio : prev.bio,
         };
       });
     },

@@ -9,6 +9,7 @@
 import * as React from "react";
 import type { CardRecord } from "@/types/card";
 import type { UserBadgeSummary, UserBadgeRecord } from "@/types/badges";
+import type { CreatorProfile } from "@/types/profile";
 import { getUserCardsWithMetrics } from "@/lib/cards";
 import {
   getUserBadgesSummary,
@@ -327,6 +328,94 @@ export function useUserBadgesData(user: SupriloUser | null) {
     isLoading,
     error,
     refresh: () => fetchBadges(true),
+  };
+}
+
+/**
+ * High-performance hook for authoritative Creator Profile data.
+ * Provides instant 0ms cached profile across views, background SWR revalidation,
+ * and cross-component synchronization.
+ */
+export function useUserProfileData(user: SupriloUser | null) {
+  const userId = user?.id || user?.uid || null;
+  const cacheKey = userId ? `profile:${userId}` : null;
+
+  const [profile, setProfile] = React.useState<CreatorProfile | null>(() => {
+    return cacheKey ? (getCachedData<CreatorProfile>(cacheKey) || null) : null;
+  });
+  const [isLoading, setIsLoading] = React.useState<boolean>(() => {
+    if (!cacheKey) return false;
+    return !getCachedData<CreatorProfile>(cacheKey);
+  });
+  const [error, setError] = React.useState<string | null>(null);
+
+  const fetchProfile = React.useCallback(
+    async (force = false) => {
+      if (!cacheKey) return null;
+      try {
+        const data = await executeWithSWR(
+          cacheKey,
+          async () => {
+            const res = await fetch("/api/user/profile", { credentials: "same-origin" });
+            if (!res.ok) throw new Error("Failed to load profile.");
+            const json = await res.json();
+            return (json?.profile as CreatorProfile) || null;
+          },
+          45000,
+          force
+        );
+        setProfile(data);
+        setError(null);
+        return data;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to load profile.";
+        setError(msg);
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [cacheKey]
+  );
+
+  React.useEffect(() => {
+    if (!cacheKey) {
+      setProfile(null);
+      setIsLoading(false);
+      return;
+    }
+
+    const unsubscribe = subscribe(cacheKey, (freshData) => {
+      setProfile(freshData as CreatorProfile | null);
+    });
+
+    const initial = getCachedData<CreatorProfile>(cacheKey);
+    if (initial) {
+      setProfile(initial);
+      setIsLoading(false);
+    }
+
+    fetchProfile();
+    return unsubscribe;
+  }, [cacheKey, fetchProfile]);
+
+  const mutate = React.useCallback(
+    (updater: CreatorProfile | null | ((prev: CreatorProfile | null) => CreatorProfile | null)) => {
+      if (!cacheKey) return;
+      mutateCache<CreatorProfile | null>(cacheKey, (prev) => {
+        const current = prev || null;
+        return typeof updater === "function" ? updater(current) : updater;
+      });
+    },
+    [cacheKey]
+  );
+
+  return {
+    profile,
+    isLoading,
+    error,
+    refresh: () => fetchProfile(true),
+    mutate,
   };
 }
 

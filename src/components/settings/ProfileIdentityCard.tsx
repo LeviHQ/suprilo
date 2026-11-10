@@ -14,10 +14,16 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { CreatorProfile } from "@/types/profile";
+import { mutateCache } from "@/lib/client/db-cache";
 
 interface ProfileIdentityCardProps {
   profile: CreatorProfile | null;
   onProfileUpdated: (updated: CreatorProfile) => void;
+}
+
+interface SuccessFeedback {
+  title: string;
+  message: string;
 }
 
 export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdentityCardProps) {
@@ -26,7 +32,7 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
   const [displayName, setDisplayName] = React.useState(profile?.display_name || user?.displayName || "");
   const [bio, setBio] = React.useState(profile?.bio || "");
   const [isSaving, setIsSaving] = React.useState(false);
-  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+  const [successFeedback, setSuccessFeedback] = React.useState<SuccessFeedback | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   // Sync with prop when fetched
@@ -63,10 +69,16 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
 
     setIsSaving(true);
     setErrorMessage(null);
-    setSuccessMessage(null);
+    setSuccessFeedback(null);
+
+    // Compute exact change delta to customize feedback banner
+    const currentName = (profile?.display_name ?? user?.displayName ?? "").trim();
+    const currentBio = (profile?.bio ?? "").trim();
+    const nameChanged = cleanName !== currentName;
+    const bioChanged = cleanBio !== currentBio;
 
     // Optimistic UI update across app (Sidebar, Header, Profile)
-    setOptimisticProfile({ displayName: cleanName });
+    setOptimisticProfile({ displayName: cleanName, bio: cleanBio || null });
 
     try {
       const res = await fetch("/api/user/profile", {
@@ -85,13 +97,37 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
       }
 
       onProfileUpdated(data.profile);
-      setSuccessMessage(`Display name successfully updated to "${cleanName}".`);
-      setTimeout(() => setSuccessMessage(null), 5000);
+      if (user?.id) {
+        mutateCache(`profile:${user.id}`, data.profile);
+      }
+
+      let feedbackTitle = "Identity Saved!";
+      let feedbackMsg = "Creator identity updated successfully.";
+
+      if (nameChanged && !bioChanged) {
+        feedbackTitle = "Display Name Saved!";
+        feedbackMsg = `Display name successfully updated to "${cleanName}".`;
+      } else if (!nameChanged && bioChanged) {
+        feedbackTitle = "Bio Saved!";
+        feedbackMsg = "Creator bio successfully updated.";
+      } else if (nameChanged && bioChanged) {
+        feedbackTitle = "Identity Saved!";
+        feedbackMsg = "Display name and creator bio were successfully updated.";
+      } else {
+        feedbackTitle = "Identity Saved!";
+        feedbackMsg = "Your creator identity is up to date.";
+      }
+
+      setSuccessFeedback({ title: feedbackTitle, message: feedbackMsg });
+      setTimeout(() => setSuccessFeedback(null), 5000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error saving profile identity";
       setErrorMessage(msg);
       // Revert optimistic update
-      setOptimisticProfile({ displayName: profile?.display_name || user?.displayName || "" });
+      setOptimisticProfile({
+        displayName: profile?.display_name || user?.displayName || "",
+        bio: profile?.bio || null,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -103,20 +139,20 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
       className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-card space-y-6"
     >
       {/* Top Green Success Banner */}
-      {successMessage && (
+      {successFeedback && (
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs sm:text-sm font-semibold text-emerald-950 flex items-center justify-between shadow-xs animate-in fade-in duration-200">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-emerald-950 text-xs sm:text-sm">Display Name Saved!</p>
-              <p className="text-xs text-emerald-800 font-normal truncate">{successMessage}</p>
+              <p className="font-bold text-emerald-950 text-xs sm:text-sm">{successFeedback.title}</p>
+              <p className="text-xs text-emerald-800 font-normal truncate">{successFeedback.message}</p>
             </div>
           </div>
           <button
             type="button"
-            onClick={() => setSuccessMessage(null)}
+            onClick={() => setSuccessFeedback(null)}
             className="p-1 rounded-lg text-emerald-700 hover:bg-emerald-100 transition-colors shrink-0 ml-2"
             aria-label="Close notification"
           >
