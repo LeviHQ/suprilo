@@ -519,3 +519,67 @@ Prior to production deployment, the engineering team must verify:
 - [ ] 30-day pruning query deletes both read and unread records older than 30 days.
 - [ ] Invalid push endpoints (410 Gone) are immediately expunged from the database.
 
+---
+
+## 13. Mobile & Responsive UI Architecture for Notification Cards
+
+> **Mandatory UI Rule for All In-App Notification Interfaces**:
+> Notification card layouts must maintain perfect visual balance across mobile (`< 640px`) and desktop (`>= 640px`) viewports without orphaned floating timestamps or crushed word boundaries.
+
+### 13.1 Root Cause of Mobile Timestamp Orphan Bug
+When notification card title rows use `flex-wrap` with `ml-auto` on the timestamp:
+- On mobile, the category badge (`System`, `Badge`, `Reveal`) plus title (`Creator Data Exported`) occupies the majority of the card width.
+- The relative timestamp (`53m ago`, `1h ago`) gets pushed onto a second row.
+- Because of `ml-auto`, the timestamp aligns to the far right on its own line, creating an awkward, empty gap between the title and the notification body description.
+
+### 13.2 Canonical Responsive Layout Solution
+Every notification list item (in `src/app/profile/notifications/page.tsx` and dropdowns) must follow this dual-tier responsive structure:
+
+1. **Title Row (Top)**:
+   - Contains ONLY `{badge}` and `{title}` inside a non-wrapping flex row (`flex items-center gap-2 min-w-0`).
+   - On desktop (`sm:`), the timestamp is visible on the far right (`hidden sm:inline-block ml-auto shrink-0`).
+   - On mobile (`< sm`), the top timestamp is strictly hidden to avoid pushing onto an empty row.
+   - Title must use `tracking-normal` (not `tracking-tight`) to ensure clean spacing between words.
+
+2. **Body Description (Middle)**:
+   - Standard paragraph with `text-xs text-brand-muted leading-relaxed`.
+
+3. **Action & Meta Row (Bottom Footer)**:
+   - Uses `flex items-center justify-between gap-2 text-xs`.
+   - Left side: "View details" link with `ArrowRight` icon.
+   - Right side on mobile (`sm:hidden shrink-0`): The relative timestamp (`formatRelativeTime(item.created_at)`).
+   - On desktop, this footer timestamp is hidden since it already renders cleanly in the title row.
+
+```tsx
+{/* Canonical Mobile-Responsive Notification Card Structure */}
+<div className="flex-1 min-w-0 space-y-1">
+  {/* 1. Header Row */}
+  <div className="flex items-center gap-2 min-w-0">
+    {getNotificationBadge(item.type)}
+    <h4 className="text-sm tracking-normal truncate font-bold text-brand-dark">
+      {item.title}
+    </h4>
+    <span className="text-[11px] text-brand-muted ml-auto shrink-0 hidden sm:inline-block">
+      {formatRelativeTime(item.created_at)}
+    </span>
+  </div>
+
+  {/* 2. Body Description */}
+  <p className="text-xs text-brand-muted leading-relaxed">
+    {item.body}
+  </p>
+
+  {/* 3. Action & Timestamp Footer */}
+  <div className="pt-1.5 flex items-center justify-between gap-2 text-xs">
+    <div className="flex items-center gap-1 font-bold text-brand-pink hover:underline">
+      <span>View details</span>
+      <ArrowRight className="w-3 h-3" />
+    </div>
+    <span className="text-[11px] text-brand-muted shrink-0 sm:hidden">
+      {formatRelativeTime(item.created_at)}
+    </span>
+  </div>
+</div>
+```
+
+

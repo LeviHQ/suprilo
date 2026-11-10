@@ -83,14 +83,14 @@ function getNotificationTypeIcon(type: NotificationItem["type"]) {
 function getNotificationBadge(type: NotificationItem["type"]) {
   switch (type) {
     case "CARD_REVEAL":
-      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-brand-pink border border-pink-100">Reveal</span>;
+      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-brand-pink border border-pink-100 whitespace-nowrap shrink-0">Reveal</span>;
     case "BADGE_UNLOCKED":
-      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-brand-orange border border-amber-100">Badge</span>;
+      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-brand-orange border border-amber-100 whitespace-nowrap shrink-0">Badge</span>;
     case "LEVEL_UP":
-      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">Level Up</span>;
+      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap shrink-0">Level Up</span>;
     case "SYSTEM":
     default:
-      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">System</span>;
+      return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 whitespace-nowrap shrink-0">System</span>;
   }
 }
 
@@ -498,16 +498,16 @@ export default function NotificationsPage() {
 
                   {/* Body Content */}
                   <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
                       {getNotificationBadge(item.type)}
                       <h4
-                        className={`text-sm tracking-tight truncate ${
+                        className={`text-sm tracking-normal truncate ${
                           !item.is_read ? "font-extrabold text-brand-dark" : "font-semibold text-brand-dark/90"
                         }`}
                       >
                         {item.title}
                       </h4>
-                      <span className="text-[11px] text-brand-muted ml-auto shrink-0">
+                      <span className="text-[11px] text-brand-muted ml-auto shrink-0 hidden sm:inline-block">
                         {formatRelativeTime(item.created_at)}
                       </span>
                     </div>
@@ -516,9 +516,14 @@ export default function NotificationsPage() {
                       {item.body}
                     </p>
 
-                    <div className="pt-1.5 flex items-center gap-1 text-xs font-bold text-brand-pink hover:underline">
-                      <span>View details</span>
-                      <ArrowRight className="w-3 h-3" />
+                    <div className="pt-1.5 flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-1 font-bold text-brand-pink hover:underline">
+                        <span>View details</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </div>
+                      <span className="text-[11px] text-brand-muted shrink-0 sm:hidden">
+                        {formatRelativeTime(item.created_at)}
+                      </span>
                     </div>
                   </div>
 
