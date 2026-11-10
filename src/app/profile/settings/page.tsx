@@ -18,10 +18,10 @@ export default function AccountSettingsPage() {
   const [profile, setProfile] = React.useState<CreatorProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = React.useState<boolean>(true);
 
-  // Fetch Authoritative Creator Profile from /api/user/profile
+  // Fetch Authoritative Creator Profile from /api/user/profile (keyed strictly by user ID)
   React.useEffect(() => {
     let isMounted = true;
-    if (!user) return;
+    if (!user?.id) return;
 
     setIsLoadingProfile(true);
     fetch("/api/user/profile", { credentials: "same-origin" })
@@ -44,7 +44,7 @@ export default function AccountSettingsPage() {
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user?.id]);
 
   // Smooth scroll to anchor target if URL hash is present (e.g. from notification redirection)
   React.useEffect(() => {

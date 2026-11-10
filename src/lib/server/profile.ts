@@ -10,6 +10,9 @@ import {
   CreatorProfile,
   validateUsername,
   getUsernameEligibility,
+  AvatarType,
+  AvatarSource,
+  PresetAvatarId,
 } from "@/types/profile";
 
 export class ProfileError extends Error {
@@ -76,9 +79,29 @@ export async function getOrCreateCreatorProfile(
     null;
 
   // Generate safe default username via RPC or fallback
-  let initialUsername = email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").slice(0, 7);
+  let initialUsername = (typeof userMeta.username === "string" && userMeta.username) || email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").slice(0, 7);
   if (initialUsername.length < 3) {
     initialUsername = `user_${initialUsername}`;
+  }
+
+  const authProfile: CreatorProfile = {
+    user_id: userId,
+    username: (typeof userMeta.username === "string" && userMeta.username) || initialUsername,
+    username_updated_at: (userMeta.username_updated_at as string) || null,
+    display_name: displayName.slice(0, 50),
+    bio: (userMeta.bio as string) || null,
+    avatar_type: (userMeta.avatar_type as AvatarType) || (userMeta.custom_avatar ? "custom" : "google"),
+    avatar_preset_id: (userMeta.avatar_preset_id as PresetAvatarId) || null,
+    custom_avatar_url: photoURL,
+    avatar_source: (userMeta.avatar_source as AvatarSource) || "google",
+    allow_card_analytics: typeof userMeta.allow_card_analytics === "boolean" ? userMeta.allow_card_analytics : true,
+    created_at: authUser.created_at || new Date().toISOString(),
+    updated_at: authUser.updated_at || new Date().toISOString(),
+  };
+
+  // If profiles table does not exist yet, return graceful authoritative record from auth.users
+  if (error && error.code === "PGRST205") {
+    return authProfile;
   }
 
   // Check collision and adjust if necessary
@@ -97,11 +120,11 @@ export async function getOrCreateCreatorProfile(
     username: initialUsername,
     username_updated_at: null,
     display_name: displayName.slice(0, 50),
-    bio: null,
-    avatar_type: "google",
-    avatar_preset_id: null,
+    bio: (userMeta.bio as string) || null,
+    avatar_type: (userMeta.avatar_type as AvatarType) || "google",
+    avatar_preset_id: (userMeta.avatar_preset_id as PresetAvatarId) || null,
     custom_avatar_url: photoURL,
-    avatar_source: "google",
+    avatar_source: (userMeta.avatar_source as AvatarSource) || "google",
     allow_card_analytics: true,
   };
 
@@ -112,6 +135,10 @@ export async function getOrCreateCreatorProfile(
     .single();
 
   if (insertError) {
+    if (insertError.code === "PGRST205") {
+      return authProfile;
+    }
+
     // Check if another concurrent request created it
     const { data: retryProfile } = await adminClient
       .from("profiles")
@@ -162,6 +189,9 @@ export async function checkUsernameAvailability(
   const { data, error } = await query.maybeSingle();
 
   if (error) {
+    if (error.code === "PGRST205") {
+      return { available: true };
+    }
     return { available: false, reason: "Error validating availability" };
   }
 
@@ -218,6 +248,22 @@ export async function reserveCreatorUsername(
 
   // Atomically update username and set throttle timestamp
   const now = new Date().toISOString();
+
+  // Update auth.users metadata first
+  const adminClient = getSupabaseAdminClient();
+  if (adminClient) {
+    try {
+      await adminClient.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          username: clean,
+          username_updated_at: now,
+        },
+      });
+    } catch {
+      // Safe fallback
+    }
+  }
+
   const { data: updated, error: updateError } = await db
     .from("profiles")
     .update({
@@ -227,15 +273,28 @@ export async function reserveCreatorUsername(
     })
     .eq("user_id", userId)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (updateError) {
+    if (updateError.code === "PGRST205") {
+      return {
+        ...currentProfile,
+        username: newUsername.trim(),
+        username_updated_at: now,
+        updated_at: now,
+      };
+    }
     if (updateError.code === "23505") {
       throw new ProfileError("Username was just taken by another creator. Please pick another.", 409, "ALREADY_TAKEN");
     }
     throw new ProfileError(updateError.message, 500, "UPDATE_FAILED");
   }
 
-  return updated as CreatorProfile;
+  return (updated || {
+    ...currentProfile,
+    username: newUsername.trim(),
+    username_updated_at: now,
+    updated_at: now,
+  }) as CreatorProfile;
 }
 

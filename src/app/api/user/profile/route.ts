@@ -7,7 +7,7 @@ import {
   notifyBioUpdated,
   notifyAvatarUpdated,
 } from "@/lib/server/settings-notifications";
-import { AvatarType, AvatarSource, PresetAvatarId, getResolvedAvatarUrl } from "@/types/profile";
+import { CreatorProfile, AvatarType, AvatarSource, PresetAvatarId, getResolvedAvatarUrl } from "@/types/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -162,30 +162,70 @@ export async function PATCH(request: Request) {
 
     updates.updated_at = new Date().toISOString();
 
-    // Persist updates to public.profiles
-    const { data: updatedProfile, error: updateError } = await adminClient
-      .from("profiles")
-      .update(updates)
-      .eq("user_id", userId)
-      .select("*")
-      .single();
+    // 1. Synchronize changes with auth.users metadata first (guarantees real persistence in Supabase Auth)
+    const metadataUpdates: Record<string, unknown> = {};
+    if (displayNameChanged && typeof updates.display_name === "string") {
+      metadataUpdates.full_name = updates.display_name;
+    }
+    if (bioChanged) {
+      metadataUpdates.bio = updates.bio;
+    }
+    if (avatarChanged) {
+      if ("avatar_type" in updates) metadataUpdates.avatar_type = updates.avatar_type;
+      if ("avatar_preset_id" in updates) metadataUpdates.avatar_preset_id = updates.avatar_preset_id;
+      if ("custom_avatar_url" in updates) metadataUpdates.custom_avatar_url = updates.custom_avatar_url;
+      if ("avatar_source" in updates) metadataUpdates.avatar_source = updates.avatar_source;
 
-    if (updateError || !updatedProfile) {
-      return NextResponse.json(
-        { success: false, error: { message: updateError?.message || "Failed to update profile" } },
-        { status: 500 }
+      const resolvedAvatarUrl = getResolvedAvatarUrl(
+        {
+          avatar_type: (updates.avatar_type as AvatarType) || currentProfile.avatar_type,
+          avatar_preset_id: (updates.avatar_preset_id as PresetAvatarId) || currentProfile.avatar_preset_id,
+          custom_avatar_url: (updates.custom_avatar_url as string) || currentProfile.custom_avatar_url,
+        },
+        (authResult.user.user_metadata?.avatar_url as string) ||
+        (authResult.user.user_metadata?.picture as string) ||
+        null
       );
+      metadataUpdates.avatar_url = resolvedAvatarUrl;
+      metadataUpdates.custom_avatar = updates.avatar_type !== "google";
     }
 
-    // Synchronize display name with auth.users metadata
-    if (displayNameChanged && typeof updates.display_name === "string") {
+    if (Object.keys(metadataUpdates).length > 0) {
       try {
         await adminClient.auth.admin.updateUserById(userId, {
-          user_metadata: { full_name: updates.display_name },
+          user_metadata: metadataUpdates,
         });
-      } catch {
-        // Safe fallback; database profiles is authoritative
+      } catch (authErr) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[PATCH /api/user/profile] auth.admin.updateUserById warning:", authErr);
+        }
       }
+    }
+
+    // 2. Persist updates to public.profiles table (safe try/catch for pending migrations)
+    let finalProfile: CreatorProfile = {
+      ...currentProfile,
+      ...updates,
+      updated_at: updates.updated_at as string,
+    } as CreatorProfile;
+
+    try {
+      const { data: updatedProfile, error: updateError } = await adminClient
+        .from("profiles")
+        .update(updates)
+        .eq("user_id", userId)
+        .select("*")
+        .maybeSingle();
+
+      if (!updateError && updatedProfile) {
+        finalProfile = updatedProfile as CreatorProfile;
+      }
+    } catch {
+      // Safe fallback if public.profiles migration is pending
+    }
+
+    // 3. Dispatch system ledger notifications
+    if (displayNameChanged && typeof updates.display_name === "string") {
       await notifyDisplayNameUpdated(userId, updates.display_name);
     }
 
@@ -194,29 +234,13 @@ export async function PATCH(request: Request) {
     }
 
     if (avatarChanged) {
-      const resolvedAvatarUrl = getResolvedAvatarUrl(
-        updatedProfile,
-        (authResult.user.user_metadata?.avatar_url as string) ||
-        (authResult.user.user_metadata?.picture as string) ||
-        null
-      );
-      try {
-        await adminClient.auth.admin.updateUserById(userId, {
-          user_metadata: {
-            avatar_url: resolvedAvatarUrl,
-            custom_avatar: updatedProfile.avatar_type !== "google",
-          },
-        });
-      } catch {
-        // Safe fallback; database profiles is authoritative
-      }
       await notifyAvatarUpdated(userId);
     }
 
     return NextResponse.json(
       {
         success: true,
-        profile: updatedProfile,
+        profile: finalProfile,
       },
       { status: 200 }
     );

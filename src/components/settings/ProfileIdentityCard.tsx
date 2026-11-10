@@ -9,6 +9,7 @@ import {
   Loader2,
   FileText,
   Save,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
@@ -84,8 +85,8 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
       }
 
       onProfileUpdated(data.profile);
-      setSuccessMessage("Creator identity updated successfully!");
-      setTimeout(() => setSuccessMessage(null), 4000);
+      setSuccessMessage(`Display name successfully updated to "${cleanName}".`);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error saving profile identity";
       setErrorMessage(msg);
@@ -101,6 +102,29 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
       id="profile-identity"
       className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-card space-y-6"
     >
+      {/* Top Green Success Banner */}
+      {successMessage && (
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs sm:text-sm font-semibold text-emerald-950 flex items-center justify-between shadow-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-emerald-950 text-xs sm:text-sm">Display Name Saved!</p>
+              <p className="text-xs text-emerald-800 font-normal truncate">{successMessage}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessMessage(null)}
+            className="p-1 rounded-lg text-emerald-700 hover:bg-emerald-100 transition-colors shrink-0 ml-2"
+            aria-label="Close notification"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-b border-brand-warm-border/60 pb-4">
         <div className="flex items-center gap-2">
@@ -113,14 +137,6 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
           Your public display name and creator bio visible across cards, scratch animations, and showcases.
         </p>
       </div>
-
-      {/* Feedback Alerts */}
-      {successMessage && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2 animate-in fade-in duration-150">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{successMessage}</span>
-        </div>
-      )}
 
       {errorMessage && (
         <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-2 animate-in fade-in duration-150">
