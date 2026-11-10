@@ -218,7 +218,7 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-warm-border/60 pb-4">
         <div>
-          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-tight inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <h3 className="text-base sm:text-lg font-bold text-brand-dark tracking-normal inline-flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <span>Avatar Studio</span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2.5 py-0.5 rounded-full border border-pink-200 whitespace-nowrap shrink-0">
               Personalize

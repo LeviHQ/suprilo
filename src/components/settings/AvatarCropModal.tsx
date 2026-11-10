@@ -240,7 +240,7 @@ export function AvatarCropModal({
               <Crop className="w-4 h-4" />
             </span>
             <div>
-              <h3 id="crop-modal-title" className="text-base font-bold text-brand-dark tracking-tight">
+              <h3 id="crop-modal-title" className="text-base font-bold text-brand-dark tracking-normal">
                 Crop Creator Avatar
               </h3>
               <p className="text-[11px] text-brand-muted">Drag to position, slider to zoom</p>

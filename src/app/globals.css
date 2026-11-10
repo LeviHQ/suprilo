@@ -32,6 +32,7 @@
     max-width: 100vw;
     width: 100%;
     position: relative;
+    word-spacing: 0.05em;
   }
 
   /* Prevent any element from causing horizontal blank space on touch swiping */
@@ -39,9 +40,17 @@
     max-width: 100vw;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* Ensure legible word spacing across all platform headings and typography */
+  h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: var(--font-heading), system-ui, -apple-system, sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.005em;
+    word-spacing: 0.12em;
+  }
+
+  /* Prevent tight tracking from collapsing word spacing anywhere on the platform */
+  .tracking-tight,
+  .tracking-tighter {
+    word-spacing: 0.12em;
   }
 }
 

@@ -23,7 +23,7 @@ export function DangerZoneCard({ expectedDisplayName }: DangerZoneCardProps) {
           <AlertTriangle className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-rose-950 tracking-tight">Danger Zone</h3>
+          <h3 className="text-lg font-bold text-rose-950 tracking-normal">Danger Zone</h3>
           <p className="text-xs text-rose-800/80">
             Irreversible account termination, media cleanup, and record deletion.
           </p>

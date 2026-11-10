@@ -125,7 +125,7 @@ export function DeleteAccountConfirmModal({
               <ShieldAlert className="w-5 h-5" />
             </span>
             <div>
-              <h3 id="delete-account-title" className="text-lg font-bold text-rose-950 tracking-tight">
+              <h3 id="delete-account-title" className="text-lg font-bold text-rose-950 tracking-normal">
                 Permanent Account Deletion
               </h3>
               <p className="text-xs text-rose-600/90 font-medium">Irreversible destructive action</p>
