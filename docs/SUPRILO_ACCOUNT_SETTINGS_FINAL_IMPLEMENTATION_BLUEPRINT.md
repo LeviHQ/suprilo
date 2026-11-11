@@ -1,6 +1,6 @@
 # SUPRILO — ACCOUNT SETTINGS: FINAL IMPLEMENTATION BLUEPRINT
 
-**Document Version:** 1.2.0-PROD-BLUEPRINT  
+**Document Version:** 1.3.0-PROD-BLUEPRINT  
 **Target Specification:** SPEC-2C-5.8.0-ACCOUNT-SETTINGS  
 **Project:** Suprilo — Scratch Card Maker  
 **Canonical Document Location:** `docs/SUPRILO_ACCOUNT_SETTINGS_FINAL_IMPLEMENTATION_BLUEPRINT.md`  
@@ -147,16 +147,22 @@ The following systems are verified as fully operational and **must be preserved 
   - Characters: alphanumeric and underscores only (`^[a-zA-Z0-9_]{3,20}$`). No spaces, no hyphens, no symbols.
   - Case-insensitive uniqueness enforced via database constraint `UNIQUE (LOWER(username))`.
   - Reserved system usernames rejected: `admin`, `api`, `suprilo`, `support`, `settings`, `profile`, `card`, `auth`, `null`, `undefined`, `help`, `billing`, `root`, `studio`, `create`, `system`, `legal`, `terms`, `privacy`, `explore`.
-- **Availability Checking:**
-  - Debounced (300ms) client lookup calling a lightweight endpoint: `GET /api/user/check-username?username=...`.
-  - Visual feedback: Real-time spinner, green checkmark for Available, red cross for Taken/Invalid.
-- **30-Day Change Restriction:**
+- **Form Input & Interaction Architecture (Senior Dev Standard):**
+  - **Clean Initial State:** The input starts completely blank without pre-filling the user's active handle as editable text, preventing accidental modifications and eliminating the friction of selecting and backspacing existing text.
+  - **Universal Dummy Placeholder:** Displays `placeholder="e.g. bob"` as a generic, brand-agnostic example so users immediately understand what to enter.
+  - **Single Focused Action:** Presents a single, high-contrast `"Reserve Handle"` button. Distracting secondary reset buttons or repetitive current handle tags are omitted to maintain clean, focused UI hierarchy.
+  - **Live Availability Checking:** Debounced (350ms) client lookup against `GET /api/user/check-username?username=...`. Activates only when the user types a new string (>= 3 chars) distinct from their current handle.
+  - **Inline Status Badges:** Visual feedback badge inside the input field:
+    - Checking: Animated loader with `"Checking..."` text in brand warm badge.
+    - Available: Emerald badge with checkmark (`Available`).
+    - Taken/Invalid: Rose badge with alert icon (`Taken`).
+- **30-Day Change Restriction & Lock Modal:**
   - Tracked via `public.profiles.username_updated_at`.
   - Server-side validation: If `now() - username_updated_at < interval '30 days'`, reject update with `403 Forbidden` and return the exact `nextEligibleDate`.
-  - Confirmation Modal: Before persisting, an explicit confirmation dialog warns: *"Changing your handle to @[username] will lock it for 30 days. You will not be able to change it again until [Formatted Date]. Do you want to proceed?"*
+  - Confirmation Modal: Before persisting, an explicit confirmation dialog compares `@current` with `@new` and enforces the commitment: *"Changing your handle to @[username] will lock it for 30 days. You will not be able to change it again until [Formatted Date]. Do you want to proceed?"*
   - On failure, previous username remains intact.
 - **Future Purpose Indicator:**
-  - Tasteful badge: *"Reserved for your upcoming public creator showcase at suprilo.com/@username"*.
+  - Tasteful roadmap preview: *"Public Showcase URL (Coming Soon): https://suprilo.com/@[username]"*.
   - Public profile routes (`/@username`) remain locked and NOT implemented.
 - **Notification Coverage:**
   - Toast: *"Handle @[username] successfully reserved!"*
@@ -165,9 +171,21 @@ The following systems are verified as fully operational and **must be preserved 
 
 #### A3. Creator Bio / Headline
 - **Classification:** `NEW — IMPLEMENT NOW`
-- **Rules:** Max 100 characters, optional (`null` or empty string allowed).
-- **UI:** Textarea with live character counter (`[X] / 100 characters`), auto-resizing, debounced autosave or explicit Save button.
-- **Backend:** Enforced at database level (`CHECK (bio IS NULL OR char_length(bio) <= 100)`) and API level.
+- **Default Happiness Quote for New Creators:**
+  - Every new user account is automatically initialized with the brand happiness quote:
+    `"Here to celebrate life, share smiles, and make every moment special ✨"` (70 chars, well within the 100-character ceiling).
+  - Defined as authoritative constant `DEFAULT_CREATOR_BIO` in `src/types/profile.ts`.
+  - Profile resolvers (`src/lib/server/profile.ts`, `src/lib/auth-user.ts`) fall back to `DEFAULT_CREATOR_BIO` if no custom bio is set.
+  - Displayed on the user profile (`src/app/profile/page.tsx`) with strict text wrapping rules (`break-words [overflow-wrap:anywhere] [word-break:break-word]`) preventing layout clipping on mobile.
+- **Account Settings Editing & Counter:**
+  - Textarea pre-populated with current bio (or default happiness quote for new creators) with live counter (`[X] / 100`).
+  - Maximum 100 characters enforced by database check constraint (`chk_profiles_bio`) and client validation.
+  - Placeholder displays `DEFAULT_CREATOR_BIO` as inspiration if cleared.
+- **Dynamic Contextual Green Feedback Banner:**
+  - Distinct banner title and message based on the exact fields updated:
+    - Display Name only: Title `"Display Name Saved!"`, Message: `"Display name successfully updated."`
+    - Bio only: Title `"Bio Saved!"`, Message: `"Creator bio successfully updated."`
+    - Both Display Name & Bio: Title `"Identity Saved!"`, Message: `"Display name and creator bio were successfully updated."`
 - **Notification Coverage:**
   - Toast: *"Creator bio saved successfully."*
   - In-App Notification: *"Profile Bio Updated: Your creator bio has been updated."* with destination URL `/profile/settings#profile-identity`.
@@ -546,6 +564,12 @@ src/
 │       ├── DangerZoneCard.tsx               (id="danger-zone": Destructive action trigger)
 │       └── DeleteAccountConfirmModal.tsx    (Dual-input exact match confirmation)
 ```
+
+### 11.1 Section Header & Badge Alignment Standards
+To ensure consistent visual balance and prevent badges from pushing to card edges or splitting awkwardly:
+- **Heading Wrap & Badge Proximity:** Every card heading uses `inline-flex flex-wrap items-center gap-x-2.5 gap-y-1`.
+- **Badge Stability:** Every section status badge uses `whitespace-nowrap shrink-0` with standard pill padding (`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider`).
+- **Typography & Word Spacing:** Card titles employ `tracking-normal` rather than aggressive `tracking-tight` to preserve clear word legibility across responsive widths.
 
 ---
 
