@@ -176,7 +176,9 @@ The following systems are verified as fully operational and **must be preserved 
   - Confirmation Modal: Before persisting, an explicit confirmation dialog compares `@current` with `@new` and enforces the commitment: *"Changing your handle to @[username] will lock it for 30 days. You will not be able to change it again until [Formatted Date]. Do you want to proceed?"*
   - On failure, previous username remains intact.
 - **Future Purpose Indicator:**
-  - Tasteful roadmap preview: *"Public Showcase URL (Coming Soon): https://suprilo.com/@[username]"*. When the input is blank, it defaults to displaying `https://suprilo.com/@username`.
+  - Tasteful roadmap preview: *"Public Showcase URL (Coming Soon): https://suprilo.com/@[handle]"*.
+    - **When Cooldown Active (Locked):** Displays the creator's confirmed registered handle (`https://suprilo.com/@adarsh`).
+    - **When Eligible to Change:** Displays candidate handle in real-time as the user types (`https://suprilo.com/@bob`), or defaults to `https://suprilo.com/@username` when the input is blank.
   - Public profile routes (`/@username`) remain locked and NOT implemented.
 - **Notification Coverage:**
   - Toast: *"Handle @[username] successfully reserved!"*

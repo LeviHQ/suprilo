@@ -68,6 +68,11 @@ export function UsernameReservationCard({
   // When eligible to change, display handleInput (starts blank with placeholder="e.g. bob")
   const displayedValue = eligibility.canChange ? handleInput : currentUsername;
 
+  // Showcase handle: when locked, shows registered handle; when eligible, shows candidate input or "username" placeholder
+  const displayedShowcaseHandle = eligibility.canChange
+    ? (cleanHandle || "username")
+    : (currentUsername || cleanHandle || "username");
+
   // Debounced real-time availability check against /api/user/check-username
   React.useEffect(() => {
     if (!isChanged) {
@@ -370,7 +375,7 @@ export function UsernameReservationCard({
 
         <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-brand-warm-border text-xs font-mono text-brand-dark/90">
           <span className="text-brand-muted select-none">https://suprilo.com/@</span>
-          <span className="font-bold text-brand-pink">{cleanHandle || "username"}</span>
+          <span className="font-bold text-brand-pink">{displayedShowcaseHandle}</span>
         </div>
 
         <div className="flex items-center gap-1.5 text-[11px] text-brand-muted pt-1">
