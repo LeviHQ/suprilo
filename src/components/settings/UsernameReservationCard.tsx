@@ -30,13 +30,11 @@ export function UsernameReservationCard({
   onProfileUpdated,
 }: UsernameReservationCardProps) {
   const currentUsername = profile?.username || "";
-  const [handleInput, setHandleInput] = React.useState(currentUsername);
+  const [handleInput, setHandleInput] = React.useState("");
 
-  // Sync with prop when fetched
+  // Keep input empty on profile updates so user can type a new handle directly
   React.useEffect(() => {
-    if (profile?.username) {
-      setHandleInput(profile.username);
-    }
+    setHandleInput("");
   }, [profile?.username]);
 
   // Real-time availability check state
@@ -62,7 +60,7 @@ export function UsernameReservationCard({
   );
 
   const cleanHandle = handleInput.trim().toLowerCase();
-  const isChanged = cleanHandle !== currentUsername.toLowerCase();
+  const isChanged = Boolean(cleanHandle && cleanHandle !== currentUsername.toLowerCase());
 
   // Debounced real-time availability check against /api/user/check-username
   React.useEffect(() => {
@@ -154,6 +152,8 @@ export function UsernameReservationCard({
       }
 
       onProfileUpdated(data.profile);
+      setHandleInput("");
+      setAvailabilityResult({ checked: false, available: true });
       setIsConfirmModalOpen(false);
       setSuccessMessage(`@${data.profile.username} is now reserved for your creator showcase!`);
       setTimeout(() => setSuccessMessage(null), 5000);
@@ -231,12 +231,19 @@ export function UsernameReservationCard({
       {/* Handle Reservation Form */}
       <form onSubmit={handleInitiateChange} className="space-y-4 max-w-lg">
         <div className="space-y-1.5">
-          <label
-            htmlFor="usernameInput"
-            className="block text-xs font-bold text-brand-dark uppercase tracking-wider"
-          >
-            Reserved Creator Handle
-          </label>
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="usernameInput"
+              className="block text-xs font-bold text-brand-dark uppercase tracking-wider"
+            >
+              Reserved Creator Handle
+            </label>
+            {currentUsername && (
+              <span className="text-[11px] text-brand-muted">
+                Current: <strong className="font-mono text-brand-dark">@{currentUsername}</strong>
+              </span>
+            )}
+          </div>
 
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-muted">
@@ -254,7 +261,7 @@ export function UsernameReservationCard({
                 setHandleInput(e.target.value);
                 if (errorMessage) setErrorMessage(null);
               }}
-              placeholder="e.g. adarsh_m"
+              placeholder="e.g. bob"
               className="w-full pl-9 pr-28 py-2.5 rounded-xl border border-brand-warm-border bg-white text-brand-dark text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-pink transition-all disabled:bg-brand-warm/30 disabled:text-brand-muted"
             />
 
@@ -294,6 +301,13 @@ export function UsernameReservationCard({
           </p>
         )}
 
+        {/* Informational notice if user types current handle */}
+        {cleanHandle === currentUsername.toLowerCase() && cleanHandle.length > 0 && (
+          <p className="text-xs text-brand-muted font-medium flex items-center gap-1.5">
+            <span>@{currentUsername} is already your current reserved handle.</span>
+          </p>
+        )}
+
         <div className="pt-2 flex items-center gap-3">
           <Button
             type="submit"
@@ -318,7 +332,7 @@ export function UsernameReservationCard({
               variant="outline"
               size="sm"
               onClick={() => {
-                setHandleInput(currentUsername);
+                setHandleInput("");
                 setAvailabilityResult({ checked: false, available: true });
               }}
               className="text-xs"
@@ -347,7 +361,7 @@ export function UsernameReservationCard({
 
         <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-brand-warm-border text-xs font-mono text-brand-dark/90">
           <span className="text-brand-muted select-none">https://suprilo.com/@</span>
-          <span className="font-bold text-brand-pink">{cleanHandle || "username"}</span>
+          <span className="font-bold text-brand-pink">{cleanHandle || currentUsername || "bob"}</span>
         </div>
 
         <div className="flex items-center gap-1.5 text-[11px] text-brand-muted pt-1">
