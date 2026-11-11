@@ -285,7 +285,7 @@ BEGIN
     v_username,
     NULL,
     v_display_name,
-    NULL,
+    'Here to celebrate life, share smiles, and make every moment special ✨',
     'google',
     NULL,
     v_avatar_url,
@@ -321,6 +321,8 @@ BEGIN
     WHERE id NOT IN (SELECT user_id FROM public.profiles)
   ) LOOP
     v_dname := coalesce(
+      trim(r.raw_user_meta_data->>'custom_display_name'),
+      trim(r.raw_user_meta_data->>'display_name'),
       trim(r.raw_user_meta_data->>'full_name'),
       trim(r.raw_user_meta_data->>'name'),
       split_part(r.email, '@', 1),
@@ -331,12 +333,16 @@ BEGIN
     END IF;
 
     v_pic := coalesce(
+      r.raw_user_meta_data->>'custom_avatar_url',
       r.raw_user_meta_data->>'avatar_url',
       r.raw_user_meta_data->>'picture',
       NULL
     );
 
-    v_uname := public.generate_default_username(r.email, r.id);
+    v_uname := coalesce(
+      r.raw_user_meta_data->>'username',
+      public.generate_default_username(r.email, r.id)
+    );
 
     INSERT INTO public.profiles (
       user_id,
@@ -352,13 +358,13 @@ BEGIN
     ) VALUES (
       r.id,
       v_uname,
-      NULL,
+      CASE WHEN r.raw_user_meta_data->>'username_updated_at' IS NOT NULL THEN (r.raw_user_meta_data->>'username_updated_at')::timestamptz ELSE NULL END,
       v_dname,
-      NULL,
-      'google',
-      NULL,
+      coalesce(r.raw_user_meta_data->>'custom_bio', r.raw_user_meta_data->>'bio', 'Here to celebrate life, share smiles, and make every moment special ✨'),
+      coalesce(r.raw_user_meta_data->>'custom_avatar_type', r.raw_user_meta_data->>'avatar_type', 'google'),
+      coalesce(r.raw_user_meta_data->>'custom_avatar_preset_id', r.raw_user_meta_data->>'avatar_preset_id', NULL),
       v_pic,
-      'google',
+      coalesce(r.raw_user_meta_data->>'custom_avatar_source', r.raw_user_meta_data->>'avatar_source', 'google'),
       true
     )
     ON CONFLICT (user_id) DO NOTHING;

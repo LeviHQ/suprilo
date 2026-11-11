@@ -69,15 +69,30 @@ export async function getOrCreateCreatorProfile(
   const userMeta = authUser.user_metadata || {};
 
   const displayName =
+    (typeof userMeta.custom_display_name === "string" && userMeta.custom_display_name.trim()) ||
+    (typeof userMeta.display_name === "string" && userMeta.display_name.trim()) ||
     (typeof userMeta.full_name === "string" && userMeta.full_name.trim()) ||
     (typeof userMeta.name === "string" && userMeta.name.trim()) ||
     email.split("@")[0] ||
     "Suprilo Creator";
 
-  const photoURL =
-    (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
-    (typeof userMeta.picture === "string" && userMeta.picture) ||
-    null;
+  const isManualAvatar = userMeta.custom_avatar === true || userMeta.avatar_source === "manual" || userMeta.custom_avatar_source === "manual";
+  const avatarType = (userMeta.custom_avatar_type as AvatarType) || (userMeta.avatar_type as AvatarType) || (isManualAvatar ? "custom" : "google");
+  const avatarPresetId = (userMeta.custom_avatar_preset_id as PresetAvatarId) || (userMeta.avatar_preset_id as PresetAvatarId) || null;
+
+  let photoURL: string | null = null;
+  if (avatarType === "preset" && avatarPresetId) {
+    photoURL = `/avatars/presets/${avatarPresetId}.svg`;
+  } else if (avatarType === "custom" && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
+    photoURL = userMeta.custom_avatar_url;
+  } else if (isManualAvatar && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
+    photoURL = userMeta.custom_avatar_url;
+  } else {
+    photoURL =
+      (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
+      (typeof userMeta.picture === "string" && userMeta.picture) ||
+      null;
+  }
 
   // Generate safe default username via RPC or fallback
   let initialUsername = (typeof userMeta.username === "string" && userMeta.username) || email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").slice(0, 7);
@@ -90,11 +105,11 @@ export async function getOrCreateCreatorProfile(
     username: (typeof userMeta.username === "string" && userMeta.username) || initialUsername,
     username_updated_at: (userMeta.username_updated_at as string) || null,
     display_name: displayName.slice(0, 50),
-    bio: (userMeta.bio as string) || DEFAULT_CREATOR_BIO,
-    avatar_type: (userMeta.avatar_type as AvatarType) || (userMeta.custom_avatar ? "custom" : "google"),
-    avatar_preset_id: (userMeta.avatar_preset_id as PresetAvatarId) || null,
-    custom_avatar_url: photoURL,
-    avatar_source: (userMeta.avatar_source as AvatarSource) || "google",
+    bio: (userMeta.custom_bio as string) || (userMeta.bio as string) || DEFAULT_CREATOR_BIO,
+    avatar_type: avatarType,
+    avatar_preset_id: avatarPresetId,
+    custom_avatar_url: avatarType === "custom" ? ((userMeta.custom_avatar_url as string) || null) : null,
+    avatar_source: (userMeta.custom_avatar_source as AvatarSource) || (userMeta.avatar_source as AvatarSource) || "google",
     allow_card_analytics: typeof userMeta.allow_card_analytics === "boolean" ? userMeta.allow_card_analytics : true,
     created_at: authUser.created_at || new Date().toISOString(),
     updated_at: authUser.updated_at || new Date().toISOString(),
@@ -118,15 +133,15 @@ export async function getOrCreateCreatorProfile(
 
   const newProfileRecord = {
     user_id: userId,
-    username: initialUsername,
-    username_updated_at: null,
-    display_name: displayName.slice(0, 50),
-    bio: (userMeta.bio as string) || DEFAULT_CREATOR_BIO,
-    avatar_type: (userMeta.avatar_type as AvatarType) || "google",
-    avatar_preset_id: (userMeta.avatar_preset_id as PresetAvatarId) || null,
-    custom_avatar_url: photoURL,
-    avatar_source: (userMeta.avatar_source as AvatarSource) || "google",
-    allow_card_analytics: true,
+    username: authProfile.username,
+    username_updated_at: authProfile.username_updated_at,
+    display_name: authProfile.display_name,
+    bio: authProfile.bio,
+    avatar_type: authProfile.avatar_type,
+    avatar_preset_id: authProfile.avatar_preset_id,
+    custom_avatar_url: authProfile.custom_avatar_url,
+    avatar_source: authProfile.avatar_source,
+    allow_card_analytics: authProfile.allow_card_analytics,
   };
 
   const { data: inserted, error: insertError } = await adminClient

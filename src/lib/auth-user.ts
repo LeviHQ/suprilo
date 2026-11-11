@@ -29,22 +29,38 @@ export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | 
 
   const userMeta = user.user_metadata || {};
 
-  // Resolve display name across standard Google OAuth metadata conventions
+  // Resolve display name: custom_display_name takes absolute precedence over Google OAuth defaults
   const displayName =
+    (typeof userMeta.custom_display_name === "string" && userMeta.custom_display_name.trim()) ||
+    (typeof userMeta.display_name === "string" && userMeta.display_name.trim()) ||
     (typeof userMeta.full_name === "string" && userMeta.full_name.trim()) ||
     (typeof userMeta.name === "string" && userMeta.name.trim()) ||
     (typeof userMeta.given_name === "string" && userMeta.given_name.trim()) ||
     (user.email ? user.email.split("@")[0] : null) ||
     "Creator";
 
-  // Resolve avatar URL across standard Google OAuth metadata conventions
-  const photoURL =
-    (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
-    (typeof userMeta.picture === "string" && userMeta.picture) ||
-    null;
+  // Resolve avatar URL: preset or custom avatar takes absolute precedence over Google OAuth picture
+  const avatarType = (userMeta.custom_avatar_type || userMeta.avatar_type) as string | undefined;
+  const presetId = (userMeta.custom_avatar_preset_id || userMeta.avatar_preset_id) as string | undefined;
+  const isCustomAvatar = userMeta.custom_avatar === true || userMeta.avatar_source === "manual" || userMeta.custom_avatar_source === "manual";
 
-  // Resolve creator bio — fall back to the brand default happiness quote for new users
+  let photoURL: string | null = null;
+  if (avatarType === "preset" && presetId) {
+    photoURL = `/avatars/presets/${presetId}.svg`;
+  } else if (avatarType === "custom" && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
+    photoURL = userMeta.custom_avatar_url;
+  } else if (isCustomAvatar && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
+    photoURL = userMeta.custom_avatar_url;
+  } else {
+    photoURL =
+      (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
+      (typeof userMeta.picture === "string" && userMeta.picture) ||
+      null;
+  }
+
+  // Resolve creator bio: custom_bio takes absolute precedence
   const bio =
+    (typeof userMeta.custom_bio === "string" && userMeta.custom_bio.trim()) ||
     (typeof userMeta.bio === "string" && userMeta.bio.trim()) ||
     DEFAULT_CREATOR_BIO;
 

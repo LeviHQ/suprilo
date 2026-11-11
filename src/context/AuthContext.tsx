@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { SupriloUser, normalizeSupabaseUser } from "@/lib/auth-user";
+import { invalidateCache } from "@/lib/client/db-cache";
 
 export type { SupriloUser };
 export { normalizeSupabaseUser };
@@ -344,6 +345,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const supabaseClient = createClient();
       await supabaseClient.auth.signOut();
+      invalidateCache();
       setUser(null);
       setError(null);
     } catch {

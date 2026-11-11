@@ -162,32 +162,64 @@ export async function PATCH(request: Request) {
 
     updates.updated_at = new Date().toISOString();
 
-    // 1. Synchronize changes with auth.users metadata first (guarantees real persistence in Supabase Auth)
+    // 1. Synchronize changes with auth.users metadata first (guarantees real persistence in Supabase Auth immune to OAuth overwrites)
     const metadataUpdates: Record<string, unknown> = {};
-    if (displayNameChanged && typeof updates.display_name === "string") {
-      metadataUpdates.full_name = updates.display_name;
-    }
-    if (bioChanged) {
-      metadataUpdates.bio = updates.bio;
-    }
-    if (avatarChanged) {
-      if ("avatar_type" in updates) metadataUpdates.avatar_type = updates.avatar_type;
-      if ("avatar_preset_id" in updates) metadataUpdates.avatar_preset_id = updates.avatar_preset_id;
-      if ("custom_avatar_url" in updates) metadataUpdates.custom_avatar_url = updates.custom_avatar_url;
-      if ("avatar_source" in updates) metadataUpdates.avatar_source = updates.avatar_source;
 
-      const resolvedAvatarUrl = getResolvedAvatarUrl(
-        {
-          avatar_type: (updates.avatar_type as AvatarType) || currentProfile.avatar_type,
-          avatar_preset_id: (updates.avatar_preset_id as PresetAvatarId) || currentProfile.avatar_preset_id,
-          custom_avatar_url: (updates.custom_avatar_url as string) || currentProfile.custom_avatar_url,
-        },
-        (authResult.user.user_metadata?.avatar_url as string) ||
-        (authResult.user.user_metadata?.picture as string) ||
-        null
-      );
-      metadataUpdates.avatar_url = resolvedAvatarUrl;
-      metadataUpdates.custom_avatar = updates.avatar_type !== "google";
+    // 1. Resolve and protect Display Name
+    const targetDisplayName = typeof updates.display_name === "string"
+      ? updates.display_name
+      : currentProfile.display_name;
+    if (targetDisplayName) {
+      metadataUpdates.custom_display_name = targetDisplayName;
+      metadataUpdates.display_name = targetDisplayName;
+      metadataUpdates.full_name = targetDisplayName;
+    }
+
+    // 2. Resolve and protect Bio
+    const targetBio = "bio" in updates
+      ? (updates.bio as string | null)
+      : currentProfile.bio;
+    if (targetBio !== undefined) {
+      metadataUpdates.custom_bio = targetBio;
+      metadataUpdates.bio = targetBio;
+    }
+
+    // 3. Resolve and protect Avatar
+    const targetAvatarType = (updates.avatar_type as AvatarType) || currentProfile.avatar_type || "google";
+    const targetPresetId = "avatar_preset_id" in updates
+      ? (updates.avatar_preset_id as PresetAvatarId | null)
+      : currentProfile.avatar_preset_id;
+    const targetCustomUrl = "custom_avatar_url" in updates
+      ? (updates.custom_avatar_url as string | null)
+      : currentProfile.custom_avatar_url;
+    const targetAvatarSource = (updates.avatar_source as AvatarSource) || currentProfile.avatar_source || (targetAvatarType === "google" ? "google" : "manual");
+
+    metadataUpdates.custom_avatar_type = targetAvatarType;
+    metadataUpdates.avatar_type = targetAvatarType;
+    metadataUpdates.custom_avatar_preset_id = targetPresetId;
+    metadataUpdates.avatar_preset_id = targetPresetId;
+    metadataUpdates.custom_avatar_source = targetAvatarSource;
+    metadataUpdates.avatar_source = targetAvatarSource;
+    metadataUpdates.custom_avatar = targetAvatarType !== "google";
+
+    const resolvedAvatarUrl = getResolvedAvatarUrl(
+      {
+        avatar_type: targetAvatarType,
+        avatar_preset_id: targetPresetId,
+        custom_avatar_url: targetCustomUrl,
+      },
+      (authResult.user.user_metadata?.avatar_url as string) ||
+      (authResult.user.user_metadata?.picture as string) ||
+      null
+    );
+
+    metadataUpdates.avatar_url = resolvedAvatarUrl;
+    if (targetAvatarType === "custom") {
+      metadataUpdates.custom_avatar_url = targetCustomUrl;
+    } else if (targetAvatarType === "preset" && targetPresetId) {
+      metadataUpdates.custom_avatar_url = `/avatars/presets/${targetPresetId}.svg`;
+    } else {
+      metadataUpdates.custom_avatar_url = null;
     }
 
     if (Object.keys(metadataUpdates).length > 0) {

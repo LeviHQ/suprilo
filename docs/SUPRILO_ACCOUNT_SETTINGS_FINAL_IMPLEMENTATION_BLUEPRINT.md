@@ -124,9 +124,18 @@ The following systems are verified as fully operational and **must be preserved 
 
 #### A1. Display Name Editing & Application-Wide Propagation
 - **Classification:** `EXISTING — IMPROVE`
-- **Current Behavior:** Calls `supabase.auth.updateUser({ data: { full_name: displayName.trim() } })`. It updates `auth.users.raw_user_meta_data`, but does not guarantee instant local state synchronization across the Studio Sidebar and Dashboard Header without delay.
-- **Target Implementation:**
-  - Persist to both `auth.users` metadata and the proposed `public.profiles.display_name`.
+- **Current Behavior:** Calls `PATCH /api/user/profile` with `display_name` updates. Synchronizes with both `auth.users` metadata and `public.profiles.display_name`.
+- **Target Implementation & OAuth Persistence Immunity:**
+  - **Google OAuth Synchronization Challenge:** Whenever a user logs in via Google OAuth, Supabase Auth updates `auth.users.raw_user_meta_data` with claims sent by Google (`full_name`, `name`, `picture`, `avatar_url`). If custom profile settings were stored directly under `full_name` or `avatar_url`, subsequent Google logins would overwrite user customizations back to their default Google account details.
+  - **Protected Custom Metadata Architecture:** All creator customizations are written under protected namespaced keys that Google OAuth never issues or overwrites:
+    - `custom_display_name`: Authoritative creator display name. Takes absolute precedence over Google's `full_name`, `name`, and `given_name`.
+    - `custom_bio`: Authoritative creator bio. Takes absolute precedence over defaults.
+    - `custom_avatar_type` (`google` | `preset` | `custom`): Chosen avatar mode.
+    - `custom_avatar_preset_id`: Preserved preset avatar ID (e.g. `preset-male-2`).
+    - `custom_avatar_source`: Manual or Google origin indicator.
+    - `custom_avatar_url`: Explicit custom URL or resolved preset SVG path.
+  - **Normalized User Model (`src/lib/auth-user.ts`):** `normalizeSupabaseUser` resolves `displayName`, `photoURL`, and `bio` by prioritizing `custom_*` fields before falling back to OAuth defaults, guaranteeing 100% immunity to Google OAuth sign-in syncs.
+  - **Secure Sign Out Cache Flush:** When `signOutUser()` is executed in [`AuthContext.tsx`](file:///d:/My%20Projects/suprilo/src/context/AuthContext.tsx), `invalidateCache()` is invoked immediately to purge all in-memory SWR cached records, preventing stale user profile data from bleeding into subsequent logins.
   - Expose an `updateUserMetadata` helper in `AuthContext.tsx` that updates the in-memory `user` state immediately upon successful Supabase resolution.
   - Sidebar ([`Sidebar.tsx`](file:///d:/My%20Projects/suprilo/src/components/dashboard/Sidebar.tsx#L124)) and Header ([`DashboardHeader.tsx`](file:///d:/My%20Projects/suprilo/src/components/dashboard/DashboardHeader.tsx#L63)) automatically re-render without page refresh.
   - Validation: 1 to 50 characters, trimmed, required.
