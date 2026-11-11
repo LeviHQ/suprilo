@@ -148,14 +148,15 @@ The following systems are verified as fully operational and **must be preserved 
   - Case-insensitive uniqueness enforced via database constraint `UNIQUE (LOWER(username))`.
   - Reserved system usernames rejected: `admin`, `api`, `suprilo`, `support`, `settings`, `profile`, `card`, `auth`, `null`, `undefined`, `help`, `billing`, `root`, `studio`, `create`, `system`, `legal`, `terms`, `privacy`, `explore`.
 - **Form Input & Interaction Architecture (Senior Dev Standard):**
-  - **Clean Initial State:** The input starts completely blank without pre-filling the user's active handle as editable text, preventing accidental modifications and eliminating the friction of selecting and backspacing existing text.
-  - **Universal Dummy Placeholder:** Displays `placeholder="e.g. bob"` as a generic, brand-agnostic example so users immediately understand what to enter.
-  - **Single Focused Action:** Presents a single, high-contrast `"Reserve Handle"` button. Distracting secondary reset buttons or repetitive current handle tags are omitted to maintain clean, focused UI hierarchy.
-  - **Live Availability Checking:** Debounced (350ms) client lookup against `GET /api/user/check-username?username=...`. Activates only when the user types a new string (>= 3 chars) distinct from their current handle.
-  - **Inline Status Badges:** Visual feedback badge inside the input field:
-    - Checking: Animated loader with `"Checking..."` text in brand warm badge.
-    - Available: Emerald badge with checkmark (`Available`).
-    - Taken/Invalid: Rose badge with alert icon (`Taken`).
+  - **Locked Cooldown State (30-Day Limit Active):** When `!eligibility.canChange`, the input displays the user's active registered username in **disabled read-only format** with an inline `Locked` indicator. The generic placeholder is suppressed so the user clearly sees their confirmed handle throughout the 30-day cooldown period.
+  - **Eligible State (Ready to Change / Initial Setup):** When `eligibility.canChange` is true, the input starts blank with `placeholder="e.g. bob"`, allowing creators to directly click and type without backspacing existing text.
+  - **Single Focused Action:** Presents a single, high-contrast `"Reserve Handle"` button without cluttering secondary controls.
+  - **Live Availability Checking:** Debounced (350ms) client lookup against `GET /api/user/check-username?username=...`. Activates when typing a new candidate handle.
+  - **Strict Status Badges & Error Differentiation:**
+    - `Available` (Emerald): The handle is valid and available for reservation.
+    - `Taken` (Rose): **ONLY displayed when the candidate handle is already claimed by another creator in the database.**
+    - `Invalid` (Amber): Displayed when the input violates validation rules (fewer than 3 characters, invalid characters, spaces, or platform reserved handles). Short inputs (e.g. 1 or 2 characters) explicitly display **`Invalid`**, never `Taken`.
+    - `Checking...` (Brand Warm): Real-time spinner during network lookups.
 - **30-Day Change Restriction & Lock Modal:**
   - Tracked via `public.profiles.username_updated_at`.
   - Server-side validation: If `now() - username_updated_at < interval '30 days'`, reject update with `403 Forbidden` and return the exact `nextEligibleDate`.

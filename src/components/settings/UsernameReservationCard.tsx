@@ -42,8 +42,9 @@ export function UsernameReservationCard({
   const [availabilityResult, setAvailabilityResult] = React.useState<{
     checked: boolean;
     available: boolean;
+    isTaken?: boolean;
     reason?: string;
-  }>({ checked: false, available: true });
+  }>({ checked: false, available: true, isTaken: false });
 
   // Confirmation modal state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
@@ -62,10 +63,14 @@ export function UsernameReservationCard({
   const cleanHandle = handleInput.trim().toLowerCase();
   const isChanged = Boolean(cleanHandle && cleanHandle !== currentUsername.toLowerCase());
 
+  // When locked under 30-day throttle, display registered username in disabled read-only format
+  // When eligible to change, display handleInput (starts blank with placeholder="e.g. bob")
+  const displayedValue = eligibility.canChange ? handleInput : currentUsername;
+
   // Debounced real-time availability check against /api/user/check-username
   React.useEffect(() => {
     if (!isChanged) {
-      setAvailabilityResult({ checked: false, available: true });
+      setAvailabilityResult({ checked: false, available: true, isTaken: false });
       setIsChecking(false);
       return;
     }
@@ -76,6 +81,7 @@ export function UsernameReservationCard({
       setAvailabilityResult({
         checked: true,
         available: false,
+        isTaken: false, // Syntax/length error is Invalid, NOT Taken
         reason: clientValidation.error,
       });
       setIsChecking(false);
@@ -93,12 +99,14 @@ export function UsernameReservationCard({
         setAvailabilityResult({
           checked: true,
           available: Boolean(data.available),
+          isTaken: Boolean(data.isTaken),
           reason: data.reason,
         });
       } catch {
         setAvailabilityResult({
           checked: true,
           available: false,
+          isTaken: false,
           reason: "Error checking handle availability.",
         });
       } finally {
@@ -153,7 +161,7 @@ export function UsernameReservationCard({
 
       onProfileUpdated(data.profile);
       setHandleInput("");
-      setAvailabilityResult({ checked: false, available: true });
+      setAvailabilityResult({ checked: false, available: true, isTaken: false });
       setIsConfirmModalOpen(false);
       setSuccessMessage(`@${data.profile.username} is now reserved for your creator showcase!`);
       setTimeout(() => setSuccessMessage(null), 5000);
@@ -248,19 +256,26 @@ export function UsernameReservationCard({
               type="text"
               minLength={3}
               maxLength={20}
-              value={handleInput}
+              value={displayedValue}
               disabled={!eligibility.canChange}
+              readOnly={!eligibility.canChange}
               onChange={(e) => {
+                if (!eligibility.canChange) return;
                 setHandleInput(e.target.value);
                 if (errorMessage) setErrorMessage(null);
               }}
-              placeholder="e.g. bob"
-              className="w-full pl-9 pr-28 py-2.5 rounded-xl border border-brand-warm-border bg-white text-brand-dark text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-pink transition-all disabled:bg-brand-warm/30 disabled:text-brand-muted"
+              placeholder={eligibility.canChange ? "e.g. bob" : undefined}
+              className="w-full pl-9 pr-28 py-2.5 rounded-xl border border-brand-warm-border bg-white text-brand-dark text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-pink transition-all disabled:bg-brand-warm-subtle/80 disabled:text-brand-dark/80 disabled:cursor-not-allowed"
             />
 
             {/* Live Availability Badge inside input */}
-            <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center">
-              {isChecking ? (
+            <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+              {!eligibility.canChange ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
+                  <Lock className="w-3 h-3 text-amber-600" />
+                  <span>Locked</span>
+                </span>
+              ) : isChecking ? (
                 <span className="inline-flex items-center gap-1 text-[11px] text-brand-muted bg-brand-warm px-2 py-1 rounded-lg">
                   <Loader2 className="w-3 h-3 animate-spin text-brand-pink" />
                   <span>Checking...</span>
@@ -271,10 +286,15 @@ export function UsernameReservationCard({
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                     <span>Available</span>
                   </span>
-                ) : (
+                ) : availabilityResult.isTaken ? (
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">
                     <AlertCircle className="w-3 h-3 text-rose-600" />
                     <span>Taken</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
+                    <AlertCircle className="w-3 h-3 text-amber-600" />
+                    <span>Invalid</span>
                   </span>
                 )
               ) : null}
@@ -282,7 +302,13 @@ export function UsernameReservationCard({
           </div>
 
           <p className="text-[11px] text-brand-muted">
-            3–20 characters. Alphanumeric characters and underscores only.
+            {!eligibility.canChange ? (
+              <span className="text-amber-800/90 font-medium">
+                Handle is locked until {eligibility.formattedDate}. Next modification will open after 30 days.
+              </span>
+            ) : (
+              "3–20 characters. Alphanumeric characters and underscores only."
+            )}
           </p>
         </div>
 
@@ -332,7 +358,7 @@ export function UsernameReservationCard({
 
         <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-brand-warm-border text-xs font-mono text-brand-dark/90">
           <span className="text-brand-muted select-none">https://suprilo.com/@</span>
-          <span className="font-bold text-brand-pink">{cleanHandle || "username"}</span>
+          <span className="font-bold text-brand-pink">{cleanHandle || currentUsername || "username"}</span>
         </div>
 
         <div className="flex items-center gap-1.5 text-[11px] text-brand-muted pt-1">

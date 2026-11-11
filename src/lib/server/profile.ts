@@ -165,15 +165,15 @@ export async function checkUsernameAvailability(
   username: string,
   excludeUserId?: string,
   client?: SupabaseClient
-): Promise<{ available: boolean; reason?: string }> {
+): Promise<{ available: boolean; isTaken?: boolean; reason?: string }> {
   const validation = validateUsername(username);
   if (!validation.valid) {
-    return { available: false, reason: validation.error };
+    return { available: false, isTaken: false, reason: validation.error };
   }
 
   const db = client || getSupabaseAdminClient();
   if (!db) {
-    return { available: false, reason: "Database unavailable" };
+    return { available: false, isTaken: false, reason: "Database unavailable" };
   }
 
   const clean = username.trim().toLowerCase();
@@ -191,16 +191,16 @@ export async function checkUsernameAvailability(
 
   if (error) {
     if (error.code === "PGRST205") {
-      return { available: true };
+      return { available: true, isTaken: false };
     }
-    return { available: false, reason: "Error validating availability" };
+    return { available: false, isTaken: false, reason: "Error validating availability" };
   }
 
   if (data) {
-    return { available: false, reason: "Username is already taken." };
+    return { available: false, isTaken: true, reason: "Username is already taken." };
   }
 
-  return { available: true };
+  return { available: true, isTaken: false };
 }
 
 /**

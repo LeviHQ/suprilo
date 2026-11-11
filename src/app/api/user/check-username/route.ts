@@ -34,6 +34,7 @@ export async function GET(request: Request) {
       {
         success: true,
         available: result.available,
+        isTaken: Boolean(result.isTaken),
         reason: result.reason,
         username: username.trim().toLowerCase(),
       },
