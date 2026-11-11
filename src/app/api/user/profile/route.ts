@@ -218,14 +218,15 @@ export async function PATCH(request: Request) {
       metadataUpdates.custom_avatar_source = "google";
       metadataUpdates.avatar_source = "google";
       metadataUpdates.custom_avatar = false;
-      metadataUpdates.custom_avatar_url = null;
+      metadataUpdates.custom_avatar_url = googlePicture;
       metadataUpdates.avatar_url = googlePicture;
 
       updates.avatar_type = "google";
       updates.avatar_preset_id = null;
-      updates.custom_avatar_url = null;
+      updates.custom_avatar_url = googlePicture;
       updates.avatar_source = "google";
     } else if (targetAvatarType === "preset") {
+      const presetPath = targetPresetId ? `/avatars/presets/${targetPresetId}.svg` : null;
       metadataUpdates.custom_avatar_type = "preset";
       metadataUpdates.avatar_type = "preset";
       metadataUpdates.custom_avatar_preset_id = targetPresetId;
@@ -233,12 +234,12 @@ export async function PATCH(request: Request) {
       metadataUpdates.custom_avatar_source = "manual";
       metadataUpdates.avatar_source = "manual";
       metadataUpdates.custom_avatar = true;
-      metadataUpdates.custom_avatar_url = null;
-      metadataUpdates.avatar_url = targetPresetId ? `/avatars/presets/${targetPresetId}.svg` : null;
+      metadataUpdates.custom_avatar_url = presetPath;
+      metadataUpdates.avatar_url = presetPath;
 
       updates.avatar_type = "preset";
       updates.avatar_preset_id = targetPresetId;
-      updates.custom_avatar_url = null;
+      updates.custom_avatar_url = presetPath;
       updates.avatar_source = "manual";
     } else if (targetAvatarType === "custom") {
       metadataUpdates.custom_avatar_type = "custom";

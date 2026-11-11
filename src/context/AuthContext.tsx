@@ -371,6 +371,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = React.useCallback(async () => {
     try {
       const supabaseClient = createClient();
+      await supabaseClient.auth.refreshSession();
       const {
         data: { user: latestUser },
       } = await supabaseClient.auth.getUser();

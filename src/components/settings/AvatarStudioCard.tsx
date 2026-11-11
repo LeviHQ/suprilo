@@ -63,6 +63,9 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
 
   // Authentic Google OAuth photo URL (never falls back to preset paths)
   const googlePhotoUrl =
+    (profile?.avatar_type === "google" && profile.custom_avatar_url && !profile.custom_avatar_url.startsWith("/avatars/")
+      ? profile.custom_avatar_url
+      : null) ||
     user?.googlePhotoURL ||
     (typeof user?.photoURL === "string" && !user.photoURL.startsWith("/avatars/") ? user.photoURL : null) ||
     (user?.metadata as Record<string, unknown>)?.picture as string ||
@@ -122,6 +125,14 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
       }
 
       onProfileUpdated(data.profile);
+      const finalResolvedUrl =
+        data.profile.avatar_type === "google"
+          ? (data.profile.custom_avatar_url || googlePhotoUrl)
+          : data.profile.avatar_type === "preset" && data.profile.avatar_preset_id
+          ? `/avatars/presets/${data.profile.avatar_preset_id}.svg`
+          : data.profile.custom_avatar_url;
+
+      setOptimisticProfile({ photoURL: finalResolvedUrl });
       if (typeof refreshUser === "function") {
         await refreshUser();
       }
