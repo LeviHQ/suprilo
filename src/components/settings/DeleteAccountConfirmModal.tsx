@@ -9,6 +9,8 @@ import {
   Loader2,
   AlertCircle,
   ShieldAlert,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
@@ -31,6 +33,34 @@ export function DeleteAccountConfirmModal({
   const [inputDelete, setInputDelete] = React.useState("");
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [copiedName, setCopiedName] = React.useState(false);
+  const [copiedDelete, setCopiedDelete] = React.useState(false);
+
+  const handleCopy = async (text: string, type: "name" | "delete") => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      if (type === "name") {
+        setCopiedName(true);
+        setTimeout(() => setCopiedName(false), 2000);
+      } else {
+        setCopiedDelete(true);
+        setTimeout(() => setCopiedDelete(false), 2000);
+      }
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
 
   // Reset inputs on open/close
   React.useEffect(() => {
@@ -39,6 +69,8 @@ export function DeleteAccountConfirmModal({
       setInputDelete("");
       setErrorMessage(null);
       setIsDeleting(false);
+      setCopiedName(false);
+      setCopiedDelete(false);
     }
   }, [isOpen]);
 
@@ -166,9 +198,29 @@ export function DeleteAccountConfirmModal({
         <form onSubmit={handleDeleteAccount} className="space-y-4">
           {/* Step 1: Current Creator Display Name */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-brand-dark">
-              1. Type your creator name <span className="font-mono text-rose-600 font-bold select-all">&ldquo;{expectedDisplayName}&rdquo;</span> to confirm:
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="block text-xs font-bold text-brand-dark">
+                1. Type your creator name <span className="font-mono text-rose-600 font-bold select-all">&ldquo;{expectedDisplayName}&rdquo;</span> to confirm:
+              </label>
+              <button
+                type="button"
+                onClick={() => handleCopy(expectedDisplayName, "name")}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 hover:border-rose-300 transition-colors shrink-0 active:scale-95 cursor-pointer"
+                title="Copy creator name"
+              >
+                {copiedName ? (
+                  <>
+                    <Check className="w-3 h-3 text-emerald-600" />
+                    <span className="text-emerald-700 font-bold">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3 text-rose-600" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
             <input
               type="text"
               value={inputName}
@@ -181,9 +233,29 @@ export function DeleteAccountConfirmModal({
 
           {/* Step 2: Confirmation Word "DELETE" */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-brand-dark">
-              2. Type <span className="font-mono text-rose-600 font-bold select-all">&ldquo;DELETE&rdquo;</span> in uppercase:
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="block text-xs font-bold text-brand-dark">
+                2. Type <span className="font-mono text-rose-600 font-bold select-all">&ldquo;DELETE&rdquo;</span> in uppercase:
+              </label>
+              <button
+                type="button"
+                onClick={() => handleCopy("DELETE", "delete")}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 hover:border-rose-300 transition-colors shrink-0 active:scale-95 cursor-pointer"
+                title="Copy DELETE"
+              >
+                {copiedDelete ? (
+                  <>
+                    <Check className="w-3 h-3 text-emerald-600" />
+                    <span className="text-emerald-700 font-bold">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3 text-rose-600" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
             <input
               type="text"
               value={inputDelete}
@@ -212,7 +284,7 @@ export function DeleteAccountConfirmModal({
               variant="secondary"
               size="md"
               disabled={!canSubmit}
-              className="flex-1 justify-center gap-2 text-xs bg-rose-600 text-white hover:bg-rose-700 border-transparent shadow-md disabled:bg-neutral-200 disabled:text-neutral-400"
+              className="flex-1 justify-center gap-2 text-xs border transition-all duration-150 bg-rose-600 text-white hover:bg-rose-700 border-rose-600 shadow-md active:bg-rose-800 disabled:opacity-100 disabled:bg-rose-50 disabled:text-rose-500 disabled:border-rose-200 disabled:shadow-none disabled:cursor-not-allowed"
             >
               {isDeleting ? (
                 <>

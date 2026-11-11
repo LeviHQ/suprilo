@@ -313,9 +313,11 @@ The following systems are verified as fully operational and **must be preserved 
 #### E1. Dual-Input Account Deletion Confirmation
 - **Classification:** `NEW — IMPLEMENT NOW`
 - **Modal Mechanics:**
-  - Input 1: Exact current `displayName` (case-sensitive check against authoritative user state).
-  - Input 2: Literal confirmation text `DELETE` (uppercase).
-  - Button state: Permanently disabled until both fields strictly match.
+  - Input 1: Exact current `displayName` (case-sensitive check against authoritative user state). Includes 1-click **Copy button** with clipboard write and instant visual feedback (`Copied` badge with `Check` icon).
+  - Input 2: Literal confirmation text `DELETE` (uppercase). Includes 1-click **Copy button** with clipboard write and instant visual feedback (`Copied` badge with `Check` icon).
+  - Button state & styling:
+    - **Disabled mode:** Explicitly styled with high contrast (`disabled:opacity-100 disabled:bg-rose-50 disabled:text-rose-500 disabled:border-rose-200 disabled:cursor-not-allowed`) ensuring crisp button boundaries, legible text, and visible trash icon while strictly preventing premature execution.
+    - **Enabled mode:** Transitions into solid danger crimson (`bg-rose-600 text-white hover:bg-rose-700 border-rose-600 shadow-md`) when both inputs strictly match.
 
 #### E2. Irreversible Account Deletion Orchestration
 - **Classification:** `NEW — IMPLEMENT NOW`
