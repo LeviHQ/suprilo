@@ -160,8 +160,14 @@ The following systems are verified as fully operational and **must be preserved 
     `admin`, `administrator`, `api`, `app`, `auth`, `billing`, `card`, `cards`, `create`, `creator`, `dashboard`, `delete`, `dev`, `developer`, `edit`, `explore`, `export`, `feed`, `feedback`, `help`, `home`, `legal`, `login`, `logout`, `new`, `notification`, `notifications`, `null`, `privacy`, `profile`, `root`, `security`, `settings`, `signin`, `signout`, `signup`, `status`, `studio`, `suprilo`, `support`, `system`, `team`, `terms`, `undefined`, `user`, `users`, `webhook`, `webhooks`.
     - When a user enters any reserved handle, the inline badge displays **`Reserved`** in purple, and the error clearly explains: *"This username is reserved by the platform. Please choose another."*
 - **Form Input & Interaction Architecture (Senior Dev Standard):**
+  - **Initial State for New & Existing Creators:**
+    - The input field is initialized with the creator's authoritative username (e.g. `adarshmishra709`), and the Public Showcase URL immediately displays `https://suprilo.com/@adarshmishra709`.
+  - **Clearing Behavior & Fallback Placeholders:**
+    - If the user clears the field completely, the input shows placeholder `bob`, and the Public Showcase URL gracefully falls back to `https://suprilo.com/@username`.
+  - **Validation & Leaving Unfilled:**
+    - If the user clears the field and attempts to blur or leave without filling it, the input borders highlight in red (`border-rose-400 focus:ring-rose-400`) and an inline validation error appears: *"Username is required."*
+    - The `"Reserve Handle"` button remains disabled while empty or unchanged.
   - **Locked Cooldown State (30-Day Limit Active):** When `!eligibility.canChange`, the input displays the user's active registered username in **disabled read-only format** with an inline `Locked` indicator. The generic placeholder is suppressed so the user clearly sees their confirmed handle throughout the 30-day cooldown period.
-  - **Eligible State (Ready to Change / Initial Setup):** When `eligibility.canChange` is true, the input starts blank with `placeholder="e.g. bob"`, allowing creators to directly click and type without backspacing existing text.
   - **Single Focused Action:** Presents a single, high-contrast `"Reserve Handle"` button without cluttering secondary controls.
   - **Live Availability Checking:** Debounced (350ms) client lookup against `GET /api/user/check-username?username=...`. Activates when typing a new candidate handle.
   - **Strict Status Badges & Error Differentiation:**

@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import {
   CreatorProfile,
   validateUsername,
@@ -30,12 +31,16 @@ export function UsernameReservationCard({
   onProfileUpdated,
 }: UsernameReservationCardProps) {
   const currentUsername = profile?.username || "";
-  const [handleInput, setHandleInput] = React.useState("");
+  const [handleInput, setHandleInput] = React.useState(profile?.username || "");
+  const [isDirty, setIsDirty] = React.useState(false);
+  const [isTouched, setIsTouched] = React.useState(false);
 
-  // Keep input empty on profile updates so user can type a new handle directly
+  // Sync handleInput with authoritative profile username when loaded/updated (unless user has dirty edits)
   React.useEffect(() => {
-    setHandleInput("");
-  }, [profile?.username]);
+    if (profile?.username && !isDirty) {
+      setHandleInput(profile.username);
+    }
+  }, [profile?.username, isDirty]);
 
   // Real-time availability check state
   const [isChecking, setIsChecking] = React.useState(false);
@@ -63,15 +68,18 @@ export function UsernameReservationCard({
 
   const cleanHandle = handleInput.trim().toLowerCase();
   const isChanged = Boolean(cleanHandle && cleanHandle !== currentUsername.toLowerCase());
+  const isRequiredError = isTouched && cleanHandle === "";
 
   // When locked under 30-day throttle, display registered username in disabled read-only format
-  // When eligible to change, display handleInput (starts blank with placeholder="e.g. bob")
+  // When eligible to change, display handleInput (initialized to default username)
   const displayedValue = eligibility.canChange ? handleInput : currentUsername;
 
-  // Showcase handle: when locked, shows registered handle; when eligible, shows candidate input or "username" placeholder
-  const displayedShowcaseHandle = eligibility.canChange
-    ? (cleanHandle || "username")
-    : (currentUsername || cleanHandle || "username");
+  // Showcase handle:
+  // - When locked: shows current registered handle
+  // - When eligible: shows cleanHandle (starts as default username, or falls back to "username" if cleared)
+  const displayedShowcaseHandle = !eligibility.canChange
+    ? (currentUsername || "username")
+    : (cleanHandle || "username");
 
   // Debounced real-time availability check against /api/user/check-username
   React.useEffect(() => {
@@ -130,8 +138,14 @@ export function UsernameReservationCard({
   // Handle Form Submit -> opens confirmation modal
   const handleInitiateChange = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsTouched(true);
     if (!eligibility.canChange) {
       setErrorMessage(`Handle changes are locked. You can change again after ${eligibility.formattedDate}.`);
+      return;
+    }
+
+    if (!cleanHandle) {
+      setErrorMessage("Username is required.");
       return;
     }
 
@@ -170,7 +184,9 @@ export function UsernameReservationCard({
       }
 
       onProfileUpdated(data.profile);
-      setHandleInput("");
+      setHandleInput(data.profile.username);
+      setIsDirty(false);
+      setIsTouched(false);
       setAvailabilityResult({ checked: false, available: true, isTaken: false });
       setIsConfirmModalOpen(false);
       setSuccessMessage(`@${data.profile.username} is now reserved for your creator showcase!`);
@@ -269,15 +285,24 @@ export function UsernameReservationCard({
               value={displayedValue}
               disabled={!eligibility.canChange}
               readOnly={!eligibility.canChange}
+              onBlur={() => {
+                setIsTouched(true);
+              }}
               onChange={(e) => {
                 if (!eligibility.canChange) return;
+                setIsDirty(true);
                 // Strict input sanitization: allow only lowercase letters, digits, and underscores
                 const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
                 setHandleInput(sanitized);
                 if (errorMessage) setErrorMessage(null);
               }}
-              placeholder={eligibility.canChange ? "e.g. bob" : undefined}
-              className="w-full pl-9 pr-28 py-2.5 rounded-xl border border-brand-warm-border bg-white text-brand-dark text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-pink transition-all disabled:bg-brand-warm-subtle/80 disabled:text-brand-dark/80 disabled:cursor-not-allowed"
+              placeholder={eligibility.canChange ? "bob" : undefined}
+              className={cn(
+                "w-full pl-9 pr-28 py-2.5 rounded-xl border bg-white text-brand-dark text-sm font-mono focus:outline-none focus:ring-2 transition-all disabled:bg-brand-warm-subtle/80 disabled:text-brand-dark/80 disabled:cursor-not-allowed",
+                isRequiredError
+                  ? "border-rose-400 focus:ring-rose-400 focus:border-rose-400"
+                  : "border-brand-warm-border focus:ring-brand-pink"
+              )}
             />
 
             {/* Live Availability Badge inside input */}
@@ -329,13 +354,18 @@ export function UsernameReservationCard({
           </p>
         </div>
 
-        {/* Validation Error Message */}
-        {isChanged && availabilityResult.checked && !availabilityResult.available && (
-          <p className="text-xs text-rose-600 font-medium flex items-center gap-1.5">
+        {/* Validation / Required Error Message */}
+        {isRequiredError ? (
+          <p className="text-xs text-rose-600 font-medium flex items-center gap-1.5 animate-in fade-in duration-150">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <span>Username is required.</span>
+          </p>
+        ) : isChanged && availabilityResult.checked && !availabilityResult.available ? (
+          <p className="text-xs text-rose-600 font-medium flex items-center gap-1.5 animate-in fade-in duration-150">
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span>{availabilityResult.reason || "Username is not available."}</span>
           </p>
-        )}
+        ) : null}
 
         <div className="pt-2">
           <Button
@@ -347,7 +377,8 @@ export function UsernameReservationCard({
               !isChanged ||
               isChecking ||
               !availabilityResult.available ||
-              isSubmitting
+              isSubmitting ||
+              !cleanHandle
             }
             className="text-xs gap-1.5 shadow-md"
           >
