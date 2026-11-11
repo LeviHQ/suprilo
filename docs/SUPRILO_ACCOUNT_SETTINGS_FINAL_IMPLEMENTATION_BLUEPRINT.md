@@ -1,6 +1,6 @@
 # SUPRILO — ACCOUNT SETTINGS: FINAL IMPLEMENTATION BLUEPRINT
 
-**Document Version:** 1.3.0-PROD-BLUEPRINT  
+**Document Version:** 1.4.0-PROD-BLUEPRINT  
 **Target Specification:** SPEC-2C-5.8.0-ACCOUNT-SETTINGS  
 **Project:** Suprilo — Scratch Card Maker  
 **Canonical Document Location:** `docs/SUPRILO_ACCOUNT_SETTINGS_FINAL_IMPLEMENTATION_BLUEPRINT.md`  
@@ -142,11 +142,14 @@ The following systems are verified as fully operational and **must be preserved 
   - Sanitize characters (`[^a-zA-Z0-9_]`).
   - Ensure length 3–20 characters. If `< 3` chars, prefix with `creator_`.
   - Verify database uniqueness. If taken, append random 3-digit number (e.g. `adarshm_482`).
-- **Validation Rules:**
+- **Validation Rules & Character Sanitization:**
   - Length: 3 to 20 characters.
   - Characters: alphanumeric and underscores only (`^[a-zA-Z0-9_]{3,20}$`). No spaces, no hyphens, no symbols.
-  - Case-insensitive uniqueness enforced via database constraint `UNIQUE (LOWER(username))`.
-  - Reserved system usernames rejected: `admin`, `api`, `suprilo`, `support`, `settings`, `profile`, `card`, `auth`, `null`, `undefined`, `help`, `billing`, `root`, `studio`, `create`, `system`, `legal`, `terms`, `privacy`, `explore`.
+  - **Strict Client-Side Keystroke Sanitization:** Input automatically filters out non-alphanumeric/non-underscore characters on typing/pasting (`replace(/[^a-z0-9_]/g, '')`), making it impossible to submit special symbols like `%`, `@`, `#`, `!`, or whitespace.
+  - Case-insensitive uniqueness enforced via database constraint `UNIQUE (LOWER(username))` AND authoritative multi-account verification against `auth.users` metadata.
+  - **Platform Reserved Handles (48 Words):**
+    `admin`, `administrator`, `api`, `app`, `auth`, `billing`, `card`, `cards`, `create`, `creator`, `dashboard`, `delete`, `dev`, `developer`, `edit`, `explore`, `export`, `feed`, `feedback`, `help`, `home`, `legal`, `login`, `logout`, `new`, `notification`, `notifications`, `null`, `privacy`, `profile`, `root`, `security`, `settings`, `signin`, `signout`, `signup`, `status`, `studio`, `suprilo`, `support`, `system`, `team`, `terms`, `undefined`, `user`, `users`, `webhook`, `webhooks`.
+    - When a user enters any reserved handle, the inline badge displays **`Reserved`** in purple, and the error clearly explains: *"This username is reserved by the platform. Please choose another."*
 - **Form Input & Interaction Architecture (Senior Dev Standard):**
   - **Locked Cooldown State (30-Day Limit Active):** When `!eligibility.canChange`, the input displays the user's active registered username in **disabled read-only format** with an inline `Locked` indicator. The generic placeholder is suppressed so the user clearly sees their confirmed handle throughout the 30-day cooldown period.
   - **Eligible State (Ready to Change / Initial Setup):** When `eligibility.canChange` is true, the input starts blank with `placeholder="e.g. bob"`, allowing creators to directly click and type without backspacing existing text.
@@ -154,8 +157,9 @@ The following systems are verified as fully operational and **must be preserved 
   - **Live Availability Checking:** Debounced (350ms) client lookup against `GET /api/user/check-username?username=...`. Activates when typing a new candidate handle.
   - **Strict Status Badges & Error Differentiation:**
     - `Available` (Emerald): The handle is valid and available for reservation.
-    - `Taken` (Rose): **ONLY displayed when the candidate handle is already claimed by another creator in the database.**
-    - `Invalid` (Amber): Displayed when the input violates validation rules (fewer than 3 characters, invalid characters, spaces, or platform reserved handles). Short inputs (e.g. 1 or 2 characters) explicitly display **`Invalid`**, never `Taken`.
+    - `Reserved` (Purple): The handle is a reserved platform keyword. Rejection reason: *"This username is reserved by the platform. Please choose another."*
+    - `Taken` (Rose): **ONLY displayed when the candidate handle is already claimed by another creator in the database or auth accounts.**
+    - `Invalid` (Amber): Displayed when the input violates validation rules (fewer than 3 characters). Short inputs (e.g. 1 or 2 characters) explicitly display **`Invalid`**, never `Taken`.
     - `Checking...` (Brand Warm): Real-time spinner during network lookups.
 - **30-Day Change Restriction & Lock Modal:**
   - Tracked via `public.profiles.username_updated_at`.
@@ -163,7 +167,7 @@ The following systems are verified as fully operational and **must be preserved 
   - Confirmation Modal: Before persisting, an explicit confirmation dialog compares `@current` with `@new` and enforces the commitment: *"Changing your handle to @[username] will lock it for 30 days. You will not be able to change it again until [Formatted Date]. Do you want to proceed?"*
   - On failure, previous username remains intact.
 - **Future Purpose Indicator:**
-  - Tasteful roadmap preview: *"Public Showcase URL (Coming Soon): https://suprilo.com/@[username]"*.
+  - Tasteful roadmap preview: *"Public Showcase URL (Coming Soon): https://suprilo.com/@[username]"*. When the input is blank, it defaults to displaying `https://suprilo.com/@username`.
   - Public profile routes (`/@username`) remain locked and NOT implemented.
 - **Notification Coverage:**
   - Toast: *"Handle @[username] successfully reserved!"*

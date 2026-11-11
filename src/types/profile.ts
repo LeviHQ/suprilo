@@ -203,7 +203,7 @@ export function validateUsername(username: string): { valid: boolean; error?: st
   }
 
   if (RESERVED_USERNAMES.has(clean)) {
-    return { valid: false, error: "This username is reserved by the platform." };
+    return { valid: false, error: "This username is reserved by the platform. Please choose another." };
   }
 
   return { valid: true };

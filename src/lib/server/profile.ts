@@ -159,25 +159,26 @@ export async function getOrCreateCreatorProfile(
 
 /**
  * Checks if a candidate username is available.
- * Case-insensitive comparison against public.profiles and system reserved handles.
+ * Case-insensitive comparison against public.profiles, auth.users metadata, and system reserved handles.
  */
 export async function checkUsernameAvailability(
   username: string,
   excludeUserId?: string,
   client?: SupabaseClient
-): Promise<{ available: boolean; isTaken?: boolean; reason?: string }> {
-  const validation = validateUsername(username);
+): Promise<{ available: boolean; isTaken?: boolean; isReserved?: boolean; reason?: string }> {
+  const clean = username.trim().toLowerCase();
+  const validation = validateUsername(clean);
   if (!validation.valid) {
-    return { available: false, isTaken: false, reason: validation.error };
+    const isReserved = validation.error?.includes("reserved by the platform") || false;
+    return { available: false, isTaken: false, isReserved, reason: validation.error };
   }
 
   const db = client || getSupabaseAdminClient();
   if (!db) {
-    return { available: false, isTaken: false, reason: "Database unavailable" };
+    return { available: false, isTaken: false, isReserved: false, reason: "Database unavailable" };
   }
 
-  const clean = username.trim().toLowerCase();
-
+  // 1. Check public.profiles table (when created)
   let query = db
     .from("profiles")
     .select("user_id")
@@ -189,18 +190,37 @@ export async function checkUsernameAvailability(
 
   const { data, error } = await query.maybeSingle();
 
-  if (error) {
-    if (error.code === "PGRST205") {
-      return { available: true, isTaken: false };
-    }
-    return { available: false, isTaken: false, reason: "Error validating availability" };
-  }
-
   if (data) {
-    return { available: false, isTaken: true, reason: "Username is already taken." };
+    return { available: false, isTaken: true, isReserved: false, reason: "Username is already taken." };
   }
 
-  return { available: true, isTaken: false };
+  // 2. Authoritative check across all accounts in Supabase Auth (auth.users)
+  const adminClient = getSupabaseAdminClient();
+  if (adminClient) {
+    try {
+      const { data: authUsers } = await adminClient.auth.admin.listUsers();
+      if (authUsers?.users) {
+        const takenUser = authUsers.users.find((u) => {
+          if (u.id === excludeUserId) return false;
+          const uMeta = u.user_metadata || {};
+          const uName = typeof uMeta.username === "string" ? uMeta.username.trim().toLowerCase() : "";
+          return uName === clean;
+        });
+
+        if (takenUser) {
+          return { available: false, isTaken: true, isReserved: false, reason: "Username is already taken." };
+        }
+      }
+    } catch {
+      // Graceful fallback
+    }
+  }
+
+  if (error && error.code !== "PGRST205") {
+    return { available: false, isTaken: false, isReserved: false, reason: "Error validating availability" };
+  }
+
+  return { available: true, isTaken: false, isReserved: false };
 }
 
 /**

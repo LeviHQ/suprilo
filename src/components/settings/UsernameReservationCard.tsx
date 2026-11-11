@@ -43,8 +43,9 @@ export function UsernameReservationCard({
     checked: boolean;
     available: boolean;
     isTaken?: boolean;
+    isReserved?: boolean;
     reason?: string;
-  }>({ checked: false, available: true, isTaken: false });
+  }>({ checked: false, available: true, isTaken: false, isReserved: false });
 
   // Confirmation modal state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
@@ -70,7 +71,7 @@ export function UsernameReservationCard({
   // Debounced real-time availability check against /api/user/check-username
   React.useEffect(() => {
     if (!isChanged) {
-      setAvailabilityResult({ checked: false, available: true, isTaken: false });
+      setAvailabilityResult({ checked: false, available: true, isTaken: false, isReserved: false });
       setIsChecking(false);
       return;
     }
@@ -78,10 +79,12 @@ export function UsernameReservationCard({
     // Client-side quick syntax validation first
     const clientValidation = validateUsername(cleanHandle);
     if (!clientValidation.valid) {
+      const isReserved = clientValidation.error?.includes("reserved by the platform") || false;
       setAvailabilityResult({
         checked: true,
         available: false,
-        isTaken: false, // Syntax/length error is Invalid, NOT Taken
+        isTaken: false,
+        isReserved,
         reason: clientValidation.error,
       });
       setIsChecking(false);
@@ -100,6 +103,7 @@ export function UsernameReservationCard({
           checked: true,
           available: Boolean(data.available),
           isTaken: Boolean(data.isTaken),
+          isReserved: Boolean(data.isReserved),
           reason: data.reason,
         });
       } catch {
@@ -107,6 +111,7 @@ export function UsernameReservationCard({
           checked: true,
           available: false,
           isTaken: false,
+          isReserved: false,
           reason: "Error checking handle availability.",
         });
       } finally {
@@ -261,7 +266,9 @@ export function UsernameReservationCard({
               readOnly={!eligibility.canChange}
               onChange={(e) => {
                 if (!eligibility.canChange) return;
-                setHandleInput(e.target.value);
+                // Strict input sanitization: allow only lowercase letters, digits, and underscores
+                const sanitized = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+                setHandleInput(sanitized);
                 if (errorMessage) setErrorMessage(null);
               }}
               placeholder={eligibility.canChange ? "e.g. bob" : undefined}
@@ -285,6 +292,11 @@ export function UsernameReservationCard({
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                     <span>Available</span>
+                  </span>
+                ) : availabilityResult.isReserved ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded-lg border border-purple-200">
+                    <AlertCircle className="w-3 h-3 text-purple-600" />
+                    <span>Reserved</span>
                   </span>
                 ) : availabilityResult.isTaken ? (
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">
@@ -358,7 +370,7 @@ export function UsernameReservationCard({
 
         <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-brand-warm-border text-xs font-mono text-brand-dark/90">
           <span className="text-brand-muted select-none">https://suprilo.com/@</span>
-          <span className="font-bold text-brand-pink">{cleanHandle || currentUsername || "username"}</span>
+          <span className="font-bold text-brand-pink">{cleanHandle || "username"}</span>
         </div>
 
         <div className="flex items-center gap-1.5 text-[11px] text-brand-muted pt-1">
