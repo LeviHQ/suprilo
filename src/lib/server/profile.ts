@@ -80,20 +80,6 @@ export async function getOrCreateCreatorProfile(
   const avatarType = (userMeta.custom_avatar_type as AvatarType) || (userMeta.avatar_type as AvatarType) || (isManualAvatar ? "custom" : "google");
   const avatarPresetId = (userMeta.custom_avatar_preset_id as PresetAvatarId) || (userMeta.avatar_preset_id as PresetAvatarId) || null;
 
-  let photoURL: string | null = null;
-  if (avatarType === "preset" && avatarPresetId) {
-    photoURL = `/avatars/presets/${avatarPresetId}.svg`;
-  } else if (avatarType === "custom" && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
-    photoURL = userMeta.custom_avatar_url;
-  } else if (isManualAvatar && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
-    photoURL = userMeta.custom_avatar_url;
-  } else {
-    photoURL =
-      (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
-      (typeof userMeta.picture === "string" && userMeta.picture) ||
-      null;
-  }
-
   // Generate safe default username via RPC or fallback
   let initialUsername = (typeof userMeta.username === "string" && userMeta.username) || email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "").slice(0, 7);
   if (initialUsername.length < 3) {
