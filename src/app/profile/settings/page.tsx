@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 import { mutateCache } from "@/lib/client/db-cache";
 
 export default function AccountSettingsPage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [profile, setProfile] = React.useState<CreatorProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = React.useState<boolean>(true);
 
@@ -70,12 +70,15 @@ export default function AccountSettingsPage() {
     }
   }, [isLoadingProfile]);
 
-  const handleProfileUpdated = React.useCallback((updated: CreatorProfile) => {
+  const handleProfileUpdated = React.useCallback(async (updated: CreatorProfile) => {
     setProfile(updated);
     if (user?.id) {
       mutateCache(`profile:${user.id}`, updated);
     }
-  }, [user?.id]);
+    if (typeof refreshUser === "function") {
+      await refreshUser();
+    }
+  }, [user?.id, refreshUser]);
 
   if (!user) return null;
 

@@ -12,6 +12,7 @@ export interface SupriloUser {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
+  googlePhotoURL?: string | null;
   bio?: string | null;
   isGoogleVerified?: boolean;
   metadata: {
@@ -29,6 +30,16 @@ export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | 
 
   const userMeta = user.user_metadata || {};
 
+  // Resolve authentic Google OAuth photo URL (never polluted by preset paths)
+  const googlePhotoURL =
+    (typeof userMeta.picture === "string" && userMeta.picture) ||
+    (typeof userMeta.avatar_url === "string" && !userMeta.avatar_url.startsWith("/avatars/") && userMeta.avatar_url) ||
+    (typeof user.identities?.find((id) => id.provider === "google")?.identity_data?.picture === "string" &&
+      (user.identities?.find((id) => id.provider === "google")?.identity_data?.picture as string)) ||
+    (typeof user.identities?.find((id) => id.provider === "google")?.identity_data?.avatar_url === "string" &&
+      (user.identities?.find((id) => id.provider === "google")?.identity_data?.avatar_url as string)) ||
+    null;
+
   // Resolve display name: custom_display_name takes absolute precedence over Google OAuth defaults
   const displayName =
     (typeof userMeta.custom_display_name === "string" && userMeta.custom_display_name.trim()) ||
@@ -42,20 +53,18 @@ export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | 
   // Resolve avatar URL: preset or custom avatar takes absolute precedence over Google OAuth picture
   const avatarType = (userMeta.custom_avatar_type || userMeta.avatar_type) as string | undefined;
   const presetId = (userMeta.custom_avatar_preset_id || userMeta.avatar_preset_id) as string | undefined;
-  const isCustomAvatar = userMeta.custom_avatar === true || userMeta.avatar_source === "manual" || userMeta.custom_avatar_source === "manual";
 
   let photoURL: string | null = null;
   if (avatarType === "preset" && presetId) {
     photoURL = `/avatars/presets/${presetId}.svg`;
   } else if (avatarType === "custom" && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
     photoURL = userMeta.custom_avatar_url;
-  } else if (isCustomAvatar && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
+  } else if (avatarType === "google") {
+    photoURL = googlePhotoURL;
+  } else if (userMeta.custom_avatar === true && typeof userMeta.custom_avatar_url === "string" && userMeta.custom_avatar_url) {
     photoURL = userMeta.custom_avatar_url;
   } else {
-    photoURL =
-      (typeof userMeta.avatar_url === "string" && userMeta.avatar_url) ||
-      (typeof userMeta.picture === "string" && userMeta.picture) ||
-      null;
+    photoURL = googlePhotoURL || (typeof userMeta.avatar_url === "string" && !userMeta.avatar_url.startsWith("/avatars/") ? userMeta.avatar_url : null);
   }
 
   // Resolve creator bio: custom_bio takes absolute precedence

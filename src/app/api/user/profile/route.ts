@@ -7,7 +7,7 @@ import {
   notifyBioUpdated,
   notifyAvatarUpdated,
 } from "@/lib/server/settings-notifications";
-import { CreatorProfile, AvatarType, AvatarSource, PresetAvatarId, getResolvedAvatarUrl } from "@/types/profile";
+import { CreatorProfile, AvatarType, AvatarSource, PresetAvatarId } from "@/types/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -185,6 +185,23 @@ export async function PATCH(request: Request) {
     }
 
     // 3. Resolve and protect Avatar
+    const userMeta = authResult.user.user_metadata || {};
+    const rawUser = authResult.user as unknown as Record<string, unknown>;
+    const identities = Array.isArray(rawUser.identities) ? (rawUser.identities as Array<{ provider?: string; identity_data?: Record<string, unknown> }>) : [];
+    const googleIdentity = identities.find((id) => id.provider === "google");
+    const googlePicture =
+      (typeof userMeta.picture === "string" && userMeta.picture) ||
+      (typeof userMeta.avatar_url === "string" && !userMeta.avatar_url.startsWith("/avatars/")
+        ? (userMeta.avatar_url as string)
+        : null) ||
+      (typeof googleIdentity?.identity_data?.picture === "string"
+        ? (googleIdentity.identity_data.picture as string)
+        : null) ||
+      (typeof googleIdentity?.identity_data?.avatar_url === "string"
+        ? (googleIdentity.identity_data.avatar_url as string)
+        : null) ||
+      null;
+
     const targetAvatarType = (updates.avatar_type as AvatarType) || currentProfile.avatar_type || "google";
     const targetPresetId = "avatar_preset_id" in updates
       ? (updates.avatar_preset_id as PresetAvatarId | null)
@@ -192,34 +209,52 @@ export async function PATCH(request: Request) {
     const targetCustomUrl = "custom_avatar_url" in updates
       ? (updates.custom_avatar_url as string | null)
       : currentProfile.custom_avatar_url;
-    const targetAvatarSource = (updates.avatar_source as AvatarSource) || currentProfile.avatar_source || (targetAvatarType === "google" ? "google" : "manual");
 
-    metadataUpdates.custom_avatar_type = targetAvatarType;
-    metadataUpdates.avatar_type = targetAvatarType;
-    metadataUpdates.custom_avatar_preset_id = targetPresetId;
-    metadataUpdates.avatar_preset_id = targetPresetId;
-    metadataUpdates.custom_avatar_source = targetAvatarSource;
-    metadataUpdates.avatar_source = targetAvatarSource;
-    metadataUpdates.custom_avatar = targetAvatarType !== "google";
-
-    const resolvedAvatarUrl = getResolvedAvatarUrl(
-      {
-        avatar_type: targetAvatarType,
-        avatar_preset_id: targetPresetId,
-        custom_avatar_url: targetCustomUrl,
-      },
-      (authResult.user.user_metadata?.avatar_url as string) ||
-      (authResult.user.user_metadata?.picture as string) ||
-      null
-    );
-
-    metadataUpdates.avatar_url = resolvedAvatarUrl;
-    if (targetAvatarType === "custom") {
-      metadataUpdates.custom_avatar_url = targetCustomUrl;
-    } else if (targetAvatarType === "preset" && targetPresetId) {
-      metadataUpdates.custom_avatar_url = `/avatars/presets/${targetPresetId}.svg`;
-    } else {
+    if (targetAvatarType === "google") {
+      metadataUpdates.custom_avatar_type = "google";
+      metadataUpdates.avatar_type = "google";
+      metadataUpdates.custom_avatar_preset_id = null;
+      metadataUpdates.avatar_preset_id = null;
+      metadataUpdates.custom_avatar_source = "google";
+      metadataUpdates.avatar_source = "google";
+      metadataUpdates.custom_avatar = false;
       metadataUpdates.custom_avatar_url = null;
+      metadataUpdates.avatar_url = googlePicture;
+
+      updates.avatar_type = "google";
+      updates.avatar_preset_id = null;
+      updates.custom_avatar_url = null;
+      updates.avatar_source = "google";
+    } else if (targetAvatarType === "preset") {
+      metadataUpdates.custom_avatar_type = "preset";
+      metadataUpdates.avatar_type = "preset";
+      metadataUpdates.custom_avatar_preset_id = targetPresetId;
+      metadataUpdates.avatar_preset_id = targetPresetId;
+      metadataUpdates.custom_avatar_source = "manual";
+      metadataUpdates.avatar_source = "manual";
+      metadataUpdates.custom_avatar = true;
+      metadataUpdates.custom_avatar_url = null;
+      metadataUpdates.avatar_url = targetPresetId ? `/avatars/presets/${targetPresetId}.svg` : null;
+
+      updates.avatar_type = "preset";
+      updates.avatar_preset_id = targetPresetId;
+      updates.custom_avatar_url = null;
+      updates.avatar_source = "manual";
+    } else if (targetAvatarType === "custom") {
+      metadataUpdates.custom_avatar_type = "custom";
+      metadataUpdates.avatar_type = "custom";
+      metadataUpdates.custom_avatar_preset_id = null;
+      metadataUpdates.avatar_preset_id = null;
+      metadataUpdates.custom_avatar_source = "manual";
+      metadataUpdates.avatar_source = "manual";
+      metadataUpdates.custom_avatar = true;
+      metadataUpdates.custom_avatar_url = targetCustomUrl;
+      metadataUpdates.avatar_url = targetCustomUrl;
+
+      updates.avatar_type = "custom";
+      updates.avatar_preset_id = null;
+      updates.custom_avatar_url = targetCustomUrl;
+      updates.avatar_source = "manual";
     }
 
     if (Object.keys(metadataUpdates).length > 0) {

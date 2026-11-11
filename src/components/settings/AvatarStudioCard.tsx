@@ -31,7 +31,7 @@ interface AvatarStudioCardProps {
 }
 
 export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCardProps) {
-  const { user, setOptimisticProfile } = useAuth();
+  const { user, setOptimisticProfile, refreshUser } = useAuth();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [activeTab, setActiveTab] = React.useState<AvatarType>(profile?.avatar_type || "google");
@@ -61,9 +61,11 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
     }
   }, [profile]);
 
+  // Authentic Google OAuth photo URL (never falls back to preset paths)
   const googlePhotoUrl =
+    user?.googlePhotoURL ||
+    (typeof user?.photoURL === "string" && !user.photoURL.startsWith("/avatars/") ? user.photoURL : null) ||
     (user?.metadata as Record<string, unknown>)?.picture as string ||
-    user?.photoURL ||
     null;
 
   // Resolve currently active avatar URL for preview
@@ -109,7 +111,7 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
         body: JSON.stringify({
           avatar_type: type,
           avatar_preset_id: type === "preset" ? presetId : null,
-          custom_avatar_url: customUrl,
+          custom_avatar_url: type === "custom" ? customUrl : null,
           avatar_source: type === "google" ? "google" : "manual",
         }),
       });
@@ -120,6 +122,9 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
       }
 
       onProfileUpdated(data.profile);
+      if (typeof refreshUser === "function") {
+        await refreshUser();
+      }
       setSuccessMessage("Avatar updated successfully across your showcase!");
       setTimeout(() => setSuccessMessage(null), 4000);
     } catch (err) {
@@ -136,14 +141,15 @@ export function AvatarStudioCard({ profile, onProfileUpdated }: AvatarStudioCard
   // Switch to Google Photo
   const handleSelectGoogle = async () => {
     setActiveTab("google");
-    await saveAvatarSelection("google", null, customAvatarUrl);
+    setSelectedPresetId(null);
+    await saveAvatarSelection("google", null, null);
   };
 
   // Switch to a Preset Avatar
   const handleSelectPreset = async (presetId: PresetAvatarId) => {
     setActiveTab("preset");
     setSelectedPresetId(presetId);
-    await saveAvatarSelection("preset", presetId, customAvatarUrl);
+    await saveAvatarSelection("preset", presetId, null);
   };
 
   // Custom File Selection
