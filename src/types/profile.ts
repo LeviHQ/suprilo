@@ -3,6 +3,14 @@
  * Specification Reference: SPEC-2C-5.8.0-ACCOUNT-SETTINGS
  */
 
+/**
+ * Default happiness-oriented bio shown for all new Suprilo creators.
+ * Users can customize or clear this from Account Settings at any time.
+ * Max 100 characters enforced by DB constraint.
+ */
+export const DEFAULT_CREATOR_BIO =
+  "Here to celebrate life, share smiles, and make every moment special ✨";
+
 export type AvatarType = "google" | "preset" | "custom";
 export type AvatarSource = "google" | "manual";
 

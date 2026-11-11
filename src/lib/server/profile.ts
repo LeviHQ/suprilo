@@ -13,6 +13,7 @@ import {
   AvatarType,
   AvatarSource,
   PresetAvatarId,
+  DEFAULT_CREATOR_BIO,
 } from "@/types/profile";
 
 export class ProfileError extends Error {
@@ -89,7 +90,7 @@ export async function getOrCreateCreatorProfile(
     username: (typeof userMeta.username === "string" && userMeta.username) || initialUsername,
     username_updated_at: (userMeta.username_updated_at as string) || null,
     display_name: displayName.slice(0, 50),
-    bio: (userMeta.bio as string) || null,
+    bio: (userMeta.bio as string) || DEFAULT_CREATOR_BIO,
     avatar_type: (userMeta.avatar_type as AvatarType) || (userMeta.custom_avatar ? "custom" : "google"),
     avatar_preset_id: (userMeta.avatar_preset_id as PresetAvatarId) || null,
     custom_avatar_url: photoURL,
@@ -120,7 +121,7 @@ export async function getOrCreateCreatorProfile(
     username: initialUsername,
     username_updated_at: null,
     display_name: displayName.slice(0, 50),
-    bio: (userMeta.bio as string) || null,
+    bio: (userMeta.bio as string) || DEFAULT_CREATOR_BIO,
     avatar_type: (userMeta.avatar_type as AvatarType) || "google",
     avatar_preset_id: (userMeta.avatar_preset_id as PresetAvatarId) || null,
     custom_avatar_url: photoURL,

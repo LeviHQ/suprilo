@@ -1,4 +1,5 @@
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { DEFAULT_CREATOR_BIO } from "@/types/profile";
 
 /**
  * Normalized application-level user model.
@@ -42,10 +43,10 @@ export function normalizeSupabaseUser(user: SupabaseUser | null): SupriloUser | 
     (typeof userMeta.picture === "string" && userMeta.picture) ||
     null;
 
-  // Resolve creator bio
+  // Resolve creator bio — fall back to the brand default happiness quote for new users
   const bio =
     (typeof userMeta.bio === "string" && userMeta.bio.trim()) ||
-    null;
+    DEFAULT_CREATOR_BIO;
 
   const creationTime = user.created_at || new Date().toISOString();
   const lastSignInTime = user.last_sign_in_at || creationTime;

@@ -22,6 +22,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { MySurpriseCards, CardFilterType } from "@/components/dashboard/MySurpriseCards";
 import { getLevelProgress } from "@/types/badges";
+import { DEFAULT_CREATOR_BIO } from "@/types/profile";
 import { useUserCardsData, useUserBadgesData, useUserProfileData } from "@/lib/client/db-cache";
 
 export default function ProfileHomePage() {
@@ -30,7 +31,7 @@ export default function ProfileHomePage() {
   const { summary: badgeSummary } = useUserBadgesData(user);
   const { profile } = useUserProfileData(user);
 
-  const bio = (profile?.bio ?? user?.bio ?? "").trim();
+  const bio = (profile?.bio ?? user?.bio ?? DEFAULT_CREATOR_BIO).trim();
 
   // Controlled card filter to allow clicking StatCard to switch view
   const [cardFilter, setCardFilter] = React.useState<CardFilterType>("all");
@@ -157,11 +158,11 @@ export default function ProfileHomePage() {
               {user.email || "No public email available"}
             </p>
 
-            {bio ? (
+            {bio && (
               <p className="text-xs sm:text-sm text-brand-dark/80 font-medium pt-1 max-w-lg leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
                 {bio}
               </p>
-            ) : null}
+            )}
 
             {/* Account Metadata Pills */}
             <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-brand-muted w-full max-w-full">

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
-import { CreatorProfile } from "@/types/profile";
+import { CreatorProfile, DEFAULT_CREATOR_BIO } from "@/types/profile";
 import { mutateCache } from "@/lib/client/db-cache";
 
 interface ProfileIdentityCardProps {
@@ -30,7 +30,7 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
   const { user, setOptimisticProfile } = useAuth();
 
   const [displayName, setDisplayName] = React.useState(profile?.display_name || user?.displayName || "");
-  const [bio, setBio] = React.useState(profile?.bio || "");
+  const [bio, setBio] = React.useState(profile?.bio || DEFAULT_CREATOR_BIO);
   const [isSaving, setIsSaving] = React.useState(false);
   const [successFeedback, setSuccessFeedback] = React.useState<SuccessFeedback | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -39,13 +39,13 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
   React.useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name);
-      setBio(profile.bio || "");
+      setBio(profile.bio || DEFAULT_CREATOR_BIO);
     }
   }, [profile]);
 
   const hasChanges =
     displayName.trim() !== (profile?.display_name || user?.displayName || "") ||
-    bio.trim() !== (profile?.bio || "");
+    bio.trim() !== (profile?.bio || DEFAULT_CREATOR_BIO);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +73,7 @@ export function ProfileIdentityCard({ profile, onProfileUpdated }: ProfileIdenti
 
     // Compute exact change delta to customize feedback banner
     const currentName = (profile?.display_name ?? user?.displayName ?? "").trim();
-    const currentBio = (profile?.bio ?? "").trim();
+    const currentBio = (profile?.bio ?? DEFAULT_CREATOR_BIO).trim();
     const nameChanged = cleanName !== currentName;
     const bioChanged = cleanBio !== currentBio;
 
