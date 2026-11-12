@@ -28,6 +28,7 @@ import {
 import { ScratchCard, CoverStyle } from "@/components/scratch/ScratchCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { CreationFlightStage } from "@/components/create/CreationFlightStage";
@@ -363,9 +364,7 @@ function CreateCardStudio() {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <div className="relative h-8 w-24">
-              <Image src="/brand/logo.png" alt="Suprilo" fill className="object-contain" priority />
-            </div>
+            <BrandLogo href="/" size="sm" priority />
             <div className="w-9" />
           </div>
         </header>
@@ -526,17 +525,7 @@ function CreateCardStudio() {
               <ArrowLeft className="w-4 h-4" />
             </button>
 
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-8 sm:h-9 w-24 sm:w-28 aspect-[800/285]">
-                <Image
-                  src="/brand/logo.png"
-                  alt="Suprilo"
-                  fill
-                  priority
-                  className="object-contain object-left"
-                />
-              </div>
-            </Link>
+            <BrandLogo href="/" size="sm" priority />
           </div>
 
           <div className="flex items-center gap-2.5">

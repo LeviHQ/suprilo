@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import { X, Sparkles, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/Button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -95,16 +95,8 @@ export function AuthModal({
         </button>
 
         {/* Brand Logo & Subtle Badge */}
-        <div className="space-y-3 pt-2">
-          <div className="relative h-10 w-32 sm:w-36 mx-auto aspect-[800/285]">
-            <Image
-              src="/brand/logo.png"
-              alt="Suprilo"
-              fill
-              priority
-              className="object-contain"
-            />
-          </div>
+        <div className="space-y-3 pt-2 text-center">
+          <BrandLogo size="md" className="justify-center mx-auto" priority />
 
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20">
             <Sparkles className="w-3.5 h-3.5 text-brand-pink" />

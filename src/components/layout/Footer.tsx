@@ -1,7 +1,7 @@
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShieldCheck, Scale } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,21 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-brand-warm-border/60">
           {/* Col 1: Logo and Tagline (5 cols) */}
           <div className="md:col-span-5 text-center md:text-left space-y-4 max-w-sm mx-auto md:mx-0">
-            <Link
-              href="/"
-              className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded-lg"
-              aria-label="Suprilo Home"
-            >
-              <div className="relative h-16 sm:h-18 w-52 sm:w-60 mx-auto md:mx-0 aspect-[800/285]">
-                <Image
-                  src="/brand/logo.png"
-                  alt="Suprilo - Make Every Moment a Surprise"
-                  fill
-                  sizes="(max-width: 640px) 208px, 240px"
-                  className="object-contain object-center md:object-left"
-                />
-              </div>
-            </Link>
+            <BrandLogo href="/" size="lg" withTagline className="justify-center md:justify-start" />
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
               Digital scratch cards for real smiles, heartfelt memories, and unexpected celebrations. Hide a personal note and photo behind metallic foil.
             </p>

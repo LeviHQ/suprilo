@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { X, LogOut, ArrowLeft, PlusCircle } from "lucide-react";
 import { DASHBOARD_NAV_ITEMS } from "./navigation";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils";
 import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
@@ -68,14 +68,12 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       >
         {/* Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-brand-warm-border">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative h-7 w-22">
-              <Image src="/brand/logo.png" alt="Suprilo" fill priority className="object-contain" />
-            </div>
+          <div className="flex items-center gap-2">
+            <BrandLogo href="/" size="sm" priority />
             <span className="text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full border border-brand-pink/20">
               Studio
             </span>
-          </Link>
+          </div>
 
           <button
             type="button"

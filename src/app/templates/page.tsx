@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -21,6 +20,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils";
 
 export default function TemplatesGalleryPage() {
@@ -78,11 +78,7 @@ export default function TemplatesGalleryPage() {
               <ArrowLeft className="w-4 h-4" />
             </button>
 
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-8 w-24">
-                <Image src="/brand/logo.png" alt="Suprilo" fill priority className="object-contain" />
-              </div>
-            </Link>
+            <BrandLogo href="/" size="sm" priority />
           </div>
 
           <div className="flex items-center gap-3">

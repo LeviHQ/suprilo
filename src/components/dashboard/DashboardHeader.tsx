@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, PlusCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/Button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface DashboardHeaderProps {
   onOpenMobileNav: () => void;
@@ -30,9 +30,7 @@ export function DashboardHeader({ onOpenMobileNav }: DashboardHeaderProps) {
         </button>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <Link href="/" className="relative h-6 w-20">
-            <Image src="/brand/logo.png" alt="Suprilo" fill priority className="object-contain" />
-          </Link>
+          <BrandLogo href="/" size="sm" priority />
         </div>
 
         <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-brand-muted">

@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, ArrowLeft, PlusCircle } from "lucide-react";
 import { DASHBOARD_NAV_ITEMS } from "./navigation";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils";
 import { useUnreadNotificationsCount } from "@/lib/client/unread-notifications";
 
@@ -32,16 +32,8 @@ export function Sidebar() {
     <aside className="hidden lg:flex flex-col w-64 xl:w-72 fixed inset-y-0 left-0 z-30 bg-white border-r border-brand-warm-border">
       {/* Top Header / Logo */}
       <div className="h-16 px-6 flex items-center justify-between border-b border-brand-warm-border">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="relative h-8 w-24">
-            <Image
-              src="/brand/logo.png"
-              alt="Suprilo"
-              fill
-              priority
-              className="object-contain group-hover:scale-105 transition-transform"
-            />
-          </div>
+        <Link href="/" className="flex items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded-xl">
+          <BrandLogo size="sm" priority />
           <span className="text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full border border-brand-pink/20">
             Studio
           </span>

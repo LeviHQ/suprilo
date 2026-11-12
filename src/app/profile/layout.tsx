@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +9,7 @@ import { MobileNav } from "@/components/dashboard/MobileNav";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -87,9 +87,7 @@ export default function ProfileDashboardLayout({
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <div className="relative h-8 w-24">
-              <Image src="/brand/logo.png" alt="Suprilo" fill className="object-contain" priority />
-            </div>
+            <BrandLogo href="/" size="sm" priority />
             <div className="w-9" />
           </div>
         </header>

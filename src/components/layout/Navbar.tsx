@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X, Sparkles, LogOut, User as UserIcon, PlusCircle, ChevronDown } from "lucide-react";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 function GoogleIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -110,22 +110,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo brand */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 group transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink rounded-lg py-1"
-            aria-label="Suprilo Home"
-          >
-            <div className="relative h-12 sm:h-14 md:h-16 w-40 sm:w-48 md:w-56 aspect-[800/285]">
-              <Image
-                src="/brand/logo.png"
-                alt="Suprilo - Make Every Moment a Surprise"
-                fill
-                priority
-                sizes="(max-width: 640px) 160px, (max-width: 768px) 192px, 208px"
-                className="object-contain object-left group-hover:scale-[1.02] transition-transform duration-200"
-              />
-            </div>
-          </Link>
+          <BrandLogo href="/" size="md" priority />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
