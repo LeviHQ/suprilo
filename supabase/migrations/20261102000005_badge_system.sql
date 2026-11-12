@@ -329,7 +329,7 @@ BEGIN
     RETURN false;
   END IF;
 
-  v_token := encode(gen_random_bytes(12), 'hex');
+  v_token := encode(extensions.gen_random_bytes(12), 'hex');
 
   INSERT INTO public.user_badges (user_id, badge_id, points_awarded, unlocked_at, share_token)
   VALUES (p_user_id, p_badge_id, v_points, clock_timestamp(), v_token)

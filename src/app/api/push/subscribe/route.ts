@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { verifyUserAuth } from "@/lib/server/auth";
 import { getSupabaseAdminClient } from "@/lib/server/card-recipient";
 import { validatePushSubscriptionPayload } from "@/lib/server/push-validation";
+import { dispatchPendingPushDeliveries } from "@/lib/server/push-dispatcher";
 
 export const dynamic = "force-dynamic";
 
@@ -132,6 +133,26 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    // Trigger instant welcome/confirmation push so the user immediately sees alerts are active
+    after(async () => {
+      try {
+        await adminClient.rpc("enqueue_notification_safe", {
+          p_user_id: authResult.user.id,
+          p_type: "SYSTEM",
+          p_title: "Push Notifications Active 🎉",
+          p_body: "Web Push is now active! You will receive instant alerts when someone scratches your cards or unlocks achievements.",
+          p_dedup_key: `settings:push_enabled:${authResult.user.id}:${Math.floor(Date.now() / 60000)}`,
+          p_metadata: { url: "/profile/notifications" },
+        });
+
+        await dispatchPendingPushDeliveries(20);
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[POST /api/push/subscribe] Welcome push dispatch error:", err);
+        }
+      }
+    });
 
     return NextResponse.json(
       {

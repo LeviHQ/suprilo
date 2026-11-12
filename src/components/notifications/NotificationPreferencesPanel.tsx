@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Shield,
   Info,
+  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -285,6 +286,33 @@ export function NotificationPreferencesPanel() {
     }
   };
 
+  const [isSendingTest, setIsSendingTest] = React.useState<boolean>(false);
+
+  const handleSendTestNotification = async () => {
+    setIsSendingTest(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/push/test", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data?.message || "Failed to dispatch test notification.");
+      }
+      setFeedback({
+        type: "success",
+        message: "Test push notification sent! Check your device or notification center.",
+      });
+      setTimeout(() => setFeedback(null), 5000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send test push notification.";
+      setFeedback({ type: "error", message: msg });
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-8 text-center space-y-3 bg-white rounded-2xl border border-brand-warm-border">
@@ -363,16 +391,32 @@ export function NotificationPreferencesPanel() {
 
           <div>
             {isDeviceSubscribed ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDisablePush}
-                disabled={pushStatusLoading}
-                className="text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 border-rose-200"
-              >
-                {pushStatusLoading && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
-                Disable on this device
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSendTestNotification}
+                  disabled={pushStatusLoading || isSendingTest}
+                  className="text-xs text-brand-dark hover:text-brand-pink border-brand-warm-border hover:bg-brand-warm-subtle"
+                >
+                  {isSendingTest ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5 mr-1.5 text-brand-pink" />
+                  )}
+                  Send Test Alert
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisablePush}
+                  disabled={pushStatusLoading || isSendingTest}
+                  className="text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 border-rose-200"
+                >
+                  {pushStatusLoading && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
+                  Disable on this device
+                </Button>
+              </div>
             ) : browserPermission === "denied" ? (
               <p className="text-xs font-medium text-rose-600">
                 Notifications blocked. Please click the lock icon in your URL bar to allow notifications for Suprilo.
