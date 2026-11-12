@@ -3,15 +3,15 @@
 import * as React from "react";
 import {
   Sparkles,
-  Heart,
   Palette,
   PenTool,
   ArrowRight,
-  Layers,
   Wand2,
   Volume2,
   VolumeX,
   RotateCcw,
+  Camera,
+  Music,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { soundManager } from "@/lib/sound";
@@ -327,72 +327,124 @@ export function CreationFlightStage({
       {/* ========================================================================= */}
       {/* 4. SCENE 3: TWO BALLOON CARDS (Floating in on threads, 100% Mobile Ready) */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-6 anim-balloons-entrance">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 anim-balloons-entrance">
         {/* ======================================================== */}
-        {/* BALLOON 1: Use a Template (Warm Rose & Peach Theme)      */}
+        {/* BALLOON 1: Use a Template (Curated Designs)              */}
         {/* ======================================================== */}
-        <div className="anim-bob-card-1 group relative bg-white rounded-3xl p-3.5 sm:p-6 border-2 border-brand-pink/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-3 hover:-translate-y-1">
+        <div className="anim-bob-card-1 group relative bg-white rounded-3xl p-4 sm:p-6 border-2 border-brand-pink/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1">
           {/* Warm background glow */}
           <div
-            className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-gradient-to-br from-brand-pink/15 via-brand-orange/10 to-transparent rounded-full blur-lg pointer-events-none"
+            className="absolute top-0 right-0 -mr-6 -mt-6 w-40 h-40 bg-gradient-to-br from-brand-pink/20 via-brand-orange/15 to-transparent rounded-full blur-xl pointer-events-none group-hover:scale-110 transition-transform duration-500"
             aria-hidden="true"
           />
 
-          <div className="relative space-y-2.5 sm:space-y-3">
+          <div className="relative space-y-3.5">
             {/* Header: Balloon Icon & Badge */}
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-brand-pink bg-brand-pink-light border border-brand-pink/20">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-brand-pink bg-brand-pink-light border border-brand-pink/25 shadow-2xs">
                 <span className="text-sm">🎈</span>
                 <span>16 Ready Designs</span>
               </div>
 
-              <div className="flex items-center gap-1 text-xs text-brand-muted">
-                <Heart className="w-3.5 h-3.5 text-brand-pink fill-brand-pink" />
-                <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+              <div className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-pink bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100">
+                <Sparkles className="w-3 h-3 text-brand-orange" />
+                <span>Ready in 30s</span>
               </div>
             </div>
 
-            {/* Compact Visual Preview Mockup */}
-            <div className="h-20 sm:h-28 rounded-2xl bg-gradient-to-br from-[#FED7AA] via-[#FF4D6D] to-[#C084FC] p-2.5 sm:p-3 text-white flex flex-col justify-between shadow-xs relative overflow-hidden group-hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between text-[10px] font-semibold">
-                <span className="bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                  Birthday • Love • Party
-                </span>
-                <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                  Foil Finish
-                </span>
+            {/* Visual Showcase: Layered 3D Card Stack Preview */}
+            <div className="h-44 sm:h-48 rounded-2xl p-3 bg-gradient-to-br from-rose-50/70 via-amber-50/30 to-pink-50/70 border border-brand-warm-border/80 shadow-inner relative overflow-hidden flex items-center justify-center">
+              {/* Soft decorative background glow circles */}
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-brand-pink/10 rounded-full blur-md pointer-events-none" />
+              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-brand-orange/10 rounded-full blur-md pointer-events-none" />
+
+              {/* Tilted Background Card (Gallery Peek) */}
+              <div className="absolute w-48 sm:w-56 h-28 sm:h-32 rounded-xl bg-gradient-to-br from-purple-500 via-indigo-500 to-brand-purple shadow-md -rotate-6 -translate-x-3 sm:-translate-x-5 -translate-y-2 opacity-90 group-hover:-rotate-12 group-hover:-translate-x-7 group-hover:-translate-y-4 transition-all duration-500 ease-out border border-white/30 p-2.5 text-white flex flex-col justify-between pointer-events-none">
+                <div className="flex items-center justify-between text-[10px] font-bold">
+                  <span className="bg-black/25 px-2 py-0.5 rounded-full backdrop-blur-xs">Romance 💝</span>
+                  <span className="text-white/80">Amethyst Foil</span>
+                </div>
+                <div className="text-center font-bold text-xs drop-shadow-xs">
+                  “You&apos;re My Favorite Person ✨”
+                </div>
+                <div className="text-[9px] text-white/70 text-right">Instant Preview</div>
               </div>
 
-              <div className="my-auto text-center space-y-0.5">
-                <div className="inline-flex items-center gap-1 bg-white/95 text-brand-dark px-2.5 py-1 rounded-xl shadow-xs font-bold text-xs">
-                  <span>✨ Happy Birthday, Maya! ✨</span>
+              {/* Foreground Hero Scratch Card */}
+              <div className="relative w-56 sm:w-64 h-32 sm:h-36 rounded-2xl bg-white shadow-xl border border-brand-pink/25 p-3 flex flex-col justify-between group-hover:scale-[1.03] group-hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                {/* Metallic Shimmer Sweep overlay */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none z-10"
+                  aria-hidden="true"
+                />
+
+                {/* Card Top: Scratch Foil Tag */}
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-gradient-to-r from-brand-pink to-brand-orange px-2.5 py-0.5 rounded-full shadow-2xs">
+                    <span>🎂</span> Birthday Sparkle
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    ✨ Gold Foil
+                  </span>
+                </div>
+
+                {/* Scratched Center Area (Peek of Surprise) */}
+                <div className="my-auto py-1 text-center relative">
+                  <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-50 via-white to-orange-50 text-brand-dark px-3 py-1.5 rounded-xl border border-amber-200/80 shadow-xs font-bold text-xs">
+                    <span className="text-sm">🎉</span>
+                    <span className="font-extrabold tracking-tight">Happy Birthday, Maya!</span>
+                    <Sparkles className="w-3.5 h-3.5 text-brand-orange shrink-0 animate-pulse" />
+                  </div>
+                  <p className="text-[10px] text-brand-muted font-medium mt-1">
+                    Scratch to reveal hidden message & photo
+                  </p>
+                </div>
+
+                {/* Bottom card footer */}
+                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                  <span className="flex items-center gap-1 text-emerald-600 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+                    Interactive Scratch
+                  </span>
+                  <span className="text-brand-pink font-semibold">🎵 Audio Enabled</span>
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center justify-between text-[10px] text-white/80">
-                <span>Ready templates</span>
-                <span>Instant preview</span>
-              </div>
+            {/* Occasion Tags (Pill Chips) */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>🎂</span> Birthdays
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>💖</span> Romance
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>🎉</span> Party
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>🥂</span> Milestones
+              </span>
             </div>
 
             {/* Text Description */}
-            <div className="space-y-0.5 sm:space-y-1">
-              <h3 className="text-base sm:text-xl font-bold text-brand-dark tracking-tight group-hover:text-brand-pink transition-colors">
+            <div className="space-y-1">
+              <h3 className="text-lg sm:text-xl font-extrabold text-brand-dark tracking-tight group-hover:text-brand-pink transition-colors">
                 Use a Template
               </h3>
               <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-                Pick a ready-made interactive design for birthdays, anniversaries, love notes, and milestones.
+                Choose from 16 curated themes with music, metallic foils, and animations ready to go. Just customize the names & send!
               </p>
             </div>
           </div>
 
           {/* Action Button */}
-          <div className="pt-1">
+          <div className="pt-2">
             <Button
               variant="primary"
               size="lg"
               onClick={onExploreTemplates}
-              className="w-full justify-center gap-2 text-sm font-bold shadow-md hover:shadow-brand-pink/25 py-2.5"
+              className="w-full justify-center gap-2 text-sm font-bold shadow-md shadow-brand-pink/20 hover:shadow-brand-pink/35 py-3 rounded-2xl bg-gradient-to-r from-brand-pink via-rose-500 to-brand-orange hover:opacity-95 transition-all"
             >
               <Wand2 className="w-4 h-4" />
               <span>Explore Templates</span>
@@ -402,9 +454,9 @@ export function CreationFlightStage({
         </div>
 
         {/* ======================================================== */}
-        {/* BALLOON 2: Start from Scratch (Purple & Yellow Theme)     */}
+        {/* BALLOON 2: Start from Scratch (Creative Studio)          */}
         {/* ======================================================== */}
-        <div className="anim-bob-card-2 group relative bg-white rounded-3xl p-3.5 sm:p-6 border-2 border-brand-purple/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-3 hover:-translate-y-1">
+        <div className="anim-bob-card-2 group relative bg-white rounded-3xl p-4 sm:p-6 border-2 border-brand-purple/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1">
           {/* Mobile: Purple ribbon emerging from behind Card 1 directly into Card 2's balloon badge */}
           <div className="sm:hidden absolute -top-7 left-0 right-0 h-7 pointer-events-none z-10 anim-threads-reveal">
             <svg className="w-full h-full" viewBox="0 0 380 28" fill="none" preserveAspectRatio="none">
@@ -420,64 +472,123 @@ export function CreationFlightStage({
 
           {/* Purple background glow */}
           <div
-            className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-gradient-to-br from-brand-purple/15 via-brand-yellow/10 to-transparent rounded-full blur-lg pointer-events-none"
+            className="absolute top-0 right-0 -mr-6 -mt-6 w-40 h-40 bg-gradient-to-br from-brand-purple/20 via-indigo-500/15 to-transparent rounded-full blur-xl pointer-events-none group-hover:scale-110 transition-transform duration-500"
             aria-hidden="true"
           />
 
-          <div className="relative space-y-2.5 sm:space-y-3">
+          <div className="relative space-y-3.5">
             {/* Header: Balloon Icon & Badge */}
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-brand-purple bg-brand-purple-light border border-brand-purple/20">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-brand-purple bg-brand-purple-light border border-brand-purple/25 shadow-2xs">
                 <span className="text-sm">🎈</span>
                 <span>100% Custom Freedom</span>
               </div>
 
-              <div className="flex items-center gap-1 text-xs text-brand-muted">
-                <Palette className="w-3.5 h-3.5 text-brand-purple" />
-                <Layers className="w-3.5 h-3.5 text-brand-pink" />
+              <div className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-purple bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100">
+                <Palette className="w-3 h-3 text-brand-purple" />
+                <span>Full Studio</span>
               </div>
             </div>
 
-            {/* Compact Blank Canvas Mockup */}
-            <div className="h-20 sm:h-28 rounded-2xl bg-brand-warm-subtle/80 border-2 border-dashed border-brand-warm-border p-2.5 sm:p-3 text-brand-dark flex flex-col justify-between relative group-hover:border-brand-purple/40 transition-colors">
-              <div className="flex items-center justify-between text-[10px] font-semibold text-brand-muted">
-                <span>Blank Canvas Studio</span>
-                <span className="text-brand-purple font-bold">Custom Palette</span>
-              </div>
-
-              <div className="my-auto text-center space-y-0.5">
-                <div className="w-6 h-6 mx-auto rounded-lg bg-white shadow-xs border border-brand-warm-border flex items-center justify-center text-brand-purple">
-                  <PenTool className="w-3 h-3" />
+            {/* Visual Showcase: Creative Studio Workshop Preview */}
+            <div className="h-44 sm:h-48 rounded-2xl p-3 bg-gradient-to-br from-purple-50/70 via-slate-50 to-indigo-50/50 border border-brand-warm-border/80 shadow-inner relative overflow-hidden flex flex-col justify-between">
+              {/* Studio Canvas Workbench */}
+              <div className="flex items-center justify-between">
+                {/* Swatch Picker Simulation */}
+                <div className="flex items-center gap-1.5 bg-white/90 px-2.5 py-1 rounded-full border border-purple-100 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-500 mr-1">Palette:</span>
+                  <span className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 ring-2 ring-amber-500/40 shadow-xs flex items-center justify-center text-[8px] text-white font-bold">✓</span>
+                  <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 hover:scale-110 transition-transform" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 hover:scale-110 transition-transform" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-emerald-300 to-teal-600 hover:scale-110 transition-transform" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 hover:scale-110 transition-transform" />
                 </div>
-                <p className="text-[10px] text-brand-muted font-medium">
-                  Custom message, photo & foil colors
-                </p>
+
+                <span className="text-[10px] font-bold text-brand-purple bg-purple-100/80 px-2 py-0.5 rounded-full border border-purple-200">
+                  ✨ 4 Metallic Foils
+                </span>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] text-brand-muted">
-                <span>Custom foil finish</span>
-                <span>Photo upload</span>
+              {/* Center Workbench: Polaroid Photo & Custom Note in Progress */}
+              <div className="flex items-center justify-center gap-3 my-auto py-1">
+                {/* Mini Polaroid Photo Card */}
+                <div className="w-20 sm:w-24 bg-white p-1.5 rounded-xl shadow-md border border-slate-200 -rotate-6 group-hover:-rotate-12 transition-transform duration-300 relative">
+                  {/* Pin */}
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-rose-500 border border-white shadow-2xs" />
+                  <div className="h-12 sm:h-14 rounded-lg bg-gradient-to-br from-pink-100 via-purple-50 to-amber-100 flex flex-col items-center justify-center text-center p-1">
+                    <Camera className="w-4 h-4 text-brand-pink mb-0.5" />
+                    <span className="text-[8px] font-bold text-slate-700 leading-tight">Secret Photo</span>
+                  </div>
+                  <div className="text-[7px] text-slate-400 font-semibold text-center mt-1 truncate">
+                    hidden memory 💖
+                  </div>
+                </div>
+
+                {/* Mini Custom Scratch Foil Card */}
+                <div className="flex-1 max-w-[130px] sm:max-w-[150px] bg-white p-2 rounded-xl shadow-md border border-brand-purple/25 flex flex-col justify-between rotate-2 group-hover:rotate-0 transition-transform duration-300">
+                  <div className="flex items-center justify-between text-[9px] font-bold text-brand-purple mb-1">
+                    <span>Drafting Note</span>
+                    <PenTool className="w-2.5 h-2.5 text-brand-purple" />
+                  </div>
+                  <div className="h-7 rounded-md bg-purple-50/80 border border-dashed border-purple-200 p-1 flex items-center justify-center text-[9px] text-purple-900 font-medium italic">
+                    “Your custom words...”
+                  </div>
+                  <div className="flex items-center justify-between text-[8px] text-slate-400 font-bold mt-1">
+                    <span>Scratch Foil</span>
+                    <span className="text-brand-purple font-extrabold">+ Audio</span>
+                  </div>
+                </div>
+
+                {/* Floating Craft Tool */}
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-purple to-indigo-500 shadow-md text-white flex items-center justify-center group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 shrink-0">
+                  <PenTool className="w-4 h-4" />
+                </div>
               </div>
+
+              {/* Studio Bottom Bar */}
+              <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                <span className="flex items-center gap-1 text-brand-purple font-bold">
+                  <Music className="w-3 h-3 text-brand-purple" />
+                  Custom Audio Sound
+                </span>
+                <span className="text-slate-600 font-semibold">📸 Personal Photos</span>
+              </div>
+            </div>
+
+            {/* Feature Tags (Pill Chips) */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>🎨</span> 4 Foil Finishes
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>📸</span> Secret Photo
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>🎵</span> Sound Effects
+              </span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-brand-warm-subtle px-2.5 py-1 rounded-lg border border-brand-warm-border shadow-2xs">
+                <span>✍️</span> Your Words
+              </span>
             </div>
 
             {/* Text Description */}
-            <div className="space-y-0.5 sm:space-y-1">
-              <h3 className="text-base sm:text-xl font-bold text-brand-dark tracking-tight group-hover:text-brand-purple transition-colors">
+            <div className="space-y-1">
+              <h3 className="text-lg sm:text-xl font-extrabold text-brand-dark tracking-tight group-hover:text-brand-purple transition-colors">
                 Start from Scratch
               </h3>
               <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-                Build your card from scratch with custom messages, secret photos, and personalized foil coatings.
+                Total creative freedom. Paint with metallic foils, hide your own secret photos, and write a unique heartfelt message.
               </p>
             </div>
           </div>
 
           {/* Action Button */}
-          <div className="pt-1">
+          <div className="pt-2">
             <Button
               variant="secondary"
               size="lg"
               onClick={onSelectScratch}
-              className="w-full justify-center gap-2 text-sm font-bold hover:bg-brand-purple-light hover:text-brand-purple hover:border-brand-purple/30 transition-colors py-2.5"
+              className="w-full justify-center gap-2 text-sm font-bold shadow-md shadow-brand-purple/20 hover:shadow-brand-purple/35 py-3 rounded-2xl bg-gradient-to-r from-brand-purple via-indigo-600 to-brand-purple text-white hover:opacity-95 transition-all border-0"
             >
               <PenTool className="w-4 h-4" />
               <span>Start Creating</span>
