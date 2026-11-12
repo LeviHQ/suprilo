@@ -95,11 +95,11 @@ export function AuthModal({
         </button>
 
         {/* Brand Logo & Subtle Badge */}
-        <div className="flex items-center justify-center flex-wrap gap-2.5 pt-2 text-center">
+        <div className="flex flex-col items-center justify-center gap-2.5 pt-2 text-center">
           <BrandLogo size="md" priority />
 
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 shrink-0 whitespace-nowrap leading-none">
-            <Sparkles className="w-3 h-3 text-brand-pink" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 shrink-0 whitespace-nowrap leading-none">
+            <Sparkles className="w-3.5 h-3.5 text-brand-pink" />
             <span>Start Creating Surprises</span>
           </span>
         </div>

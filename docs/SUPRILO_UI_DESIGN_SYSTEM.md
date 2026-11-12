@@ -72,8 +72,10 @@ Per the W3C CSS Overflow Module Level 3 specification:
 </header>
 ```
 
-### Where to Handle Horizontal Overflow
-- Horizontal overflow must be constrained at the **root viewport level** (`<html className="overflow-x-hidden">` and `<body className="overflow-x-hidden">`) and on individual page scroll sections (`<main className="overflow-x-hidden">`), **never** on sticky headers or containers with floating popups.
+### Where to Handle Horizontal Overflow: Use `overflow-x: clip` (Never `overflow-x: hidden`)
+- **CRITICAL**: `overflow-x: hidden` on `<html>` or `<body>` creates an internal scroll container boundary that **completely breaks and disables `position: sticky`** for all child elements, causing sticky navbars to unstick and scroll away!
+- **Always use `overflow-x: clip` (or `overflow-x-clip`)** on `<html>` and `<body>` (in `globals.css` and `layout.tsx`). Unlike `hidden`, `clip` prevents elements from overflowing horizontally outside the viewport **without** establishing a new scroll container and **without** breaking `position: sticky`!
+- Sticky navigation headers must always be `sticky top-0 z-40 w-full max-w-full overflow-visible`.
 
 ---
 
@@ -204,20 +206,19 @@ Key classes:
 **Mandatory Modal Header Pattern**:
 ```tsx
 {/* Brand Logo & Subtle Badge */}
-<div className="flex items-center justify-center flex-wrap gap-2.5 pt-2 text-center">
+<div className="flex flex-col items-center justify-center gap-2.5 pt-2 text-center">
   <BrandLogo size="md" priority />
 
-  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 shrink-0 whitespace-nowrap leading-none">
-    <Sparkles className="w-3 h-3 text-brand-pink" />
+  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 shrink-0 whitespace-nowrap leading-none">
+    <Sparkles className="w-3.5 h-3.5 text-brand-pink" />
     <span>Start Creating Surprises</span>
   </span>
 </div>
 ```
 Benefits:
-- `display: flex` with `flex-wrap` ensures children are true flex items.
-- `gap-2.5` guarantees an explicit 10px separation with zero collision.
-- `items-center justify-center` centers both vertically and horizontally.
-- On narrow screens, the badge drops to the next line cleanly centered, never overlapping.
+- `display: flex` with `flex-col` positions the brand mark on top (centered) and the feature pill tag cleanly **below** it (centered).
+- `gap-2.5` enforces an exact 10px vertical distance between the brand name and the pill.
+- Completely prevents any possibility of horizontal collision or overlap across all screen sizes.
 
 ---
 
