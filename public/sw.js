@@ -126,8 +126,8 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body,
-    icon: "/brand/logo.png",
-    badge: "/brand/favicon.png",
+    icon: "/android-chrome-192x192.png",
+    badge: "/favicon-32x32.png",
     tag: notificationId,
     renotify: true,
     vibrate: [200, 100, 200],

@@ -1,0 +1,21 @@
+{
+  "name": "Suprilo — Make Every Moment a Surprise",
+  "short_name": "Suprilo",
+  "description": "Turn your favorite memories, heartfelt messages, and happy moments into interactive scratch cards. Share a link and let someone discover the surprise.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFDFB",
+  "theme_color": "#FF4D6D",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

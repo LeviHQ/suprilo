@@ -38,12 +38,17 @@ export const metadata: Metadata = {
     "Suprilo",
   ],
   authors: [{ name: "Suprilo" }],
+  manifest: "/site.webmanifest",
   icons: {
     icon: [
-      { url: "/brand/favicon.png", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/brand/favicon.png", type: "image/png" },
     ],
-    apple: [{ url: "/brand/favicon.png" }],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   openGraph: {
     title: "Suprilo — Make Every Moment a Surprise",
