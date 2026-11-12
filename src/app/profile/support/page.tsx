@@ -30,7 +30,7 @@ export default function SupportTicketsPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full min-w-0">
       <PageHeader
         title="Support Tickets"
         description="View past support inquiries, track status updates from Suprilo care, and submit new technical assistance requests."
@@ -54,7 +54,10 @@ export default function SupportTicketsPage() {
       />
 
       {/* Status Filter Tabs */}
-      <div className="border-b border-brand-warm-border overflow-x-auto scrollbar-none">
+      <div
+        className="border-b border-brand-warm-border overflow-x-auto no-scrollbar scrollbar-none w-full max-w-full min-w-0"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         <div className="flex items-center gap-2 min-w-max pb-2">
           {filters.map((filter) => {
             const isActive = activeFilter === filter.id;

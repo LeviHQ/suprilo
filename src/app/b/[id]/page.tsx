@@ -125,7 +125,7 @@ export default async function PublicBadgePage({ params }: PageProps) {
     : "Recently";
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden min-w-0">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
         <BrandLogo href="/" size="sm" priority />
@@ -139,7 +139,7 @@ export default async function PublicBadgePage({ params }: PageProps) {
       </header>
 
       {/* Main Verification Card */}
-      <main className="flex-1 flex items-center justify-center p-4 py-8">
+      <main className="flex-1 flex items-center justify-center p-4 py-8 w-full max-w-full min-w-0 overflow-hidden">
         <div className="w-full max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-brand-warm-border text-center space-y-6">
           {/* Official Verification Pill */}
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold shadow-2xs">
@@ -242,12 +242,12 @@ export default async function PublicBadgePage({ params }: PageProps) {
 
 function BadgeNotFoundState() {
   return (
-    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden min-w-0">
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
         <BrandLogo href="/" size="sm" priority />
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4 w-full max-w-full min-w-0 overflow-hidden">
         <div className="w-full max-w-md mx-auto text-center bg-white rounded-3xl p-8 sm:p-10 shadow-lg border border-brand-warm-border space-y-6">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-pink-light flex items-center justify-center text-brand-pink shadow-sm">
             <HelpCircle className="w-8 h-8" />

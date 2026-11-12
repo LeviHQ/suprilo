@@ -318,7 +318,7 @@ function NotificationBellInner({ className = "" }: { className?: string }) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-brand-warm-border bg-white shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-2xl border border-brand-warm-border bg-white shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
           {/* Header */}
           <div className="px-4 py-3 border-b border-brand-warm-border/70 flex items-center justify-between bg-brand-warm-subtle/50">
             <div className="flex items-center gap-2">

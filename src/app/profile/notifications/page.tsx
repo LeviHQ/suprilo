@@ -333,7 +333,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       {/* Page Header */}
       <PageHeader
         title="Notifications"
@@ -365,7 +365,10 @@ export default function NotificationsPage() {
       />
 
       {/* Tabs Bar */}
-      <div className="flex items-center gap-1 sm:gap-2 border-b border-brand-warm-border pb-px overflow-x-auto">
+      <div
+        className="flex items-center gap-1 sm:gap-2 border-b border-brand-warm-border pb-px overflow-x-auto no-scrollbar scrollbar-none w-full max-w-full min-w-0"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         <button
           type="button"
           onClick={() => setActiveTab("all")}

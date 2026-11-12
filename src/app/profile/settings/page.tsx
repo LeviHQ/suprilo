@@ -83,7 +83,7 @@ export default function AccountSettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8 max-w-4xl pb-12">
+    <div className="space-y-8 max-w-4xl pb-12 w-full min-w-0">
       {/* 1. Page Header */}
       <PageHeader
         title="Account Settings"

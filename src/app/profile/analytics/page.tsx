@@ -287,7 +287,7 @@ export default function AnalyticsPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full min-w-0">
       {/* 1. Page Header with Honest Last Synced Indicator */}
       <PageHeader
         title="Analytics & Performance"
@@ -320,7 +320,10 @@ export default function AnalyticsPage() {
       />
 
       {/* 2. Sub-navigation Tabs */}
-      <div className="border-b border-brand-warm-border overflow-x-auto scrollbar-none">
+      <div
+        className="border-b border-brand-warm-border overflow-x-auto no-scrollbar scrollbar-none w-full max-w-full min-w-0"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         <div className="flex items-center gap-2 min-w-max pb-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;

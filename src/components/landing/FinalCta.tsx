@@ -20,7 +20,7 @@ export function FinalCta() {
   };
 
   return (
-    <section className="py-20 relative overflow-hidden overflow-x-clip w-full max-w-full">
+    <section className="py-20 relative overflow-hidden overflow-x-hidden w-full max-w-full">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl bg-gradient-to-br from-[#1E1B38] via-[#2D1B36] to-[#1F172E] text-white p-8 sm:p-12 md:p-16 text-center overflow-hidden shadow-2xl border border-white/10">
           {/* Subtle colorful decorative gradients */}

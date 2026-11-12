@@ -251,7 +251,7 @@ export function TestimonialsMarquee() {
   return (
     <section
       id="testimonials"
-      className="py-16 md:py-24 relative overflow-hidden overflow-x-clip bg-brand-warm-subtle/40 w-full max-w-full"
+      className="py-16 md:py-24 relative overflow-hidden overflow-x-hidden bg-brand-warm-subtle/40 w-full max-w-full"
       style={{ contain: "paint" }}
       aria-label="Stories and demo feedback"
     >
@@ -275,7 +275,7 @@ export function TestimonialsMarquee() {
 
       {/* Marquee Container with edge fade masks */}
       <div
-        className="relative w-full max-w-full overflow-hidden overflow-x-clip marquee-pause-hover"
+        className="relative w-full max-w-full overflow-hidden overflow-x-hidden marquee-pause-hover"
         style={{ contain: "paint" }}
       >
         {/* Left & Right gradient edge fades */}
@@ -290,7 +290,7 @@ export function TestimonialsMarquee() {
 
         <div className="space-y-3.5 sm:space-y-5">
           {/* ROW 1: Moves Left to Right */}
-          <div className="w-full max-w-full overflow-hidden overflow-x-clip" style={{ contain: "paint" }}>
+          <div className="w-full max-w-full overflow-hidden overflow-x-hidden" style={{ contain: "paint" }}>
             <div className="flex gap-3 sm:gap-4.5 w-max animate-marquee-ltr select-none">
               {/* Primary Sequence (Accessible) */}
               <div className="flex gap-3 sm:gap-4.5">
@@ -312,7 +312,7 @@ export function TestimonialsMarquee() {
           </div>
 
           {/* ROW 2: Moves Right to Left */}
-          <div className="w-full max-w-full overflow-hidden overflow-x-clip" style={{ contain: "paint" }}>
+          <div className="w-full max-w-full overflow-hidden overflow-x-hidden" style={{ contain: "paint" }}>
             <div className="flex gap-3 sm:gap-4.5 w-max animate-marquee-rtl select-none">
               {/* Primary Sequence (Accessible) */}
               <div className="flex gap-3 sm:gap-4.5">

@@ -132,7 +132,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
   return (
     <section
       id="pricing"
-      className="py-18 sm:py-24 bg-[#FFFDFB] relative scroll-mt-16 overflow-hidden overflow-x-clip w-full max-w-full select-none"
+      className="py-18 sm:py-24 bg-[#FFFDFB] relative scroll-mt-16 overflow-hidden overflow-x-hidden w-full max-w-full select-none"
     >
       {/* Background glow accents */}
       <div

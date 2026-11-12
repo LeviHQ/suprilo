@@ -102,7 +102,7 @@ export default function BadgesPage() {
   const totalUnlocked = unlockedBadges.length;
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12 w-full min-w-0">
       {/* Header */}
       <PageHeader
         title="Creator Badges & Achievements"
@@ -131,7 +131,10 @@ export default function BadgesPage() {
       <LevelProgressBar totalXp={summary?.total_xp || 0} />
 
       {/* Category Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div
+        className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar scrollbar-none w-full max-w-full min-w-0"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {CATEGORY_TABS.map((tab) => {
           const Icon = tab.icon;
           const isSelected = selectedCategory === tab.id;

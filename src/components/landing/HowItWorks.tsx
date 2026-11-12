@@ -224,7 +224,7 @@ export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="py-16 sm:py-24 bg-[#FFFDFB] relative overflow-hidden overflow-x-clip w-full max-w-full select-none"
+      className="py-16 sm:py-24 bg-[#FFFDFB] relative overflow-hidden overflow-x-hidden w-full max-w-full select-none"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* ========================================================================= */}

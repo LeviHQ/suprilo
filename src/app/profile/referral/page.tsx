@@ -74,7 +74,7 @@ export default function ReferralPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full min-w-0">
       <PageHeader
         title="Referral & Partner Rewards"
         description="Share your unique referral link, invite fellow creators, and monitor affiliate commissions."

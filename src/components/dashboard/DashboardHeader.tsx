@@ -17,19 +17,19 @@ export function DashboardHeader({ onOpenMobileNav }: DashboardHeaderProps) {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-brand-warm-border px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+    <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-brand-warm-border px-4 sm:px-6 lg:px-8 flex items-center justify-between w-full max-w-full">
       {/* Left: Mobile hamburger & Brand/Title */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         <button
           type="button"
           onClick={onOpenMobileNav}
-          className="lg:hidden p-2 -ml-2 rounded-xl text-brand-muted hover:text-brand-dark hover:bg-brand-warm transition-colors"
+          className="lg:hidden p-2 -ml-2 rounded-xl text-brand-muted hover:text-brand-dark hover:bg-brand-warm transition-colors shrink-0"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 lg:hidden min-w-0">
           <BrandLogo href="/" size="sm" priority />
         </div>
 
@@ -41,7 +41,7 @@ export function DashboardHeader({ onOpenMobileNav }: DashboardHeaderProps) {
       </div>
 
       {/* Right: Quick CTA & User Avatar */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <Link href="/create">
           <Button variant="primary" size="sm" className="gap-1.5 shadow-sm text-xs">
             <PlusCircle className="w-3.5 h-3.5" />

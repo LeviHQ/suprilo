@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/Badge";
 
 export default function BillingPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full min-w-0">
       <PageHeader
         title="Billing & Card Usage"
         description="Review your active plan, manage surprise card creation quota, and view account allowances."

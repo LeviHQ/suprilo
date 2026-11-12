@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  */
 function CardNotFoundState({ reason }: { reason: "invalid_slug" | "not_found" }) {
   return (
-    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden min-w-0">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
         <BrandLogo href="/" size="sm" priority />
@@ -122,7 +122,7 @@ function CardNotFoundState({ reason }: { reason: "invalid_slug" | "not_found" })
  */
 function CardBackendErrorState() {
   return (
-    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden min-w-0">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
         <BrandLogo href="/" size="sm" priority />
@@ -217,7 +217,7 @@ export default async function RecipientCardPage({ params }: PageProps) {
   const clientDto = toRecipientCardDto(card);
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden min-w-0">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
         <BrandLogo href="/" size="sm" priority />
@@ -232,7 +232,7 @@ export default async function RecipientCardPage({ params }: PageProps) {
       </header>
 
       {/* Interactive Recipient Card Viewport */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-8">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-8 w-full max-w-full min-w-0 overflow-hidden">
         <RecipientCardExperience
           card={clientDto}
           hasPhoto={Boolean(card.has_photo)}

@@ -143,7 +143,7 @@ export default function ProfileDashboardLayout({
 
   // 3. Authenticated Layout Shell
   return (
-    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden min-w-0">
       {/* Persistent Left Sidebar for Desktop */}
       <Sidebar />
 
@@ -151,10 +151,10 @@ export default function ProfileDashboardLayout({
       <MobileNav isOpen={isMobileNavOpen} onClose={handleCloseMobileNav} />
 
       {/* Main Content Area */}
-      <div className="lg:pl-64 xl:pl-72 flex-1 flex flex-col min-h-screen">
+      <div className="lg:pl-64 xl:pl-72 flex-1 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden min-w-0">
         <DashboardHeader onOpenMobileNav={handleOpenMobileNav} />
 
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+        <main className="flex-1 w-full max-w-7xl min-w-0 mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 overflow-hidden">
           {children}
         </main>
       </div>

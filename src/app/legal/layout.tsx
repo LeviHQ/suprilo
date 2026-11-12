@@ -15,7 +15,7 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#FFFDFB] text-[#17152A] w-full max-w-full overflow-x-clip">
+    <div className="flex flex-col min-h-screen bg-[#FFFDFB] text-[#17152A] w-full max-w-full overflow-x-hidden">
       {/* Top Standard Navbar */}
       <Navbar />
 
@@ -23,8 +23,8 @@ export default function LegalLayout({
       <DraftNoticeBanner />
 
       {/* Main Body */}
-      <main className="flex-1 w-full max-w-full py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 w-full max-w-full min-w-0 py-8 sm:py-12 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full min-w-0">
           {children}
         </div>
       </main>

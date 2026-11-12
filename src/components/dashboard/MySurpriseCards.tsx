@@ -325,9 +325,12 @@ export function MySurpriseCards({
       )}
 
       {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full min-w-0">
         {/* Category Filters */}
-        <div className="flex items-center gap-1.5 p-1 bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-x-auto scrollbar-none">
+        <div
+          className="flex items-center gap-1.5 p-1 bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-x-auto no-scrollbar scrollbar-none w-full md:w-auto min-w-0"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           <button
             type="button"
             onClick={() => setFilter("all")}

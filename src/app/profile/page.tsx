@@ -101,7 +101,7 @@ export default function ProfileHomePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 w-full min-w-0">
       {/* 1. Creator Hub Header */}
       <PageHeader
         title="Creator Hub"

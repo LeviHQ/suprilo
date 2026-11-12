@@ -38,6 +38,13 @@
   /* Prevent any element from causing horizontal blank space on touch swiping */
   body, main, section, header, footer {
     max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Safe container rules for responsive flex and grid elements across mobile viewports */
+  img, canvas, video {
+    max-width: 100%;
+    height: auto;
   }
 
   /* Ensure legible word spacing across all platform headings and typography */

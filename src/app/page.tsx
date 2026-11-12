@@ -26,9 +26,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-full overflow-x-clip">
+    <div className="flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
       <Navbar />
-      <main className="flex-1 w-full max-w-full overflow-x-clip">
+      <main className="flex-1 w-full max-w-full min-w-0 overflow-x-hidden">
         <Hero />
         <HowItWorks />
         <Features />

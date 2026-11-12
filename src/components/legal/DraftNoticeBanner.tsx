@@ -6,20 +6,20 @@ import { LEGAL_CONFIG } from "@/lib/legal-config";
 
 export function DraftNoticeBanner() {
   return (
-    <div className="bg-amber-50/90 border-b border-amber-200/80 px-4 py-3 sm:px-6">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-950">
-        <div className="flex items-center gap-2.5">
+    <div className="bg-amber-50/90 border-b border-amber-200/80 px-4 py-3 sm:px-6 w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl w-full mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-950 min-w-0">
+        <div className="flex items-start sm:items-center gap-2.5 min-w-0">
           <span className="p-1 rounded-md bg-amber-200/80 text-amber-900 shrink-0">
             <ShieldAlert className="w-4 h-4" />
           </span>
-          <div className="space-y-0.5">
-            <p className="font-bold flex items-center gap-2">
+          <div className="space-y-0.5 min-w-0">
+            <p className="font-bold flex items-center gap-2 flex-wrap">
               <span>PRE-LAUNCH DRAFT — NOT YET EFFECTIVE</span>
               <span className="text-[10px] font-mono px-1.5 py-0.2 bg-amber-200/60 rounded border border-amber-300">
                 v{LEGAL_CONFIG.version}
               </span>
             </p>
-            <p className="text-amber-800 leading-snug">
+            <p className="text-amber-800 leading-snug break-words">
               Suprilo is currently in pre-launch development. These policies are prepared for internal owner and legal review before public launch. They do not constitute an active or binding legal agreement until officially verified and published.
             </p>
           </div>
