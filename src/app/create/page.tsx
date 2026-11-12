@@ -510,9 +510,9 @@ function CreateCardStudio() {
   );
 
   return (
-    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-clip">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border w-full max-w-full">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border w-full max-w-full overflow-visible">
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <button

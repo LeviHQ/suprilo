@@ -75,6 +75,7 @@ Per the W3C CSS Overflow Module Level 3 specification:
 ### Where to Handle Horizontal Overflow: Use `overflow-x: clip` (Never `overflow-x: hidden`)
 - **CRITICAL**: `overflow-x: hidden` on `<html>` or `<body>` creates an internal scroll container boundary that **completely breaks and disables `position: sticky`** for all child elements, causing sticky navbars to unstick and scroll away!
 - **Always use `overflow-x: clip` (or `overflow-x-clip`)** on `<html>` and `<body>` (in `globals.css` and `layout.tsx`). Unlike `hidden`, `clip` prevents elements from overflowing horizontally outside the viewport **without** establishing a new scroll container and **without** breaking `position: sticky`!
+- **Page Container Wrappers**: Any parent `div` that encloses `<Navbar />` (e.g. in `src/app/page.tsx`, `legal/layout.tsx`, `templates/page.tsx`) must ALSO use `overflow-x-clip` (or `overflow-visible`), NEVER `overflow-x-hidden`. Any `overflow-x: hidden` on an ancestor element breaks viewport sticky positioning.
 - Sticky navigation headers must always be `sticky top-0 z-40 w-full max-w-full overflow-visible`.
 
 ---

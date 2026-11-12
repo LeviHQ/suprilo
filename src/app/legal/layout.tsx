@@ -15,7 +15,7 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#FFFDFB] text-[#17152A] w-full max-w-full overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#FFFDFB] text-[#17152A] w-full max-w-full overflow-x-clip">
       {/* Top Standard Navbar */}
       <Navbar />
 
