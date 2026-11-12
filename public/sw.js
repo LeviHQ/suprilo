@@ -1,14 +1,87 @@
-// Suprilo Service Worker (Web Push & Notification Management)
-// Spec Reference: SPEC-2C-5.7.5-REV6
+// Suprilo Service Worker (Web Push & Notification Management + Asset Cache)
+// Spec Reference: SPEC-2C-5.7.5-REV7
 
-self.addEventListener("install", () => {
-  // Activate immediately without waiting for existing tabs to close
+const STATIC_CACHE_NAME = "suprilo-fixed-assets-v1";
+
+const CORE_PRECACHE_URLS = [
+  "/brand/logo.png",
+  "/favicon.ico",
+  "/favicon-32x32.png",
+  "/favicon-16x16.png",
+  "/apple-touch-icon.png",
+  "/brand/favicon.png",
+  "/avatars/presets/preset-boy-1.svg",
+  "/avatars/presets/preset-girl-1.svg",
+  "/avatars/presets/preset-female-1.svg",
+  "/avatars/presets/preset-male-1.svg",
+];
+
+self.addEventListener("install", (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(STATIC_CACHE_NAME).then((cache) => {
+      return cache.addAll(CORE_PRECACHE_URLS).catch((err) => {
+        console.warn("[SW] Precache non-blocking failure:", err);
+      });
+    })
+  );
 });
 
 self.addEventListener("activate", (event) => {
-  // Take control of all uncontrolled clients immediately
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((keys) => {
+        return Promise.all(
+          keys
+            .filter((key) => key.startsWith("suprilo-fixed-assets-") && key !== STATIC_CACHE_NAME)
+            .map((key) => caches.delete(key))
+        );
+      }),
+    ])
+  );
+});
+
+// Cache-First strategy for static platform assets (instant loading)
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+
+  // Strictly check for same-origin static assets
+  if (url.origin !== self.location.origin) return;
+
+  const isFixedPlatformAsset =
+    url.pathname.startsWith("/brand/") ||
+    url.pathname.startsWith("/images/badges/") ||
+    url.pathname.startsWith("/avatars/presets/") ||
+    url.pathname.startsWith("/landing/") ||
+    url.pathname.endsWith(".webp") ||
+    url.pathname.endsWith(".svg") ||
+    url.pathname.endsWith(".png") ||
+    url.pathname.endsWith(".ico");
+
+  // Do not intercept API requests or Next.js build chunks
+  if (!isFixedPlatformAsset || url.pathname.startsWith("/api/")) return;
+
+  event.respondWith(
+    caches.open(STATIC_CACHE_NAME).then(async (cache) => {
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      try {
+        const networkResponse = await fetch(request);
+        if (networkResponse && networkResponse.status === 200) {
+          cache.put(request, networkResponse.clone());
+        }
+        return networkResponse;
+      } catch (err) {
+        return cachedResponse || Promise.reject(err);
+      }
+    })
+  );
 });
 
 const ALLOWED_EXACT_ROUTES = [

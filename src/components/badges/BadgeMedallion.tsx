@@ -184,6 +184,7 @@ export function BadgeMedallion({
             alt={badge.name}
             width={sizeConfig.badgeWidth}
             height={sizeConfig.badgeHeight}
+            unoptimized={true}
             className="w-full h-full object-cover"
             onError={() => setImageError(true)}
           />

@@ -17,7 +17,7 @@ export function DashboardHeader({ onOpenMobileNav }: DashboardHeaderProps) {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-brand-warm-border px-4 sm:px-6 lg:px-8 flex items-center justify-between w-full max-w-full">
+    <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-brand-warm-border px-4 sm:px-6 lg:px-8 flex items-center justify-between w-full max-w-full overflow-visible">
       {/* Left: Mobile hamburger & Brand/Title */}
       <div className="flex items-center gap-3 min-w-0">
         <button

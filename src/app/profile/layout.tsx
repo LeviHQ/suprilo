@@ -151,10 +151,10 @@ export default function ProfileDashboardLayout({
       <MobileNav isOpen={isMobileNavOpen} onClose={handleCloseMobileNav} />
 
       {/* Main Content Area */}
-      <div className="lg:pl-64 xl:pl-72 flex-1 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="lg:pl-64 xl:pl-72 flex-1 flex flex-col min-h-screen w-full max-w-full min-w-0 overflow-visible">
         <DashboardHeader onOpenMobileNav={handleOpenMobileNav} />
 
-        <main className="flex-1 w-full max-w-7xl min-w-0 mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 overflow-hidden">
+        <main className="flex-1 w-full max-w-7xl min-w-0 mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 overflow-x-hidden">
           {children}
         </main>
       </div>

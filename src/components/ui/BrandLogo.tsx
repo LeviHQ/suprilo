@@ -66,6 +66,7 @@ export function BrandLogo({
           width={cfg.iconSize}
           height={cfg.iconSize}
           priority={priority}
+          unoptimized={true}
           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
         />
       </div>

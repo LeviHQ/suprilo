@@ -326,6 +326,7 @@ export function HowItWorks() {
                 alt="Paper Airplane"
                 width={32}
                 height={32}
+                unoptimized={true}
                 className="object-contain"
               />
             </div>
@@ -343,6 +344,7 @@ export function HowItWorks() {
                 width={340}
                 height={240}
                 priority
+                unoptimized={true}
                 className="w-full h-full object-contain filter drop-shadow-sm hover:scale-[1.02] transition-transform duration-300"
               />
             </div>
@@ -398,6 +400,7 @@ export function HowItWorks() {
                   fill
                   sizes="300px"
                   priority
+                  unoptimized={true}
                   className="object-cover pointer-events-none select-none"
                 />
 
@@ -419,6 +422,7 @@ export function HowItWorks() {
                       alt="Scratch hand cursor"
                       width={38}
                       height={46}
+                      unoptimized={true}
                       className="drop-shadow-md select-none"
                     />
                   </div>
@@ -483,6 +487,7 @@ export function HowItWorks() {
                 width={345}
                 height={240}
                 priority
+                unoptimized={true}
                 className="w-full h-full object-contain filter drop-shadow-sm hover:scale-[1.02] transition-transform duration-300"
               />
             </div>

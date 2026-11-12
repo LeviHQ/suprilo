@@ -305,6 +305,7 @@ export function UseCases() {
                     width={155}
                     height={180}
                     priority
+                    unoptimized={true}
                     className="w-full h-full object-contain filter drop-shadow-sm"
                   />
                 </div>
@@ -359,6 +360,7 @@ export function UseCases() {
                 width={160}
                 height={190}
                 priority
+                unoptimized={true}
                 className="w-full h-full object-contain filter drop-shadow-sm"
               />
             </div>
@@ -424,6 +426,7 @@ export function UseCases() {
                   alt={selectedOccasion.heading}
                   width={130}
                   height={155}
+                  unoptimized={true}
                   className="w-full h-full object-contain filter drop-shadow-md"
                 />
               </div>

@@ -138,7 +138,8 @@ export function getLevelProgress(xp: number): {
   }
 
   const xpInCurrentLevel = safeXp - currentLevel.requiredXp;
-  const progressPercent = Math.min(100, Math.max(0, (xpInCurrentLevel / currentLevel.deltaToNext) * 100));
+  const rawPercent = (xpInCurrentLevel / currentLevel.deltaToNext) * 100;
+  const progressPercent = Math.min(100, Math.max(0, Math.round(rawPercent)));
 
   return {
     currentLevel,

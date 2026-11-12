@@ -270,6 +270,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
                       width={280}
                       height={180}
                       priority
+                      unoptimized={true}
                       className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -346,6 +347,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
               alt=""
               width={44}
               height={52}
+              unoptimized={true}
               className="w-full h-full object-contain"
             />
           </div>
@@ -357,6 +359,7 @@ export function Pricing({ onSelectPlan }: PricingProps) {
               alt=""
               width={64}
               height={64}
+              unoptimized={true}
               className="w-full h-full object-contain"
             />
           </div>

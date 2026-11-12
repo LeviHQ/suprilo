@@ -168,6 +168,7 @@ export function Features() {
                   width={230}
                   height={285}
                   priority
+                  unoptimized={true}
                   className="w-full h-full object-cover select-none pointer-events-none"
                 />
               </div>
@@ -297,6 +298,7 @@ export function Features() {
                   width={245}
                   height={150}
                   priority
+                  unoptimized={true}
                   className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 group-hover:rotate-1 transition-transform duration-300 select-none pointer-events-none"
                 />
               </div>
@@ -337,6 +339,7 @@ export function Features() {
                   width={240}
                   height={150}
                   priority
+                  unoptimized={true}
                   className={`w-full h-full object-contain filter drop-shadow-sm transition-transform duration-300 select-none pointer-events-none ${
                     isScratching ? "scale-105 -rotate-1" : "group-hover:scale-102"
                   }`}
@@ -418,6 +421,7 @@ export function Features() {
                   width={95}
                   height={175}
                   priority
+                  unoptimized={true}
                   className="w-full h-full object-contain filter drop-shadow-sm select-none pointer-events-none"
                 />
               </div>
@@ -468,6 +472,7 @@ export function Features() {
                 width={290}
                 height={140}
                 priority
+                unoptimized={true}
                 className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
               />
             </div>
@@ -504,6 +509,7 @@ export function Features() {
                 width={295}
                 height={140}
                 priority
+                unoptimized={true}
                 className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 group-hover:-translate-y-1 transition-all duration-300 select-none pointer-events-none"
               />
             </div>

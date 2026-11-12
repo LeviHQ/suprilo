@@ -83,6 +83,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${headingFont.variable} ${bodyFont.variable} overflow-x-hidden max-w-full w-full`}>
+      <head>
+        <link rel="preload" href="/brand/logo.png" as="image" type="image/png" fetchPriority="high" />
+      </head>
       <body className="bg-brand-warm text-brand-dark min-h-screen flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink overflow-x-hidden max-w-full w-full">
         <AuthProvider>{children}</AuthProvider>
       </body>

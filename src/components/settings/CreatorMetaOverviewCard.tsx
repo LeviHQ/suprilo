@@ -118,11 +118,11 @@ export function CreatorMetaOverviewCard() {
             <Trophy className="w-3.5 h-3.5 text-amber-500" />
             <span>Creator Level</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-black text-sm text-brand-dark">
+          <div className="flex items-center flex-wrap gap-1.5 min-w-0">
+            <span className="font-black text-sm text-brand-dark whitespace-nowrap">
               Level {badgeSummary?.current_level ?? levelInfo.currentLevel.level}
             </span>
-            <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">
+            <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-300 whitespace-nowrap shrink-0 inline-flex items-center leading-none">
               {levelInfo.currentLevel.title}
             </span>
           </div>
@@ -152,7 +152,7 @@ export function CreatorMetaOverviewCard() {
             Level {levelInfo.currentLevel.level} Mastery:
           </span>
           <span className="text-brand-muted">
-            {levelInfo.progressPercent}% progress toward {levelInfo.nextLevel?.title || "Master"}
+            {Math.round(levelInfo.progressPercent)}% progress toward {levelInfo.nextLevel?.title || "Master"}
           </span>
         </div>
 
