@@ -95,13 +95,13 @@ export function AuthModal({
         </button>
 
         {/* Brand Logo & Subtle Badge */}
-        <div className="space-y-3 pt-2 text-center">
-          <BrandLogo size="md" className="justify-center mx-auto" priority />
+        <div className="flex items-center justify-center flex-wrap gap-2.5 pt-2 text-center">
+          <BrandLogo size="md" priority />
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20">
-            <Sparkles className="w-3.5 h-3.5 text-brand-pink" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 shrink-0 whitespace-nowrap leading-none">
+            <Sparkles className="w-3 h-3 text-brand-pink" />
             <span>Start Creating Surprises</span>
-          </div>
+          </span>
         </div>
 
         {/* Heading & Short Description */}

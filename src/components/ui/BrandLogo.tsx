@@ -53,7 +53,7 @@ export function BrandLogo({
   const content = (
     <div
       className={cn(
-        "inline-flex items-center select-none group transition-transform focus:outline-none",
+        "inline-flex items-center select-none group transition-transform focus:outline-none shrink-0",
         cfg.container,
         className
       )}

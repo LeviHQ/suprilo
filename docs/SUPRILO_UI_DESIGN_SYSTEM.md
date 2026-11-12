@@ -198,6 +198,27 @@ Key classes:
 - `leading-none`: Prevents unwanted line-height padding artifacts inside the pill.
 - `flex-wrap`: Allows the pill to drop neatly to the next row if the card is extremely narrow, rather than overflowing.
 
+### Modal Headers & Brand Pill Badge Containment
+> **Crucial Rule**: Never use `space-y-*` with multiple `inline-flex` children (e.g. `BrandLogo` and a badge pill). In Tailwind, `space-y-*` applies `margin-top` via adjacent sibling selector `~`, but on inline elements without a flex wrapper, the browser keeps them on the same horizontal baseline while shifting one vertically, causing the pill to horizontally collide with and overlap the brand name (`Suprilo`).
+
+**Mandatory Modal Header Pattern**:
+```tsx
+{/* Brand Logo & Subtle Badge */}
+<div className="flex items-center justify-center flex-wrap gap-2.5 pt-2 text-center">
+  <BrandLogo size="md" priority />
+
+  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 shrink-0 whitespace-nowrap leading-none">
+    <Sparkles className="w-3 h-3 text-brand-pink" />
+    <span>Start Creating Surprises</span>
+  </span>
+</div>
+```
+Benefits:
+- `display: flex` with `flex-wrap` ensures children are true flex items.
+- `gap-2.5` guarantees an explicit 10px separation with zero collision.
+- `items-center justify-center` centers both vertically and horizontally.
+- On narrow screens, the badge drops to the next line cleanly centered, never overlapping.
+
 ---
 
 ## 6. Mobile Viewport & Horizontal Overflow Prevention
