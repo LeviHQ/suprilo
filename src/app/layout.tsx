@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://suprilo.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://suprilo.vercel.app"),
   title: "Suprilo — Make Every Moment a Surprise",
   description:
     "Turn your favorite memories, heartfelt messages, and happy moments into interactive scratch cards. Share a link and let someone discover the surprise.",
@@ -54,14 +54,14 @@ export const metadata: Metadata = {
     title: "Suprilo — Make Every Moment a Surprise",
     description:
       "Turn your favorite memories, heartfelt messages, and happy moments into interactive scratch cards. Share a link and let someone discover the surprise.",
-    url: "https://suprilo.com",
+    url: "https://suprilo.vercel.app",
     siteName: "Suprilo",
     images: [
       {
-        url: "/brand/logo.png",
+        url: "/brand/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Suprilo Logo and Tagline",
+        alt: "Suprilo — Make Every Moment a Surprise",
       },
     ],
     locale: "en_US",
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     title: "Suprilo — Make Every Moment a Surprise",
     description:
       "Turn your favorite memories, heartfelt messages, and happy moments into interactive scratch cards.",
-    images: ["/brand/logo.png"],
+    images: ["/brand/og-image.png"],
   },
 };
 
