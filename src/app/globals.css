@@ -17,8 +17,8 @@
   html {
     scroll-behavior: smooth;
     color-scheme: light;
-    overflow-x: clip;
-    max-width: 100vw;
+    overflow-x: hidden;
+    max-width: 100%;
     width: 100%;
   }
 
@@ -28,8 +28,8 @@
     font-family: var(--font-body), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: clip;
-    max-width: 100vw;
+    overflow-x: hidden;
+    max-width: 100%;
     width: 100%;
     position: relative;
     word-spacing: 0.05em;
@@ -37,7 +37,7 @@
 
   /* Prevent any element from causing horizontal blank space on touch swiping */
   body, main, section, header, footer {
-    max-width: 100vw;
+    max-width: 100%;
   }
 
   /* Ensure legible word spacing across all platform headings and typography */
@@ -122,6 +122,22 @@
   .marquee-pause-hover:hover .animate-marquee-rtl {
     animation-play-state: paused !important;
   }
+}
+
+/* ========================================================================= */
+/* UTILITIES: Cross-Browser Horizontal Scrollbar Hiding (Mobile & Desktop)    */
+/* ========================================================================= */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* ========================================================================= */

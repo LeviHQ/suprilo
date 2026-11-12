@@ -510,10 +510,10 @@ function CreateCardStudio() {
   );
 
   return (
-    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border w-full max-w-full">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <button
               type="button"
@@ -565,7 +565,7 @@ function CreateCardStudio() {
       </header>
 
       {/* Main Studio Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-8">
+      <main className="flex-1 max-w-7xl w-full min-w-0 mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-8 overflow-hidden">
         {/* ======================================================== */}
         {/* VIEW 1: CREATION CHOICE SCREEN WITH DELIGHTFUL FLIGHT STAGE */}
         {/* ======================================================== */}

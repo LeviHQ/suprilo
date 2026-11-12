@@ -493,7 +493,7 @@ export function CreationFlightStage({
             {/* Visual Showcase: Creative Studio Workshop Preview */}
             <div className="h-44 sm:h-48 rounded-2xl p-3 bg-gradient-to-br from-purple-50/70 via-slate-50 to-indigo-50/50 border border-brand-warm-border/80 shadow-inner relative overflow-hidden flex flex-col justify-between">
               {/* Studio Canvas Workbench */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1 flex-wrap sm:flex-nowrap">
                 {/* Swatch Picker Simulation */}
                 <div className="flex items-center gap-1.5 bg-white/90 px-2.5 py-1 rounded-full border border-purple-100 shadow-2xs">
                   <span className="text-[10px] font-bold text-slate-500 mr-1">Palette:</span>

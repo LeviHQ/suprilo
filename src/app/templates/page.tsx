@@ -57,10 +57,10 @@ export default function TemplatesGalleryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink">
+    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-hidden">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border w-full max-w-full">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <button
               type="button"
@@ -81,7 +81,7 @@ export default function TemplatesGalleryPage() {
             <BrandLogo href="/" size="sm" priority />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/profile"
               className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
@@ -97,38 +97,38 @@ export default function TemplatesGalleryPage() {
       </header>
 
       {/* Main Gallery Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+      <main className="flex-1 max-w-7xl w-full min-w-0 mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-6 sm:space-y-8 overflow-hidden">
         {/* Gallery Hero Title */}
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Curated Design Collection</span>
+        <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-2 w-full min-w-0">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light border border-brand-pink/20 max-w-full">
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Curated Design Collection</span>
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-brand-dark tracking-tight break-words">
             Find Your Perfect Surprise
           </h1>
-          <p className="text-sm sm:text-base text-brand-muted leading-relaxed">
+          <p className="text-xs sm:text-base text-brand-muted leading-relaxed">
             Choose from our curated collection of interactive scratch card designs for every celebration, milestone, and heartfelt memory.
           </p>
         </div>
 
         {/* Search & Category Filter Bar */}
-        <div className="space-y-4 max-w-4xl mx-auto">
+        <div className="space-y-3 sm:space-y-4 max-w-4xl w-full min-w-0 mx-auto">
           {/* Search Box */}
-          <div className="relative">
-            <Search className="w-5 h-5 text-brand-muted absolute left-4 top-3.5 pointer-events-none" />
+          <div className="relative w-full">
+            <Search className="w-4 sm:w-5 h-4 sm:h-5 text-brand-muted absolute left-3.5 sm:left-4 top-3.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search templates by occasion, message, or keyword (e.g. Birthday, Love, Paris, Coffee)..."
-              className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-brand-warm-border bg-white text-brand-dark text-sm placeholder:text-brand-muted/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-pink focus:border-brand-pink transition-all"
+              placeholder="Search templates by occasion, message, or keyword..."
+              className="w-full pl-10 sm:pl-12 pr-10 py-3 sm:py-3.5 rounded-2xl border border-brand-warm-border bg-white text-brand-dark text-xs sm:text-sm placeholder:text-brand-muted/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-pink focus:border-brand-pink transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-4 top-3.5 p-1 rounded-full text-brand-muted hover:text-brand-dark hover:bg-brand-warm-subtle"
+                className="absolute right-3.5 sm:right-4 top-3 sm:top-3.5 p-1 rounded-full text-brand-muted hover:text-brand-dark hover:bg-brand-warm-subtle"
                 title="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -136,8 +136,11 @@ export default function TemplatesGalleryPage() {
             )}
           </div>
 
-          {/* Category Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {/* Category Chips (Smooth Mobile Swipe with no-scrollbar) */}
+          <div
+            className="w-full min-w-0 overflow-x-auto pb-2 flex items-center gap-2 no-scrollbar scrollbar-none"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             {TEMPLATE_CATEGORIES.map((cat) => {
               const isActive = selectedCategory === cat.id;
               return (
@@ -146,7 +149,7 @@ export default function TemplatesGalleryPage() {
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all",
+                    "px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0",
                     isActive
                       ? "bg-brand-dark text-white shadow-sm"
                       : "bg-white text-brand-muted hover:text-brand-dark hover:bg-brand-warm-subtle border border-brand-warm-border/80"
@@ -160,7 +163,7 @@ export default function TemplatesGalleryPage() {
         </div>
 
         {/* Results Counter */}
-        <div className="flex items-center justify-between text-xs text-brand-muted max-w-7xl mx-auto">
+        <div className="flex items-center justify-between text-xs text-brand-muted max-w-7xl w-full mx-auto px-1">
           <span>
             Showing <strong className="text-brand-dark">{filteredTemplates.length}</strong> design
             {filteredTemplates.length === 1 ? "" : "s"}
@@ -181,26 +184,26 @@ export default function TemplatesGalleryPage() {
 
         {/* Template Grid (16 Templates) */}
         {filteredTemplates.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full min-w-0">
             {filteredTemplates.map((template) => {
               return (
                 <div
                   key={template.id}
-                  className="group bg-white rounded-3xl p-5 border border-brand-warm-border shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1"
+                  className="group bg-white rounded-3xl p-4 sm:p-5 border border-brand-warm-border shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1 w-full min-w-0 overflow-hidden"
                 >
                   {/* Card Visual Header Preview */}
                   <div
                     className={cn(
-                      "h-44 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden shadow-inner border border-brand-warm-border/60 bg-gradient-to-br",
+                      "h-44 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden shadow-inner border border-brand-warm-border/60 bg-gradient-to-br w-full",
                       template.bgGradient
                     )}
                   >
                     {/* Top Row: Tag & Recipient */}
-                    <div className="flex items-center justify-between text-[11px] font-bold">
-                      <Badge variant={template.badgeColor} className="text-[10px] py-0.5">
+                    <div className="flex items-center justify-between gap-2 text-[11px] font-bold min-w-0">
+                      <Badge variant={template.badgeColor} className="text-[10px] py-0.5 truncate max-w-[150px] shrink-0">
                         {template.tag}
                       </Badge>
-                      <span className="text-brand-muted/80">To: {template.recipient}</span>
+                      <span className="text-brand-muted/80 truncate text-[11px]">To: {template.recipient}</span>
                     </div>
 
                     {/* Secret Message Preview Note */}
@@ -216,21 +219,21 @@ export default function TemplatesGalleryPage() {
                     </div>
 
                     {/* Bottom Row: Foil Cover Style Badge */}
-                    <div className="flex items-center justify-between text-[10px] text-brand-muted pt-2 border-t border-brand-warm-border/40">
-                      <span className="font-semibold capitalize text-brand-dark/70">
+                    <div className="flex items-center justify-between text-[10px] text-brand-muted pt-2 border-t border-brand-warm-border/40 min-w-0 gap-2">
+                      <span className="font-semibold capitalize text-brand-dark/70 truncate">
                         ✨ {template.coverStyle.replace("-", " ")}
                       </span>
-                      <span>From: {template.sender}</span>
+                      <span className="truncate shrink-0">From: {template.sender}</span>
                     </div>
                   </div>
 
                   {/* Details & Wording */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-brand-dark group-hover:text-brand-pink transition-colors">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-bold text-brand-dark group-hover:text-brand-pink transition-colors truncate">
                         {template.title}
                       </h3>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-warm-subtle text-brand-muted border border-brand-warm-border font-medium">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-warm-subtle text-brand-muted border border-brand-warm-border font-medium shrink-0">
                         {template.categoryLabel}
                       </span>
                     </div>

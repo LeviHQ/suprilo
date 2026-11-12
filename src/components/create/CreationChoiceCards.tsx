@@ -44,7 +44,7 @@ export function CreationChoiceCards({
         {/* CARD A: Use a Template (Subtle V-Shape Offset Left) */}
         {/* ======================================================== */}
         <div
-          className="group relative bg-white rounded-3xl p-6 sm:p-8 border-2 border-brand-pink/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-6 lg:translate-y-0 lg:-rotate-1 lg:hover:rotate-0 hover:-translate-y-2"
+          className="group relative bg-white rounded-3xl p-6 sm:p-8 border-2 border-brand-pink/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-6 lg:translate-y-0 lg:-rotate-1 lg:hover:rotate-0 hover:-translate-y-2 overflow-hidden"
         >
           {/* Subtle warm glow background */}
           <div
@@ -185,7 +185,7 @@ export function CreationChoiceCards({
         {/* CARD B: Create from Scratch (Subtle V-Shape Offset Right) */}
         {/* ======================================================== */}
         <div
-          className="group relative bg-white rounded-3xl p-6 sm:p-8 border-2 border-brand-purple/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-6 lg:translate-y-6 lg:rotate-1 lg:hover:rotate-0 hover:-translate-y-2"
+          className="group relative bg-white rounded-3xl p-6 sm:p-8 border-2 border-brand-purple/25 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between space-y-6 lg:translate-y-6 lg:rotate-1 lg:hover:rotate-0 hover:-translate-y-2 overflow-hidden"
         >
           {/* Subtle purple glow background */}
           <div
