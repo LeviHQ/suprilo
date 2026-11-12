@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import crypto from "crypto";
 import { Sparkles, HelpCircle, AlertTriangle, ArrowRight, RefreshCw } from "lucide-react";
 import { isValidCardSlug } from "@/lib/slug";
@@ -8,6 +7,7 @@ import { getPublishedCardBySlug, CardBackendError, toRecipientCardDto } from "@/
 import { createHandshakeToken } from "@/lib/server/visitor-identity";
 import { RecipientCardExperience } from "@/components/scratch/RecipientCardExperience";
 import { Button } from "@/components/ui/Button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -66,20 +66,7 @@ function CardNotFoundState({ reason }: { reason: "invalid_slug" | "not_found" })
     <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-            <Image
-              src="/brand/favicon.png"
-              alt="Suprilo Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight text-brand-dark">
-            Suprilo
-          </span>
-        </Link>
+        <BrandLogo href="/" size="sm" priority />
         <Link href="/create">
           <Button variant="primary" size="sm" className="gap-1.5 shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />
@@ -138,20 +125,7 @@ function CardBackendErrorState() {
     <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-            <Image
-              src="/brand/favicon.png"
-              alt="Suprilo Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight text-brand-dark">
-            Suprilo
-          </span>
-        </Link>
+        <BrandLogo href="/" size="sm" priority />
       </header>
 
       {/* Main Error Viewport */}
@@ -246,20 +220,7 @@ export default async function RecipientCardPage({ params }: PageProps) {
     <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-            <Image
-              src="/brand/favicon.png"
-              alt="Suprilo Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight text-brand-dark">
-            Suprilo
-          </span>
-        </Link>
+        <BrandLogo href="/" size="sm" priority />
 
         <Link href="/create">
           <Button variant="outline" size="sm" className="gap-1.5 shadow-sm">

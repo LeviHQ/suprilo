@@ -1,26 +1,12 @@
-import Link from "next/link";
-import Image from "next/image";
 import { Sparkles } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export default function RecipientCardLoading() {
   return (
     <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-            <Image
-              src="/brand/favicon.png"
-              alt="Suprilo Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight text-brand-dark">
-            Suprilo
-          </span>
-        </Link>
+        <BrandLogo href="/" size="sm" priority />
       </header>
 
       {/* Main Skeleton Viewport */}

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
   Sparkles,
@@ -15,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getBadgeById, RARITY_STYLES, BADGE_CATEGORIES } from "@/data/badges";
 import { BadgeMedallion } from "@/components/badges/BadgeMedallion";
 import { Button } from "@/components/ui/Button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils";
 
 interface PageProps {
@@ -128,20 +128,7 @@ export default async function PublicBadgePage({ params }: PageProps) {
     <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
       {/* Brand Header */}
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-            <Image
-              src="/brand/favicon.png"
-              alt="Suprilo Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight text-brand-dark">
-            Suprilo
-          </span>
-        </Link>
+        <BrandLogo href="/" size="sm" priority />
 
         <Link href="/create">
           <Button variant="primary" size="sm" className="gap-1.5 shadow-sm">
@@ -257,20 +244,7 @@ function BadgeNotFoundState() {
   return (
     <div className="min-h-screen flex flex-col bg-brand-warm selection:bg-brand-pink/15 selection:text-brand-pink">
       <header className="w-full max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-            <Image
-              src="/brand/favicon.png"
-              alt="Suprilo Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-          </div>
-          <span className="font-heading font-extrabold text-xl tracking-tight text-brand-dark">
-            Suprilo
-          </span>
-        </Link>
+        <BrandLogo href="/" size="sm" priority />
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
