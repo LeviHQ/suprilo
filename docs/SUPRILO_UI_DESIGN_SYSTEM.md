@@ -255,7 +255,26 @@ Benefits:
 
 ---
 
-## 8. Checklist for Every UI Pull Request / Turn
+## 9. Creation Studio Hub Architecture
+
+The `/create` route follows the same desktop-sidebar + mobile slide-over pattern established in the Suprilo Control Center (`/profile`):
+
+### 9.1 Layout Structure
+- **Persistent Left Sidebar (`StudioSidebar.tsx`)**:
+  - Pinned top action: **"Start from Scratch (Blank Canvas)"** with gradient accent for instant unconstrained creation.
+  - Category List: Pinned **"General (Curated Mix)"** (`✨`) selected by default on initial arrival, followed by the 10 occasion categories (`🎂 Birthdays`, `💖 Love`, `👯 Friendship`, `😂 Funny/Roasts`, `🏆 Celebrations`, `💼 Workplace`, `🎁 Secret Reveals`, `🌸 Heartfelt`, `🎄 Holidays`, `🧩 Games`).
+  - Active category highlight: `bg-brand-pink-light text-brand-pink shadow-xs font-bold border border-brand-pink/20`.
+- **Slide-over Mobile Drawer (`StudioMobileNav.tsx`)**:
+  - Accessible on `< 1024px` through sticky top header hamburger icon.
+  - Automatically locks body scroll on mount and dismisses on category selection.
+- **Main Showcase Grid (`TemplateStudioCard.tsx`)**:
+  - Dual-state tactile card preview with metallic foil badge (`24K Gold Foil`, `Lavender Pink`, `Cosmic Purple`, `Mint Emerald`), recipient/message preview, and primary `Use This Template →` action.
+  - "Shuffle Mix" button in General view using seeded PRNG re-roll.
+  - Live client-side search input across template title, description, message, recipient, and tags.
+
+---
+
+## 10. Checklist for Every UI Pull Request / Turn
 
 Before closing any UI work or committing changes, verify:
 - [ ] **Navbar & Header Dropdowns**: Profile dropdown and Notification Bell open and display without clipping; no scrollbar appears on the header bar.
@@ -264,8 +283,9 @@ Before closing any UI work or committing changes, verify:
 - [ ] **Percentage Precision**: Any displayed progress percentage is rounded to an integer (`Math.round(...)`), with no floating-point decimals.
 - [ ] **Pill & Badge Formatting**: Badges have `whitespace-nowrap shrink-0` and do not break into multiple lines or squish text.
 - [ ] **iPhone Viewport Verification**: Inspect at 393px width; ensure zero horizontal overflow and no clipped elements.
+- [ ] **Creation Studio Alignment**: Ensure all template routes (`/templates`) route through the unified `/create` Studio Hub.
 - [ ] **Platform Documentation**: Any new UI convention or layout pattern has been reflected in `docs/SUPRILO_UI_DESIGN_SYSTEM.md`.
 
 ---
-*Created and maintained under Suprilo Core Engineering Standards. Version 1.0.0 (November 2026).*
+*Created and maintained under Suprilo Core Engineering Standards. Version 1.1.0 (November 2026).*
 

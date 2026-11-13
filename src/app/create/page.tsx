@@ -31,8 +31,18 @@ import { Badge } from "@/components/ui/Badge";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { CreationFlightStage } from "@/components/create/CreationFlightStage";
-import { getTemplateById } from "@/data/templates";
+import { StudioSidebar } from "@/components/create/StudioSidebar";
+import { StudioMobileNav } from "@/components/create/StudioMobileNav";
+import { TemplateStudioCard } from "@/components/create/TemplateStudioCard";
+import {
+  SU_PRILO_TEMPLATES,
+  TEMPLATE_CATEGORIES,
+  getCuratedGeneralTemplates,
+  getTemplateById,
+  TemplateCategory,
+  TemplateDefinition,
+} from "@/data/templates";
+import { Menu, Search, X, Paintbrush } from "lucide-react";
 import { useCardEditor } from "@/hooks/useCardEditor";
 import { useCardDraftSync } from "@/hooks/useCardDraftSync";
 import { useCardAutosave } from "@/hooks/useCardAutosave";
@@ -167,6 +177,11 @@ function CreateCardStudio() {
     return "choices";
   });
 
+  const [activeCategory, setActiveCategory] = React.useState<TemplateCategory>("general");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
+  const [shuffleSeed, setShuffleSeed] = React.useState(42);
+
   // Canonical reducer-backed card editor hook
   const {
     state,
@@ -178,6 +193,8 @@ function CreateCardStudio() {
     setFoilStyle,
     setBgPalette,
     setSticker,
+    applyTemplate,
+    initScratch,
     remountCanvas,
     clearDraft,
   } = useCardEditor({
@@ -307,8 +324,9 @@ function CreateCardStudio() {
   };
 
   const handleBack = () => {
-    if (viewState === "editor" && !templateParam && !modeParam) {
+    if (viewState === "editor") {
       setViewState("choices");
+      router.push("/create");
       return;
     }
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -321,6 +339,54 @@ function CreateCardStudio() {
   const handleResetCard = () => {
     remountCanvas();
   };
+
+  const handleSelectTemplate = (template: TemplateDefinition) => {
+    if (!user) {
+      openAuthModal(`/create?template=${template.id}`);
+    } else {
+      applyTemplate(template);
+      setViewState("editor");
+      router.push(`/create?template=${template.id}`);
+    }
+  };
+
+  const handleStartFromScratch = () => {
+    if (!user) {
+      openAuthModal("/create?mode=scratch");
+    } else {
+      initScratch();
+      setViewState("editor");
+      router.push("/create?mode=scratch");
+    }
+  };
+
+  const displayedTemplates = React.useMemo(() => {
+    let list: TemplateDefinition[];
+    if (activeCategory === "general") {
+      list = getCuratedGeneralTemplates(shuffleSeed);
+    } else {
+      list = SU_PRILO_TEMPLATES.filter((t) => t.category === activeCategory);
+    }
+
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase().trim();
+    return list.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        t.message.toLowerCase().includes(q) ||
+        t.recipient.toLowerCase().includes(q) ||
+        t.tag.toLowerCase().includes(q) ||
+        t.categoryLabel.toLowerCase().includes(q)
+    );
+  }, [activeCategory, shuffleSeed, searchQuery]);
+
+  const currentCategoryMeta = React.useMemo(() => {
+    return (
+      TEMPLATE_CATEGORIES.find((c) => c.id === activeCategory) ||
+      TEMPLATE_CATEGORIES[0]
+    );
+  }, [activeCategory]);
 
   const handleChooseAnotherMode = () => {
     clearDraft();
@@ -510,84 +576,276 @@ function CreateCardStudio() {
   );
 
   return (
-    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-clip">
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border w-full max-w-full overflow-visible">
-        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-white hover:bg-brand-warm-subtle text-brand-dark hover:text-brand-pink border border-brand-warm-border shadow-xs active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink shrink-0"
-              aria-label="Go back"
-              title="Go back"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-
-            <BrandLogo href="/" size="sm" priority />
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            {viewState === "editor" && (
-              <Link href="/templates">
-                <Button variant="secondary" size="sm" className="gap-1.5 text-xs">
-                  <Wand2 className="w-3.5 h-3.5 text-brand-pink" />
-                  <span className="hidden sm:inline">Browse Templates</span>
-                  <span className="sm:hidden">Templates</span>
-                </Button>
-              </Link>
-            )}
-
-            {user ? (
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
-                title="View Profile Dashboard"
-              >
-                <UserAvatar user={user} size="sm" />
-                <span className="hidden sm:inline text-xs font-semibold text-brand-dark">
-                  {user.displayName?.split(" ")[0] || "Profile"}
-                </span>
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => openAuthModal("/create")}
-                className="flex items-center gap-1.5 text-xs font-semibold text-brand-dark hover:text-brand-pink px-3 py-1.5 rounded-full bg-brand-warm-subtle border border-brand-warm-border/80 hover:bg-brand-warm-border transition-colors"
-              >
-                <UserAvatar user={null} size="sm" />
-                <span className="hidden sm:inline">Sign In</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Studio Body */}
-      <main className="flex-1 max-w-7xl w-full min-w-0 mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-8 overflow-hidden">
-        {/* ======================================================== */}
-        {/* VIEW 1: CREATION CHOICE SCREEN WITH DELIGHTFUL FLIGHT STAGE */}
-        {/* ======================================================== */}
-        {viewState === "choices" ? (
-          <CreationFlightStage
-            onSelectScratch={() => {
-              if (!user) {
-                openAuthModal("/create?mode=scratch");
-              } else {
-                setViewState("editor");
-                router.push("/create?mode=scratch");
-              }
-            }}
-            onExploreTemplates={() => {
-              router.push("/templates");
-            }}
+    <div className="min-h-screen bg-brand-warm text-brand-dark flex flex-col selection:bg-brand-pink/15 selection:text-brand-pink w-full max-w-full overflow-x-clip min-w-0">
+      {viewState === "choices" ? (
+        <>
+          {/* Left Sidebar for Desktop */}
+          <StudioSidebar
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            onSelectScratch={handleStartFromScratch}
           />
-        ) : (
-          /* ======================================================== */
-          /* VIEW 2: SHARED CARD STUDIO EDITOR */
-          /* ======================================================== */
-          <div className="space-y-6">
+
+          {/* Slide-over Mobile Navigation Drawer */}
+          <StudioMobileNav
+            isOpen={isMobileNavOpen}
+            onClose={() => setIsMobileNavOpen(false)}
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            onSelectScratch={handleStartFromScratch}
+          />
+
+          {/* Main Studio Area */}
+          <div className="lg:pl-64 xl:pl-72 flex-1 flex flex-col min-h-screen w-full max-w-full min-w-0 overflow-visible">
+            {/* Studio Header */}
+            <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-brand-warm-border px-4 sm:px-6 lg:px-8 flex items-center justify-between w-full max-w-full overflow-visible">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileNavOpen(true)}
+                  className="lg:hidden p-2 -ml-2 rounded-xl text-brand-muted hover:text-brand-dark hover:bg-brand-warm transition-colors shrink-0"
+                  aria-label="Open categories menu"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center gap-2 lg:hidden min-w-0">
+                  <BrandLogo href="/" size="sm" priority />
+                </div>
+
+                <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-brand-muted">
+                  <Link href="/" className="hover:text-brand-dark transition-colors">
+                    Suprilo
+                  </Link>
+                  <span className="text-brand-warm-border">/</span>
+                  <span className="text-brand-dark font-bold">Creation Studio</span>
+                  <span className="text-brand-warm-border">/</span>
+                  <span className="text-brand-pink font-bold flex items-center gap-1.5">
+                    <span>{currentCategoryMeta.icon}</span>
+                    <span>{currentCategoryMeta.label}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Right: Search Box & Profile */}
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="relative hidden sm:block w-60 md:w-72">
+                  <Search className="w-4 h-4 text-brand-muted absolute left-3 top-2.5 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search 100 templates..."
+                    className="w-full pl-9 pr-8 py-1.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-xs text-brand-dark placeholder:text-brand-muted focus:outline-none focus:ring-1 focus:ring-brand-pink focus:border-brand-pink transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2.5 top-2 p-0.5 rounded-full text-brand-muted hover:text-brand-dark"
+                      title="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {user ? (
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
+                    title="View Profile Dashboard"
+                  >
+                    <UserAvatar user={user} size="sm" />
+                    <span className="hidden sm:inline text-xs font-semibold text-brand-dark">
+                      {user.displayName?.split(" ")[0] || "Profile"}
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal("/create")}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-brand-dark hover:text-brand-pink px-3 py-1.5 rounded-full bg-brand-warm-subtle border border-brand-warm-border/80 hover:bg-brand-warm-border transition-colors"
+                  >
+                    <UserAvatar user={null} size="sm" />
+                    <span className="hidden sm:inline">Sign In</span>
+                  </button>
+                )}
+              </div>
+            </header>
+
+            {/* Main Showcase Feed */}
+            <main className="flex-1 w-full max-w-7xl min-w-0 mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 overflow-x-clip">
+              {/* Mobile search bar */}
+              <div className="relative block sm:hidden w-full">
+                <Search className="w-4 h-4 text-brand-muted absolute left-3 top-3 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search 100 templates..."
+                  className="w-full pl-9 pr-8 py-2 rounded-xl border border-brand-warm-border bg-white text-xs text-brand-dark placeholder:text-brand-muted shadow-xs focus:outline-none focus:ring-1 focus:ring-brand-pink focus:border-brand-pink"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-2.5 p-0.5 text-brand-muted hover:text-brand-dark"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Category Hero Banner */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div className="space-y-2 max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-brand-pink-light text-brand-pink border border-brand-pink/20">
+                    <span className="text-base">{currentCategoryMeta.icon}</span>
+                    <span>{currentCategoryMeta.label}</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
+                    {activeCategory === "general"
+                      ? "Curated Inspiration Showcase"
+                      : currentCategoryMeta.label}
+                  </h1>
+                  <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+                    {currentCategoryMeta.description}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+                  {activeCategory === "general" && (
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={() => setShuffleSeed((s) => s + 1)}
+                      className="gap-2 text-xs font-bold border-brand-warm-border hover:border-brand-pink shadow-2xs"
+                      title="Randomize templates mix"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-brand-pink" />
+                      <span>Shuffle Mix</span>
+                    </Button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleStartFromScratch}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-pink to-brand-orange text-white text-xs font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+                  >
+                    <Paintbrush className="w-3.5 h-3.5" />
+                    <span>Blank Canvas</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Counter info */}
+              <div className="flex items-center justify-between text-xs text-brand-muted px-1">
+                <span>
+                  Showing <strong className="text-brand-dark font-bold">{displayedTemplates.length}</strong> design{displayedTemplates.length === 1 ? "" : "s"}
+                </span>
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="text-brand-pink font-semibold hover:underline"
+                  >
+                    Clear search
+                  </button>
+                )}
+              </div>
+
+              {/* Template Cards Grid */}
+              {displayedTemplates.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                  {displayedTemplates.map((template) => (
+                    <TemplateStudioCard
+                      key={template.id}
+                      template={template}
+                      onSelect={handleSelectTemplate}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white rounded-3xl border border-brand-warm-border p-8 space-y-4">
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-brand-warm-subtle flex items-center justify-center text-brand-muted">
+                    <Search className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold text-brand-dark">No matching templates found</h3>
+                  <p className="text-xs text-brand-muted max-w-sm mx-auto">
+                    We couldn&apos;t find any designs matching &ldquo;{searchQuery}&rdquo;. Try another keyword or reset your filter.
+                  </p>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setSearchQuery("")}
+                    className="text-xs"
+                  >
+                    Reset Search
+                  </Button>
+                </div>
+              )}
+            </main>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Top Navigation for Editor */}
+          <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-warm-border w-full max-w-full overflow-visible">
+            <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-brand-warm-subtle text-brand-dark hover:text-brand-pink border border-brand-warm-border shadow-xs active:scale-95 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink shrink-0 text-xs font-bold"
+                  aria-label="Back to templates"
+                  title="Back to templates"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Templates</span>
+                </button>
+
+                <BrandLogo href="/" size="sm" priority />
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-pink hover:bg-brand-pink-light px-3 py-1.5 rounded-full border border-brand-pink/20 transition-colors"
+                >
+                  <Wand2 className="w-3.5 h-3.5" />
+                  <span>Explore Designs</span>
+                </button>
+
+                {user ? (
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-brand-warm-subtle border border-brand-warm-border transition-colors"
+                    title="View Profile Dashboard"
+                  >
+                    <UserAvatar user={user} size="sm" />
+                    <span className="hidden sm:inline text-xs font-semibold text-brand-dark">
+                      {user.displayName?.split(" ")[0] || "Profile"}
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal("/create")}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-brand-dark hover:text-brand-pink px-3 py-1.5 rounded-full bg-brand-warm-subtle border border-brand-warm-border/80 hover:bg-brand-warm-border transition-colors"
+                  >
+                    <UserAvatar user={null} size="sm" />
+                    <span className="hidden sm:inline">Sign In</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* Main Studio Editor Body */}
+          <main className="flex-1 max-w-7xl w-full min-w-0 mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-8 overflow-hidden">
+            <div className="space-y-6">
             {/* Header Status Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-brand-warm-border shadow-sm">
               <div className="flex items-center gap-2.5">
@@ -1184,9 +1442,10 @@ function CreateCardStudio() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </main>
+            </div>
+          </main>
+        </>
+      )}
 
       {/* Share / Publish Modal */}
       {isShareModalOpen && (
