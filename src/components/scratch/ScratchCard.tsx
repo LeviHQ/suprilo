@@ -208,7 +208,7 @@ export function ScratchCard({
         // Bottom Animated Action Banner
         ctx.fillStyle = "#22D3EE";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("SWIPE TO SCRATCH ❯❯❯", width / 2, height - 34);
+        ctx.fillText("⚡ SCRATCH TO REVEAL ⚡", width / 2, height - 34);
       } else if (coverStyle === "golden-foil") {
         // ====================================================================
         // THEME: 24K ROYAL GOLD VIP PASS (Luxurious Reflective Guilloche)
@@ -268,12 +268,12 @@ export function ScratchCard({
 
         ctx.fillStyle = "#92400E";
         ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("RUB WITH COIN OR FINGER", width / 2, boxY + 60);
+        ctx.fillText("SCRATCH WITH FINGER OR MOUSE", width / 2, boxY + 60);
 
         // Bottom CTA
         ctx.fillStyle = "#78350F";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("✦ SCRATCH TO UNLOCK ✦", width / 2, height - 34);
+        ctx.fillText("✦ SCRATCH TO REVEAL ✦", width / 2, height - 34);
       } else if (coverStyle === "mint-fresh") {
         // ====================================================================
         // THEME: NEON EMERALD & MATRIX LASER (Mint Aurora)
@@ -335,7 +335,7 @@ export function ScratchCard({
         // Bottom CTA
         ctx.fillStyle = "#6EE7B7";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("❯❯ SLIDE TO UNCOVER ❯❯", width / 2, height - 34);
+        ctx.fillText("❖ SCRATCH TO REVEAL ❖", width / 2, height - 34);
       } else {
         // ====================================================================
         // THEME: HOLOGRAPHIC ROSE VELVET (Iridescent Pastel Pink & Violet)
@@ -399,7 +399,7 @@ export function ScratchCard({
         // Bottom CTA
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("✨ SWIPE TO REVEAL ✨", width / 2, height - 34);
+        ctx.fillText("✨ SCRATCH TO REVEAL ✨", width / 2, height - 34);
       }
 
       ctx.restore();

@@ -105,7 +105,7 @@ export function CardStatsDock({
                 Scratching...
               </span>
             ) : (
-              <span>Swipe or click foil above</span>
+              <span>Scratch to reveal</span>
             )}
           </span>
 
