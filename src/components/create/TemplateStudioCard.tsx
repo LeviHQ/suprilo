@@ -82,11 +82,13 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
       <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
         <span
           className={cn(
-            "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border shrink-0",
+            "relative overflow-hidden inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border shrink-0 transition-transform group-hover:scale-105",
             foilInfo.bgClass,
             foilInfo.borderClass
           )}
         >
+          {/* Tactile Holographic Shimmer Ray on Hover */}
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
           <span
             className={cn("w-1.5 h-1.5 rounded-full ring-2 shrink-0 animate-pulse", foilInfo.dotClass)}
           />

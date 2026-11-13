@@ -24,6 +24,9 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Calendar,
+  Gamepad2,
+  HeartHandshake,
 } from "lucide-react";
 import { ScratchCard, CoverStyle } from "@/components/scratch/ScratchCard";
 import { Button } from "@/components/ui/Button";
@@ -178,6 +181,8 @@ function CreateCardStudio() {
   });
 
   const [activeCategory, setActiveCategory] = React.useState<TemplateCategory>("general");
+  const [smartTab, setSmartTab] = React.useState<SmartTab>("life");
+  const [quickFilter, setQuickFilter] = React.useState<QuickFilter>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
   const [shuffleSeed, setShuffleSeed] = React.useState(42);
@@ -368,6 +373,47 @@ function CreateCardStudio() {
       list = SU_PRILO_TEMPLATES.filter((t) => t.category === activeCategory);
     }
 
+    // Apply Quick Filter chips
+    if (quickFilter === "trending") {
+      list = list.filter(
+        (t) =>
+          t.category === "holidays" ||
+          t.category === "celebrations" ||
+          /diwali|christmas|new year|valentine|halloween|thanksgiving|easter/i.test(
+            t.title + t.tag + t.categoryLabel
+          )
+      );
+    } else if (quickFilter === "emotional") {
+      list = list.filter(
+        (t) =>
+          ["heartfelt", "love", "friendship"].includes(t.category) ||
+          /hug|love|thank|grateful|comfort|sister|miss|sanctuary/i.test(t.message + t.title)
+      );
+    } else if (quickFilter === "funny") {
+      list = list.filter(
+        (t) =>
+          t.category === "funny" ||
+          /roast|joke|sarcas|laugh|damage|burn|scam|adult/i.test(
+            t.title + t.description + t.tag
+          )
+      );
+    } else if (quickFilter === "vouchers") {
+      list = list.filter(
+        (t) =>
+          t.category === "reveals" ||
+          /voucher|coupon|treat|coffee|pass|flight|concert|spa|dinner|keys/i.test(
+            t.title + t.message + t.tag
+          )
+      );
+    } else if (quickFilter === "minimalist") {
+      list = list.filter(
+        (t) =>
+          t.coverStyle === "golden-foil" ||
+          t.bgGradient.includes("stone") ||
+          /minimal|chic|vintage|toast|sanctuary/i.test(t.title + t.description)
+      );
+    }
+
     if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase().trim();
     return list.filter(
@@ -379,7 +425,7 @@ function CreateCardStudio() {
         t.tag.toLowerCase().includes(q) ||
         t.categoryLabel.toLowerCase().includes(q)
     );
-  }, [activeCategory, shuffleSeed, searchQuery]);
+  }, [activeCategory, shuffleSeed, quickFilter, searchQuery]);
 
   const currentCategoryMeta = React.useMemo(() => {
     return (
@@ -689,6 +735,124 @@ function CreateCardStudio() {
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
+              </div>
+
+              {/* 1. THE 3 SMART TOP TABS (Modular Category Architecture) */}
+              <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-x-auto no-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSmartTab("life");
+                    setActiveCategory("general");
+                    setQuickFilter("all");
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
+                    smartTab === "life"
+                      ? "bg-brand-pink text-white shadow-xs"
+                      : "text-brand-dark/70 hover:bg-brand-warm hover:text-brand-dark"
+                  )}
+                >
+                  <HeartHandshake className="w-4 h-4" />
+                  <span>Life & Milestones</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSmartTab("trending");
+                    setActiveCategory("holidays");
+                    setQuickFilter("all");
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
+                    smartTab === "trending"
+                      ? "bg-brand-pink text-white shadow-xs"
+                      : "text-brand-dark/70 hover:bg-brand-warm hover:text-brand-dark"
+                  )}
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Trending & Calendar</span>
+                  <span className="text-[10px] bg-amber-300 text-amber-950 px-1.5 py-0.5 rounded-md font-black">
+                    HOT
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSmartTab("mystery");
+                    setActiveCategory("funny");
+                    setQuickFilter("all");
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
+                    smartTab === "mystery"
+                      ? "bg-brand-pink text-white shadow-xs"
+                      : "text-brand-dark/70 hover:bg-brand-warm hover:text-brand-dark"
+                  )}
+                >
+                  <Gamepad2 className="w-4 h-4" />
+                  <span>Mystery & Fun</span>
+                </button>
+              </div>
+
+              {/* 2. DYNAMIC "HAPPENING THIS WEEK" FESTIVE BANNER (Active on Trending / Holidays) */}
+              {(smartTab === "trending" || activeCategory === "holidays") && (
+                <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-brand-pink text-white shadow-lg space-y-3 relative overflow-hidden animate-in fade-in duration-300">
+                  <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1.5 max-w-xl">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 backdrop-blur-xs">
+                        <Sparkles className="w-3 h-3" />
+                        Happening This Week
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-xs">
+                        Festival & Holiday Scratch Magic 🪔✨
+                      </h3>
+                      <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+                        Diwali Lights, Christmas Cheer, and New Year Celebrations are trending! Choose a festive card to reveal your greetings with golden foil.
+                      </p>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const festive =
+                            SU_PRILO_TEMPLATES.find((t) => t.id === "holiday-diwali-lights") ||
+                            SU_PRILO_TEMPLATES.find((t) => t.category === "holidays");
+                          if (festive) handleSelectTemplate(festive);
+                        }}
+                        className="px-4 py-2.5 rounded-2xl bg-white text-brand-dark text-xs font-black shadow-md hover:bg-stone-50 active:scale-95 transition-all"
+                      >
+                        Use Festive Card 🪔
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. QUICK-FILTER HORIZONTAL CHIPS */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                <span className="text-[11px] font-bold text-brand-muted shrink-0 mr-1 flex items-center gap-1">
+                  <Sliders className="w-3.5 h-3.5" />
+                  Quick Filter:
+                </span>
+                {QUICK_FILTER_CHIPS.map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setQuickFilter(chip.id)}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0",
+                      quickFilter === chip.id
+                        ? "bg-brand-pink text-white border-brand-pink shadow-xs font-bold"
+                        : "bg-white hover:bg-brand-warm-subtle text-brand-dark border-brand-warm-border hover:border-brand-pink/40"
+                    )}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
               </div>
 
               {/* Category Hero Banner */}
@@ -1506,6 +1670,18 @@ function CreateCardStudio() {
     </div>
   );
 }
+
+type SmartTab = "life" | "trending" | "mystery";
+type QuickFilter = "all" | "trending" | "emotional" | "funny" | "vouchers" | "minimalist";
+
+const QUICK_FILTER_CHIPS: { id: QuickFilter; label: string }[] = [
+  { id: "all", label: "All Templates" },
+  { id: "trending", label: "🔥 Trending Today" },
+  { id: "emotional", label: "💖 Emotional & Love" },
+  { id: "funny", label: "😂 Funny & Memes" },
+  { id: "vouchers", label: "🎁 Vouchers & Treats" },
+  { id: "minimalist", label: "✨ Minimalist & Gold" },
+];
 
 export default function CreateCardPage() {
   return (
