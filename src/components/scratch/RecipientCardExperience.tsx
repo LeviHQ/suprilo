@@ -11,10 +11,7 @@ import {
   PartyPopper,
   Trophy,
   Star,
-  Copy,
-  Check,
   ArrowRight,
-  ExternalLink,
 } from "lucide-react";
 import type { RecipientCardDto, BgPaletteId } from "@/types/card";
 import { ScratchCard } from "@/components/scratch/ScratchCard";
@@ -35,45 +32,39 @@ const PALETTE_CONFIGS: Record<
   {
     gradient: string;
     textColor: string;
-    badgeBg: string;
-    badgeText: string;
-    border: string;
+    accentGlow: string;
+    quoteBg: string;
   }
 > = {
   "soft-pink": {
-    gradient: "from-pink-50 via-white to-rose-50",
+    gradient: "from-pink-50 via-white to-rose-100",
     textColor: "text-rose-950",
-    badgeBg: "bg-rose-500",
-    badgeText: "text-white",
-    border: "border-pink-200",
+    accentGlow: "shadow-[0_0_25px_rgba(244,114,182,0.3)]",
+    quoteBg: "bg-rose-50/80 border-rose-200/60 text-rose-900",
   },
   "warm-sunshine": {
-    gradient: "from-amber-50 via-white to-orange-50",
+    gradient: "from-amber-50 via-white to-orange-100",
     textColor: "text-amber-950",
-    badgeBg: "bg-amber-500",
-    badgeText: "text-white",
-    border: "border-amber-200",
+    accentGlow: "shadow-[0_0_25px_rgba(251,191,36,0.3)]",
+    quoteBg: "bg-amber-50/80 border-amber-200/60 text-amber-900",
   },
   "royal-amethyst": {
-    gradient: "from-purple-50 via-white to-indigo-50",
+    gradient: "from-purple-50 via-white to-indigo-100",
     textColor: "text-indigo-950",
-    badgeBg: "bg-purple-600",
-    badgeText: "text-white",
-    border: "border-purple-200",
+    accentGlow: "shadow-[0_0_25px_rgba(168,85,247,0.3)]",
+    quoteBg: "bg-purple-50/80 border-purple-200/60 text-purple-900",
   },
   "mint-fresh": {
-    gradient: "from-emerald-50 via-white to-teal-50",
+    gradient: "from-emerald-50 via-white to-teal-100",
     textColor: "text-emerald-950",
-    badgeBg: "bg-emerald-600",
-    badgeText: "text-white",
-    border: "border-emerald-200",
+    accentGlow: "shadow-[0_0_25px_rgba(52,211,153,0.3)]",
+    quoteBg: "bg-emerald-50/80 border-emerald-200/60 text-emerald-900",
   },
   "pure-ivory": {
-    gradient: "from-brand-warm-subtle via-white to-brand-warm",
-    textColor: "text-brand-dark",
-    badgeBg: "bg-brand-pink",
-    badgeText: "text-white",
-    border: "border-brand-warm-border",
+    gradient: "from-stone-50 via-white to-amber-50/40",
+    textColor: "text-stone-900",
+    accentGlow: "shadow-[0_0_25px_rgba(255,77,109,0.25)]",
+    quoteBg: "bg-stone-50/90 border-brand-warm-border text-stone-800",
   },
 };
 
@@ -93,7 +84,7 @@ export function RecipientCardExperience({
   // Palette styling
   const palette = PALETTE_CONFIGS[card.bg_palette] || PALETTE_CONFIGS["pure-ivory"];
 
-  // Post-mount Telemetry Handshake execution (SPEC-2C-5.6.1-FINAL v3.0.0 Section 7.1)
+  // Post-mount Telemetry Handshake execution
   React.useEffect(() => {
     if (!cardId || !pageSessionId || !handshakeToken) {
       return;
@@ -101,7 +92,6 @@ export function RecipientCardExperience({
 
     const storageKey = `suprilo_receipt_${cardId}`;
 
-    // Read existing receipt from isolated tab sessionStorage if available
     try {
       const cached = sessionStorage.getItem(storageKey);
       if (cached) {
@@ -109,11 +99,8 @@ export function RecipientCardExperience({
         handshakePromiseRef.current = Promise.resolve(cached);
         return;
       }
-    } catch {
-      // Ignore sessionStorage access errors
-    }
+    } catch {}
 
-    // Execute authorized telemetry handshake
     handshakePromiseRef.current = fetch("/api/telemetry/handshake", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -131,9 +118,7 @@ export function RecipientCardExperience({
           receiptIdRef.current = data.view_receipt_id;
           try {
             sessionStorage.setItem(storageKey, data.view_receipt_id);
-          } catch {
-            // Storage quota or permission error
-          }
+          } catch {}
           return data.view_receipt_id as string;
         }
         return null;
@@ -145,27 +130,27 @@ export function RecipientCardExperience({
   const renderStickerIcon = () => {
     switch (card.sticker) {
       case "heart":
-        return <Heart className="w-6 h-6 sm:w-7 sm:h-7 fill-brand-pink text-brand-pink animate-pulse" />;
+        return <Heart className="w-10 h-10 fill-brand-pink text-brand-pink animate-pulse" />;
       case "sparkles":
-        return <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500 animate-spin" style={{ animationDuration: "6s" }} />;
+        return <Sparkles className="w-10 h-10 text-amber-500 animate-spin" style={{ animationDuration: "6s" }} />;
       case "cake":
-        return <Cake className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500" />;
+        return <Cake className="w-10 h-10 text-amber-500" />;
       case "flower":
-        return <Flower2 className="w-6 h-6 sm:w-7 sm:h-7 text-pink-500" />;
+        return <Flower2 className="w-10 h-10 text-pink-500" />;
       case "gift":
-        return <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />;
+        return <Gift className="w-10 h-10 text-purple-600" />;
       case "confetti":
-        return <PartyPopper className="w-6 h-6 sm:w-7 sm:h-7 text-orange-500" />;
+        return <PartyPopper className="w-10 h-10 text-orange-500" />;
       case "trophy":
-        return <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500" />;
+        return <Trophy className="w-10 h-10 text-amber-500" />;
       case "star":
-        return <Star className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-500 fill-yellow-400" />;
+        return <Star className="w-10 h-10 text-yellow-500 fill-yellow-400" />;
       default:
-        return <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-brand-pink" />;
+        return <Sparkles className="w-10 h-10 text-brand-pink" />;
     }
   };
 
-  // Synchronized reveal telemetry logger (awaits handshake resolution, falls back safely)
+  // Synchronized reveal telemetry logger
   const handleReveal = React.useCallback(async () => {
     if (revealLoggedRef.current) return;
     revealLoggedRef.current = true;
@@ -173,7 +158,6 @@ export function RecipientCardExperience({
     try {
       let receiptId = receiptIdRef.current;
 
-      // If receipt is not yet resolved, await pending handshake promise (bounded timeout)
       if (!receiptId && handshakePromiseRef.current) {
         const timeoutPromise = new Promise<null>((resolve) =>
           setTimeout(() => resolve(null), 2500)
@@ -182,7 +166,6 @@ export function RecipientCardExperience({
       }
 
       if (cardId && receiptId) {
-        // Primary path: Verified reveal telemetry with Fast Scratch qualification
         await fetch("/api/telemetry/reveal", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -193,7 +176,6 @@ export function RecipientCardExperience({
           }),
           keepalive: true,
         }).catch(() => {
-          // Safe fallback
           fetch(`/api/cards/${encodeURIComponent(card.slug)}/reveal`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -201,16 +183,13 @@ export function RecipientCardExperience({
           }).catch(() => {});
         });
       } else {
-        // Fallback path: Legacy cooldown reveal telemetry
         fetch(`/api/cards/${encodeURIComponent(card.slug)}/reveal`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           keepalive: true,
         }).catch(() => {});
       }
-    } catch {
-      // Telemetry errors must never disrupt the recipient experience
-    }
+    } catch {}
   }, [card.slug, cardId]);
 
   // Share link copy
@@ -223,95 +202,88 @@ export function RecipientCardExperience({
     }
   };
 
-  // Hidden card content (interior surprise revealed when scratched)
+  /**
+   * PURE SURPRISE REVEAL CONTENT (Zero Boring Metadata Inside!)
+   */
   const hiddenContent = (
     <div
       className={cn(
-        "flex flex-col justify-between h-full w-full text-center p-2 sm:p-3 rounded-2xl bg-gradient-to-br transition-colors duration-300",
+        "flex flex-col justify-center items-center h-full w-full text-center px-4 py-6 rounded-[22px] bg-gradient-to-br transition-all duration-500 space-y-4 sm:space-y-5",
         palette.gradient,
         palette.textColor
       )}
     >
-      {/* Top Header */}
-      <div className="flex items-center justify-between gap-2 border-b border-black/5 pb-2">
-        <span
+      {/* 1. HERO VISUAL: Secret Memory Photo OR Celebratory 3D Sticker */}
+      {hasPhoto && !photoError ? (
+        <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-3xl overflow-hidden shadow-xl border-3 border-white ring-4 ring-brand-pink/25 transform rotate-[-2deg] hover:rotate-0 transition-transform">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/cards/${encodeURIComponent(card.slug)}/photo`}
+            alt="Secret card memory"
+            className="w-full h-full object-cover"
+            onError={() => setPhotoError(true)}
+          />
+        </div>
+      ) : (
+        <div
           className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold shadow-sm truncate max-w-[150px]",
-            palette.badgeBg,
-            palette.badgeText
+            "w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-white/95 border border-white flex items-center justify-center shadow-lg",
+            palette.accentGlow
           )}
         >
-          <Sparkles className="w-3 h-3 shrink-0" />
-          <span className="truncate">{card.occasion_tag || "Special Surprise"}</span>
-        </span>
-        <span className="text-[11px] sm:text-xs font-semibold opacity-90 truncate max-w-[150px]">
-          From {card.sender_name} ✨
-        </span>
-      </div>
+          {renderStickerIcon()}
+        </div>
+      )}
 
-      {/* Main Secret Content */}
-      <div className="my-auto py-2 sm:py-3 space-y-2.5 sm:space-y-3">
-        {/* Photo or Sticker */}
-        {hasPhoto && !photoError ? (
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-brand-pink/30">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/api/cards/${encodeURIComponent(card.slug)}/photo`}
-              alt="Secret card memory"
-              className="w-full h-full object-cover"
-              onError={() => setPhotoError(true)}
-            />
-          </div>
-        ) : (
-          <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl bg-white/90 shadow-sm border border-black/5 flex items-center justify-center">
-            {renderStickerIcon()}
-          </div>
-        )}
-
-        {/* Primary Message */}
+      {/* 2. THE BIG SURPRISE MESSAGE (Emotional, Bold, Dramatic Typography) */}
+      <div className="space-y-2 max-w-[290px] mx-auto">
         <h2
           className={cn(
-            "font-extrabold leading-snug px-3 tracking-tight break-words",
-            card.primary_message.length > 90
+            "font-black tracking-tight leading-tight px-1 break-words drop-shadow-xs",
+            card.primary_message.length > 80
               ? "text-base sm:text-lg"
-              : "text-lg sm:text-xl md:text-2xl"
+              : card.primary_message.length > 40
+              ? "text-lg sm:text-xl"
+              : "text-xl sm:text-2xl md:text-3xl"
           )}
           style={{ fontFamily: card.font_family || undefined }}
         >
           {card.primary_message}
         </h2>
 
-        {/* Secondary Message (optional) */}
+        {/* 3. OPTIONAL SECONDARY SECRET NOTE */}
         {card.secondary_message && (
-          <p className="text-xs sm:text-sm opacity-80 leading-relaxed max-w-[320px] mx-auto font-medium break-words px-2">
+          <div
+            className={cn(
+              "px-3 py-2 rounded-2xl border text-xs sm:text-sm font-medium leading-relaxed break-words shadow-xs backdrop-blur-xs",
+              palette.quoteBg
+            )}
+          >
             {card.secondary_message}
-          </p>
+          </div>
         )}
       </div>
 
-      {/* Footer Info */}
-      <div className="flex items-center justify-between text-[11px] sm:text-xs opacity-75 pt-2 border-t border-black/5">
-        <span className="truncate max-w-[180px] font-medium">
-          For: <span className="font-bold">{card.recipient_name}</span>
-        </span>
-        <span className="shrink-0 font-semibold tracking-wide text-brand-pink">
-          suprilo.com
-        </span>
+      {/* 4. Atmospheric floating decorative spark */}
+      <div className="flex items-center justify-center gap-1.5 opacity-60 text-[11px] font-semibold tracking-wider uppercase">
+        <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+        <span>Suprilo Special Surprise</span>
+        <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
       </div>
     </div>
   );
 
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col items-center">
-      {/* Recipient intro pill */}
-      <div className="mb-4 text-center">
-        <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-white shadow-sm border border-brand-warm-border text-brand-dark">
-          <Sparkles className="w-3.5 h-3.5 text-brand-pink" />
-          <span>Surprise card for <strong className="text-brand-pink">{card.recipient_name}</strong></span>
+      {/* Top Welcome Pill */}
+      <div className="mb-4 sm:mb-5 text-center">
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md shadow-xs border border-brand-warm-border text-brand-dark">
+          <Sparkles className="w-3.5 h-3.5 text-brand-pink animate-pulse" />
+          <span>Surprise Ticket for <strong className="text-brand-purple">{card.recipient_name}</strong></span>
         </span>
       </div>
 
-      {/* Interactive Scratch Card Engine */}
+      {/* The Luminous Ticket Scratch Card Engine + Docked Stats */}
       <div className="w-full">
         <ScratchCard
           hiddenContent={hiddenContent}
@@ -320,60 +292,38 @@ export function RecipientCardExperience({
           revealThreshold={card.reveal_threshold}
           soundEnabled={card.sound_enabled}
           onReveal={handleReveal}
-          className="shadow-xl"
+          metadata={{
+            senderName: card.sender_name,
+            recipientName: card.recipient_name,
+            occasionTag: card.occasion_tag,
+          }}
+          onShare={handleCopyLink}
+          shareCopied={copied}
+          className="shadow-2xl"
         />
       </div>
 
-      {/* Social / Action Toolbar */}
-      <div className="w-full mt-6 pt-4 border-t border-brand-warm-border/60 flex items-center justify-between gap-3 text-xs">
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          className="inline-flex items-center gap-1.5 font-semibold text-brand-muted hover:text-brand-dark py-1.5 px-3 rounded-full bg-white border border-brand-warm-border hover:bg-brand-warm-subtle transition-colors shadow-xs"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="text-emerald-700">Link copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy link</span>
-            </>
-          )}
-        </button>
-
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-brand-muted hover:text-brand-dark transition-colors font-medium"
-        >
-          <span>About Suprilo</span>
-          <ExternalLink className="w-3 h-3" />
-        </Link>
-      </div>
-
-      {/* Recipient CTA: Create Your Own */}
-      <div className="w-full mt-8 p-5 sm:p-6 rounded-3xl bg-white border border-brand-warm-border shadow-sm text-center space-y-3">
-        <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-brand-pink-light text-brand-pink">
-          <Sparkles className="w-5 h-5" />
+      {/* Recipient Conversion / Viral Banner */}
+      <div className="w-full max-w-[380px] mt-6 p-5 sm:p-6 rounded-3xl bg-white/90 backdrop-blur-md border border-brand-warm-border shadow-sm text-center space-y-3">
+        <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-pink to-brand-orange text-white shadow-md">
+          <Gift className="w-5 h-5" />
         </div>
         <div className="space-y-1">
           <h3 className="font-heading font-extrabold text-base sm:text-lg text-brand-dark tracking-tight">
-            Loved this surprise?
+            Want to surprise someone?
           </h3>
-          <p className="text-xs sm:text-sm text-brand-muted max-w-sm mx-auto">
-            Create an interactive scratch card for your friend, partner, or family member in less than 2 minutes.
+          <p className="text-xs sm:text-sm text-brand-muted max-w-xs mx-auto">
+            Design an interactive scratch card with your secret photos and messages in under 2 minutes.
           </p>
         </div>
-        <div className="pt-2">
+        <div className="pt-1">
           <Link href="/create">
             <Button
               variant="primary"
               size="md"
-              className="w-full sm:w-auto px-6 gap-2 shadow-md"
+              className="w-full justify-center px-6 gap-2 shadow-md hover:shadow-brand-pink/25 font-bold"
             >
-              <span>Create Your Own Scratch Card</span>
+              <span>Create Your Free Card</span>
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

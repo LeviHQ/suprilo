@@ -22,35 +22,27 @@ export function ScratchCardDemo() {
   };
 
   const hiddenContent = (
-    <div className="flex flex-col justify-between h-full">
-      {/* Top row with celebration tag */}
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-pink text-white shadow-sm">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>A Little Joy</span>
-        </span>
-        <span className="text-xs font-bold text-brand-purple">
-          From Alex with ❤️
-        </span>
+    <div className="flex flex-col justify-center items-center h-full w-full text-center px-4 py-6 space-y-4">
+      {/* Visual Sticker */}
+      <div className="w-16 h-16 mx-auto rounded-3xl bg-white shadow-lg border border-pink-100 flex items-center justify-center text-brand-pink shadow-brand-pink/20">
+        <Heart className="w-9 h-9 fill-brand-pink text-brand-pink animate-pulse" />
       </div>
 
       {/* Heartfelt Note */}
-      <div className="my-auto py-2 text-center space-y-2">
-        <div className="w-12 h-12 mx-auto rounded-full bg-brand-pink-light flex items-center justify-center text-brand-pink shadow-sm">
-          <Heart className="w-6 h-6 fill-brand-pink text-brand-pink animate-pulse" />
-        </div>
-        <h4 className="text-lg sm:text-xl font-extrabold text-brand-dark leading-snug">
+      <div className="space-y-2 max-w-[280px] mx-auto">
+        <h4 className="text-xl sm:text-2xl font-black text-brand-dark leading-tight tracking-tight drop-shadow-xs">
           &ldquo;You&apos;re someone else&apos;s little bit of magic 💖&rdquo;
         </h4>
-        <p className="text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[280px] mx-auto font-medium">
+        <div className="px-3 py-1.5 rounded-xl bg-pink-50/80 border border-pink-200/60 text-xs sm:text-sm text-pink-900 font-medium">
           Thanks for making ordinary moments special.
-        </p>
+        </div>
       </div>
 
-      {/* Card Footer detail */}
-      <div className="flex items-center justify-between text-[11px] text-brand-muted/80 pt-2 border-t border-brand-warm-border/50">
-        <span>Card #SPR-DEMO-01</span>
-        <span>suprilo.com/s/magic-moments</span>
+      {/* Decorative spark */}
+      <div className="flex items-center justify-center gap-1.5 opacity-60 text-[10px] font-bold tracking-wider uppercase text-brand-dark">
+        <Sparkles className="w-3 h-3 text-brand-orange" />
+        <span>Suprilo Special Reveal</span>
+        <Sparkles className="w-3 h-3 text-brand-orange" />
       </div>
     </div>
   );
@@ -64,7 +56,7 @@ export function ScratchCardDemo() {
       />
 
       <div className="relative space-y-3">
-        {/* Real Canvas Scratch Card */}
+        {/* Real Canvas Scratch Card & Docked Stats */}
         <ScratchCard
           hiddenContent={hiddenContent}
           coverText="Scratch to reveal your surprise ✨"
@@ -72,6 +64,13 @@ export function ScratchCardDemo() {
           revealThreshold={0.65}
           brushRadius={26}
           onReveal={() => setIsRevealed(true)}
+          metadata={{
+            senderName: "Alex",
+            recipientName: "You",
+            occasionTag: "A Little Joy",
+          }}
+          isCreatorPreview={true}
+          showControls={true}
           ariaLabel="Interactive scratch card demo"
         />
 

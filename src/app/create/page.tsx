@@ -512,65 +512,59 @@ function CreateCardStudio() {
     }
   };
 
-  // Hidden Content revealed when scratched
+  // Hidden Content revealed when scratched (Pure Surprise Showcase)
   const hiddenContent = (
     <div
       className={cn(
-        "flex flex-col justify-between h-full text-center p-2 rounded-xl transition-colors duration-300",
+        "flex flex-col justify-center items-center h-full w-full text-center px-3 py-5 rounded-[20px] transition-all duration-300 space-y-3.5 sm:space-y-4",
         activePalette.textColor
       )}
     >
-      {/* Top Header */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-pink text-white shadow-sm truncate max-w-[140px]">
-          <Sparkles className="w-3 h-3 shrink-0" />
-          <span className="truncate">{state.occasionTag || "Surprise"}</span>
-        </span>
-        <span className="text-[11px] font-bold text-brand-purple truncate max-w-[140px]">
-          From {state.senderName || "Someone"} with ❤️
-        </span>
-      </div>
+      {/* 1. HERO VISUAL: Secret Memory Photo OR Celebratory Sticker */}
+      {state.photoUrl ? (
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-3xl overflow-hidden shadow-xl border-3 border-white ring-4 ring-brand-pink/25 transform rotate-[-2deg] hover:rotate-0 transition-transform">
+          <Image
+            src={state.photoUrl}
+            alt="Secret memory photo"
+            fill
+            className="object-cover"
+            unoptimized
+          />
+        </div>
+      ) : (
+        <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-3xl bg-white/95 border border-white flex items-center justify-center shadow-lg shadow-brand-pink/15">
+          {renderStickerIcon()}
+        </div>
+      )}
 
-      {/* Main Message Note + Optional Photo */}
-      <div className="my-auto py-1 sm:py-2 space-y-2">
-        {state.photoUrl ? (
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-white ring-2 ring-brand-pink/30">
-            <Image
-              src={state.photoUrl}
-              alt="Secret memory photo"
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          </div>
-        ) : (
-          <div className="w-11 h-11 sm:w-12 sm:h-12 mx-auto rounded-2xl bg-white shadow-sm border border-brand-warm-border flex items-center justify-center">
-            {renderStickerIcon()}
-          </div>
-        )}
-
+      {/* 2. THE BIG SURPRISE MESSAGE (Emotional, Bold, Dramatic Typography) */}
+      <div className="space-y-1.5 max-w-[280px] mx-auto">
         <h4
           className={cn(
-            "font-extrabold leading-snug px-2 tracking-tight break-words",
-            state.primaryMessage.length > 90
+            "font-black tracking-tight leading-snug px-1 break-words drop-shadow-xs",
+            state.primaryMessage.length > 80
               ? "text-sm sm:text-base"
-              : "text-base sm:text-lg"
+              : state.primaryMessage.length > 40
+              ? "text-base sm:text-lg"
+              : "text-lg sm:text-xl"
           )}
         >
-          {state.primaryMessage || "Your secret message will appear here!"}
+          {state.primaryMessage || "Your secret surprise will appear here! ✨"}
         </h4>
 
+        {/* 3. OPTIONAL SECONDARY SECRET NOTE */}
         {state.secondaryMessage && (
-          <p className="text-[11px] sm:text-xs opacity-80 leading-relaxed max-w-[280px] mx-auto font-medium break-words">
+          <div className="px-2.5 py-1.5 rounded-xl border border-black/5 bg-white/60 text-[11px] sm:text-xs font-medium leading-relaxed break-words shadow-xs">
             {state.secondaryMessage}
-          </p>
+          </div>
         )}
       </div>
 
-      {/* Footer Info */}
-      <div className="flex items-center justify-between text-[10px] opacity-75 pt-2 border-t border-brand-warm-border/40">
-        <span className="truncate max-w-[180px]">To: {state.recipientName || "Someone special"}</span>
-        <span className="shrink-0 font-mono">suprilo.com/s/preview</span>
+      {/* 4. Atmospheric floating decorative spark */}
+      <div className="flex items-center justify-center gap-1.5 opacity-60 text-[10px] font-semibold tracking-wider uppercase">
+        <Sparkles className="w-3 h-3 text-brand-orange" />
+        <span>Secret Surprise</span>
+        <Sparkles className="w-3 h-3 text-brand-orange" />
       </div>
     </div>
   );
@@ -1388,17 +1382,24 @@ function CreateCardStudio() {
                     </Button>
                   </div>
 
-                  {/* Real Canvas Scratch Component */}
+                  {/* Real Canvas Scratch Component & Docked Live Stats */}
                   <div className="flex justify-center py-2">
-                    <div className="w-full max-w-[340px]">
+                    <div className="w-full max-w-[360px]">
                       <ScratchCard
                         key={cardKey}
                         hiddenContent={hiddenContent}
                         coverStyle={state.foilStyle}
                         coverText={state.coverText}
                         revealThreshold={0.65}
-                        brushRadius={26}
-                        className="shadow-lg mx-auto"
+                        brushRadius={28}
+                        metadata={{
+                          senderName: state.senderName || "You",
+                          recipientName: state.recipientName || "Someone Special",
+                          occasionTag: state.occasionTag || "Surprise",
+                        }}
+                        isCreatorPreview={true}
+                        showControls={true}
+                        className="mx-auto"
                       />
                     </div>
                   </div>

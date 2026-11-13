@@ -22,7 +22,10 @@ const COLORS = [
   "#8B5CF6", // brand purple
   "#FFD166", // brand yellow
   "#F472B6", // pink-400
-  "#60A5FA", // sky-400
+  "#06B6D4", // cyan-500
+  "#10B981", // emerald-500
+  "#F59E0B", // gold-500
+  "#FFFFFF", // spark white
 ];
 
 export function CelebrationConfetti({ active }: { active: boolean }) {
@@ -51,7 +54,7 @@ export function CelebrationConfetti({ active }: { active: boolean }) {
     ctx.scale(dpr, dpr);
 
     const particles: Particle[] = [];
-    const count = 38;
+    const count = 65;
 
     // Emit from center with outwards burst
     const centerX = rect.width / 2;
@@ -59,18 +62,18 @@ export function CelebrationConfetti({ active }: { active: boolean }) {
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 2.5 + Math.random() * 4.5;
+      const speed = 3.0 + Math.random() * 5.5;
       particles.push({
         id: i,
-        x: centerX + (Math.random() - 0.5) * 40,
-        y: centerY + (Math.random() - 0.5) * 40,
-        size: 5 + Math.random() * 6,
+        x: centerX + (Math.random() - 0.5) * 50,
+        y: centerY + (Math.random() - 0.5) * 50,
+        size: 5 + Math.random() * 7,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        shape: Math.random() > 0.5 ? "heart" : Math.random() > 0.5 ? "star" : "circle",
+        shape: Math.random() > 0.4 ? "heart" : Math.random() > 0.4 ? "star" : "circle",
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1.5,
+        vy: Math.sin(angle) * speed - 2.2,
         rotation: Math.random() * Math.PI * 2,
-        vRot: (Math.random() - 0.5) * 0.15,
+        vRot: (Math.random() - 0.5) * 0.2,
         opacity: 1,
       });
     }
