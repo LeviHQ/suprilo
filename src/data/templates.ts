@@ -2107,10 +2107,6 @@ export function getTemplatesByCategory(
   return SU_PRILO_TEMPLATES.filter((t) => t.category === category);
 }
 
-export function getTemplateById(id: string): TemplateDefinition | undefined {
-  return SU_PRILO_TEMPLATES.find((t) => t.id === id);
-}
-
 export const DEFAULT_SCRATCH_TEMPLATE: TemplateDefinition = {
   id: "custom-scratch",
   title: "Blank Canvas Studio",
@@ -2130,3 +2126,10 @@ export const DEFAULT_SCRATCH_TEMPLATE: TemplateDefinition = {
   sticker: "sparkles",
   accentColor: "#FF4D6D",
 };
+
+export function getTemplateById(id: string): TemplateDefinition | undefined {
+  if (id === "custom-scratch" || id === DEFAULT_SCRATCH_TEMPLATE.id) {
+    return DEFAULT_SCRATCH_TEMPLATE;
+  }
+  return SU_PRILO_TEMPLATES.find((t) => t.id === id);
+}
