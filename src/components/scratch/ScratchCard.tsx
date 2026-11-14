@@ -5,8 +5,9 @@ import { soundManager } from "@/lib/sound";
 import { CelebrationConfetti } from "./CelebrationConfetti";
 import { CardStatsDock } from "./CardStatsDock";
 import { cn } from "@/lib/utils";
+import type { CoverStyle } from "@/types/card";
 
-export type CoverStyle = "lavender-pink" | "golden-foil" | "cosmic-purple" | "mint-fresh";
+export type { CoverStyle };
 
 export interface ScratchCardMetadata {
   senderName?: string;
@@ -109,7 +110,58 @@ export function ScratchCard({
       ctx.scale(dpr, dpr);
       ctx.globalCompositeOperation = "source-over";
 
-      if (coverStyle === "cosmic-purple") {
+      const foilLower = (coverStyle || "").toLowerCase();
+      const isCyber =
+        foilLower === "cosmic-purple" ||
+        foilLower.includes("cyber") ||
+        foilLower.includes("matrix") ||
+        foilLower.includes("glitch") ||
+        foilLower.includes("future") ||
+        foilLower.includes("neon") ||
+        foilLower.includes("arcade") ||
+        foilLower.includes("thunder");
+
+      const isGold =
+        foilLower === "golden-foil" ||
+        foilLower.includes("gold") ||
+        foilLower.includes("champagne") ||
+        foilLower.includes("ticket") ||
+        foilLower.includes("yellow") ||
+        foilLower.includes("sunburst") ||
+        foilLower.includes("supernova") ||
+        foilLower.includes("amber");
+
+      const isEmerald =
+        foilLower === "mint-fresh" ||
+        foilLower.includes("mint") ||
+        foilLower.includes("emerald") ||
+        foilLower.includes("green") ||
+        foilLower.includes("cash") ||
+        foilLower.includes("petrichor") ||
+        foilLower.includes("lime") ||
+        foilLower.includes("crescent");
+
+      const isRuby =
+        foilLower.includes("ruby") ||
+        foilLower.includes("red") ||
+        foilLower.includes("scarlet") ||
+        foilLower.includes("crimson") ||
+        foilLower.includes("flame") ||
+        foilLower.includes("dare");
+
+      const isSilver =
+        foilLower.includes("silver") ||
+        foilLower.includes("titanium") ||
+        foilLower.includes("mercury") ||
+        foilLower.includes("frost") ||
+        foilLower.includes("chrome") ||
+        foilLower.includes("diamond") ||
+        foilLower.includes("obsidian") ||
+        foilLower.includes("stealth") ||
+        foilLower.includes("onyx") ||
+        foilLower.includes("black");
+
+      if (isCyber) {
         // ====================================================================
         // THEME: CYBER JACKPOT / FUTURE SCRATCH (Neon Cyan & Violet Circuits)
         // ====================================================================
@@ -209,7 +261,7 @@ export function ScratchCard({
         ctx.fillStyle = "#22D3EE";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
         ctx.fillText("⚡ SCRATCH TO REVEAL ⚡", width / 2, height - 34);
-      } else if (coverStyle === "golden-foil") {
+      } else if (isGold) {
         // ====================================================================
         // THEME: 24K ROYAL GOLD VIP PASS (Luxurious Reflective Guilloche)
         // ====================================================================
@@ -274,7 +326,7 @@ export function ScratchCard({
         ctx.fillStyle = "#78350F";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
         ctx.fillText("✦ SCRATCH TO REVEAL ✦", width / 2, height - 34);
-      } else if (coverStyle === "mint-fresh") {
+      } else if (isEmerald) {
         // ====================================================================
         // THEME: NEON EMERALD & MATRIX LASER (Mint Aurora)
         // ====================================================================
@@ -336,6 +388,116 @@ export function ScratchCard({
         ctx.fillStyle = "#6EE7B7";
         ctx.font = "800 11px system-ui, -apple-system, sans-serif";
         ctx.fillText("❖ SCRATCH TO REVEAL ❖", width / 2, height - 34);
+      } else if (isRuby) {
+        // ====================================================================
+        // THEME: VELVET RUBY RED & PASSION FLAME
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#4C0519");
+        grad.addColorStop(0.3, "#9F1239");
+        grad.addColorStop(0.7, "#E11D48");
+        grad.addColorStop(1, "#881337");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Golden Heart Particles
+        ctx.fillStyle = "rgba(254, 205, 211, 0.65)";
+        for (let i = 0; i < 40; i++) {
+          const fx = (i * 53) % width;
+          const fy = (i * 79) % height;
+          ctx.beginPath();
+          ctx.arc(fx, fy, (i % 2 === 0 ? 1.5 : 0.9), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Top Header
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FECDD3";
+        ctx.font = "900 11px system-ui, -apple-system, sans-serif";
+        ctx.fillText("♥ VELVET RUBY PASS ♥", width / 2, 44);
+
+        // Center Box
+        const boxW = Math.min(width * 0.82, 290);
+        const boxH = 90;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 - 8;
+
+        ctx.fillStyle = "rgba(76, 5, 25, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+
+        ctx.strokeStyle = "#FB7185";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+
+        ctx.fillStyle = "#FECDD3";
+        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
+        ctx.fillText("SECRET SURPRISE ENCLOSED", width / 2, boxY + 60);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FECDD3";
+        ctx.font = "800 11px system-ui, -apple-system, sans-serif";
+        ctx.fillText("♥ SCRATCH TO REVEAL ♥", width / 2, height - 34);
+      } else if (isSilver) {
+        // ====================================================================
+        // THEME: PLATINUM CHROME & OBSIDIAN STEALTH
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#0F172A");
+        grad.addColorStop(0.35, "#334155");
+        grad.addColorStop(0.7, "#64748B");
+        grad.addColorStop(1, "#1E293B");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Brushed Metal Lines
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.lineWidth = 1;
+        for (let y = 0; y < height; y += 8) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        // Top Header
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#E2E8F0";
+        ctx.font = "900 11px system-ui, -apple-system, sans-serif";
+        ctx.fillText("◈ PLATINUM STEALTH PASS ◈", width / 2, 44);
+
+        // Center Box
+        const boxW = Math.min(width * 0.82, 290);
+        const boxH = 90;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 - 8;
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.95)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+
+        ctx.strokeStyle = "#94A3B8";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+
+        ctx.fillStyle = "#CBD5E1";
+        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
+        ctx.fillText("TOP SECRET CLEARANCE", width / 2, boxY + 60);
+
+        // Bottom CTA
+        ctx.fillStyle = "#E2E8F0";
+        ctx.font = "800 11px system-ui, -apple-system, sans-serif";
+        ctx.fillText("◈ SCRATCH TO REVEAL ◈", width / 2, height - 34);
       } else {
         // ====================================================================
         // THEME: HOLOGRAPHIC ROSE VELVET (Iridescent Pastel Pink & Violet)

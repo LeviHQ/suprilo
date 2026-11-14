@@ -12,7 +12,7 @@ import {
   Trophy,
   Star,
 } from "lucide-react";
-import type { TemplateDefinition } from "@/data/templates";
+import { TemplateDefinition, getFoilBadge } from "@/data/templates";
 import { CoverStyle } from "@/types/card";
 import { cn } from "@/lib/utils";
 
@@ -20,36 +20,6 @@ interface TemplateStudioCardProps {
   template: TemplateDefinition;
   onSelect: (template: TemplateDefinition) => void;
 }
-
-const FOIL_BADGES: Record<
-  CoverStyle,
-  { label: string; dotClass: string; borderClass: string; bgClass: string }
-> = {
-  "golden-foil": {
-    label: "24K Gold Foil",
-    dotClass: "bg-amber-400 ring-amber-300",
-    borderClass: "border-amber-200/80",
-    bgClass: "bg-amber-50/80 text-amber-900",
-  },
-  "lavender-pink": {
-    label: "Lavender Pink",
-    dotClass: "bg-rose-400 ring-rose-300",
-    borderClass: "border-rose-200/80",
-    bgClass: "bg-rose-50/80 text-rose-900",
-  },
-  "cosmic-purple": {
-    label: "Cosmic Purple",
-    dotClass: "bg-purple-500 ring-purple-300",
-    borderClass: "border-purple-200/80",
-    bgClass: "bg-purple-50/80 text-purple-900",
-  },
-  "mint-fresh": {
-    label: "Mint Emerald",
-    dotClass: "bg-emerald-400 ring-emerald-300",
-    borderClass: "border-emerald-200/80",
-    bgClass: "bg-emerald-50/80 text-emerald-900",
-  },
-};
 
 function StickerIcon({ sticker, className }: { sticker: string; className?: string }) {
   switch (sticker) {
@@ -74,7 +44,7 @@ function StickerIcon({ sticker, className }: { sticker: string; className?: stri
 }
 
 export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardProps) {
-  const foilInfo = FOIL_BADGES[template.coverStyle] || FOIL_BADGES["golden-foil"];
+  const foilInfo = getFoilBadge(template.coverStyle);
 
   return (
     <div className="group bg-white rounded-3xl p-4 sm:p-5 border border-brand-warm-border shadow-xs hover:shadow-card hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative overflow-hidden">

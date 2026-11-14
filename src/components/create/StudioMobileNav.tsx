@@ -11,47 +11,71 @@ import {
   Calendar,
   Gamepad2,
   HeartHandshake,
+  Share2,
 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { TEMPLATE_CATEGORIES, TemplateCategory } from "@/data/templates";
+import { ParentCategoryId } from "@/data/templates";
+import { StudioNavSelection } from "@/components/create/StudioSidebar";
 import { cn } from "@/lib/utils";
 
 interface StudioMobileNavProps {
   isOpen: boolean;
   onClose: () => void;
-  activeCategory: TemplateCategory;
-  onSelectCategory: (category: TemplateCategory) => void;
+  activeParent: StudioNavSelection;
+  onSelectParent: (parent: StudioNavSelection) => void;
   onSelectScratch: () => void;
+  draftsCount?: number;
 }
 
-const SMART_GROUPS: {
-  title: string;
+const PARENT_NAV_ITEMS: {
+  id: ParentCategoryId;
+  label: string;
+  sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
-  categories: TemplateCategory[];
+  badge?: string;
+  badgeClass?: string;
 }[] = [
   {
-    title: "Life & Milestones",
+    id: "life",
+    label: "Life",
+    sublabel: "Milestones & personal joys",
     icon: HeartHandshake,
-    categories: ["birthday", "love", "friendship", "celebrations", "workplace", "heartfelt"],
+    badge: "5 Themes",
+    badgeClass: "bg-brand-pink-light text-brand-pink border border-brand-pink/20",
   },
   {
-    title: "Trending & Calendar",
+    id: "trending",
+    label: "Trending & Calendar",
+    sublabel: "Holidays, seasons & dates",
     icon: Calendar,
-    categories: ["general", "holidays"],
+    badge: "HOT",
+    badgeClass: "bg-amber-100 text-amber-900 border border-amber-200 font-extrabold",
   },
   {
-    title: "Mystery & Fun",
+    id: "social",
+    label: "Social Media",
+    sublabel: "YouTube, X, Insta & Startups",
+    icon: Share2,
+    badge: "CREATORS",
+    badgeClass: "bg-purple-100 text-purple-900 border border-purple-200 font-extrabold",
+  },
+  {
+    id: "surprise",
+    label: "Surprise",
+    sublabel: "Vouchers, games, roasts & secrets",
     icon: Gamepad2,
-    categories: ["funny", "reveals", "games"],
+    badge: "FUN",
+    badgeClass: "bg-rose-100 text-rose-900 border border-rose-200 font-extrabold",
   },
 ];
 
 export function StudioMobileNav({
   isOpen,
   onClose,
-  activeCategory,
-  onSelectCategory,
+  activeParent,
+  onSelectParent,
   onSelectScratch,
+  draftsCount = 0,
 }: StudioMobileNavProps) {
   // Lock body scroll when mobile drawer is open
   React.useEffect(() => {
@@ -86,7 +110,7 @@ export function StudioMobileNav({
           <div className="flex items-center gap-2">
             <BrandLogo size="sm" priority />
             <span className="text-[10px] font-bold uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full border border-brand-pink/20">
-              Studio
+              Studio Hub
             </span>
           </div>
 
@@ -126,93 +150,116 @@ export function StudioMobileNav({
           </button>
         </div>
 
-        {/* Scrollable Categories List Grouped into 3 Smart Themes */}
+        {/* Categories List */}
         <nav
-          aria-label="Mobile Studio Template Categories"
-          className="flex-1 overflow-y-auto px-3 py-3 space-y-4 no-scrollbar scrollbar-none"
+          aria-label="Studio Mobile Categories"
+          className="flex-1 overflow-y-auto px-3 py-4 space-y-2 no-scrollbar scrollbar-none"
         >
-          {SMART_GROUPS.map((group) => {
-            const GroupIcon = group.icon;
+          <div className="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-widest text-brand-muted">
+            Browse Categories
+          </div>
+
+          {PARENT_NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeParent === item.id;
+
             return (
-              <div key={group.title} className="space-y-1">
-                <div className="px-2 pt-1 pb-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-brand-muted">
-                  <div className="flex items-center gap-1.5">
-                    <GroupIcon className="w-3.5 h-3.5 text-brand-pink" />
-                    <span>{group.title}</span>
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  onSelectParent(item.id);
+                  onClose();
+                }}
+                className={cn(
+                  "group flex items-center justify-between w-full p-3 rounded-2xl text-xs font-bold transition-all text-left",
+                  isActive
+                    ? "bg-brand-pink-light text-brand-pink shadow-xs font-extrabold border border-brand-pink/25"
+                    : "text-brand-dark/80 hover:bg-brand-warm hover:text-brand-dark border border-transparent"
+                )}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                      isActive
+                        ? "bg-brand-pink text-white shadow-xs"
+                        : "bg-brand-warm-subtle text-brand-dark/70 group-hover:bg-white group-hover:text-brand-pink"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold tracking-tight">{item.label}</p>
+                    <p className="text-[10px] text-brand-muted font-normal truncate mt-0.5">
+                      {item.sublabel}
+                    </p>
                   </div>
                 </div>
 
-                {group.categories.map((catId) => {
-                  const category = TEMPLATE_CATEGORIES.find((c) => c.id === catId);
-                  if (!category) return null;
-                  const isActive = activeCategory === category.id;
-                  const isGeneral = category.id === "general";
-
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() => {
-                        onSelectCategory(category.id);
-                        onClose();
-                      }}
-                      className={cn(
-                        "group flex items-center justify-between w-full px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left",
-                        isActive
-                          ? "bg-brand-pink-light text-brand-pink shadow-xs font-bold border border-brand-pink/20"
-                          : "text-brand-dark/75 hover:bg-brand-warm hover:text-brand-dark border border-transparent"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-sm shrink-0">{category.icon}</span>
-                        <span className="truncate">{category.label}</span>
-                      </div>
-
-                      <span
-                        className={cn(
-                          "text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ml-1.5",
-                          isActive
-                            ? "bg-brand-pink text-white"
-                            : isGeneral
-                            ? "bg-brand-pink-light text-brand-pink font-extrabold"
-                            : "bg-brand-warm-border/70 text-brand-muted"
-                        )}
-                      >
-                        {isGeneral ? "Mix" : category.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                {item.badge && (
+                  <span
+                    className={cn(
+                      "text-[9px] px-2 py-0.5 rounded-full font-bold shrink-0 ml-1.5 transition-colors",
+                      item.badgeClass
+                    )}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
             );
           })}
 
-          {/* Saved / My Drafts Quick Tab */}
-          <div className="pt-2 border-t border-brand-warm-border/60">
-            <Link
-              href="/profile"
-              onClick={onClose}
-              className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-brand-purple hover:bg-brand-purple/10 border border-brand-purple/15 transition-all"
+          {/* Saved Templates in Mobile Nav */}
+          <div className="pt-3 mt-3 border-t border-brand-warm-border/70">
+            <button
+              type="button"
+              onClick={() => {
+                onSelectParent("saved-templates");
+                onClose();
+              }}
+              className={cn(
+                "group flex items-center justify-between w-full p-3 rounded-2xl text-xs font-bold transition-all text-left",
+                activeParent === "saved-templates"
+                  ? "bg-purple-100 text-brand-purple shadow-xs font-extrabold border border-brand-purple/30"
+                  : "text-brand-purple hover:bg-purple-50/70 border border-brand-purple/15"
+              )}
             >
-              <div className="flex items-center gap-2">
-                <FolderHeart className="w-3.5 h-3.5 text-brand-pink" />
-                <span>Saved / My Drafts</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                    activeParent === "saved-templates"
+                      ? "bg-brand-purple text-white shadow-xs"
+                      : "bg-purple-50 text-brand-purple"
+                  )}
+                >
+                  <FolderHeart className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold tracking-tight">Saved Templates</p>
+                  <p className="text-[10px] text-brand-muted font-normal truncate mt-0.5">
+                    Drafts & custom cards
+                  </p>
+                </div>
               </div>
-              <span className="text-[10px] bg-brand-purple/15 text-brand-purple px-1.5 py-0.5 rounded-md font-extrabold">
-                3 Slots
+
+              <span className="text-[10px] bg-brand-purple/15 text-brand-purple px-2 py-0.5 rounded-md font-extrabold shrink-0">
+                {draftsCount} / 3 Slots
               </span>
-            </Link>
+            </button>
           </div>
         </nav>
 
-        {/* Footer */}
-        <div className="p-3 border-t border-brand-warm-border shrink-0 bg-brand-warm-subtle/50">
+        {/* Bottom Exit */}
+        <div className="p-4 border-t border-brand-warm-border shrink-0 bg-brand-warm-subtle/50">
           <Link
             href="/"
             onClick={onClose}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-brand-muted hover:text-brand-dark hover:bg-white border border-transparent hover:border-brand-warm-border transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-brand-muted hover:text-brand-dark transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-4 h-4" />
             <span>Exit to Suprilo Home</span>
           </Link>
         </div>

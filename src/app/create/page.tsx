@@ -34,25 +34,33 @@ import { Badge } from "@/components/ui/Badge";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useAuth } from "@/context/AuthContext";
 import { UserAvatar } from "@/components/ui/UserAvatar";
-import { StudioSidebar } from "@/components/create/StudioSidebar";
+import { StudioSidebar, StudioNavSelection } from "@/components/create/StudioSidebar";
 import { StudioMobileNav } from "@/components/create/StudioMobileNav";
 import { TemplateStudioCard } from "@/components/create/TemplateStudioCard";
 import {
+  PARENT_CATEGORIES,
+  SUBCATEGORIES,
   SU_PRILO_TEMPLATES,
-  TEMPLATE_CATEGORIES,
-  getCuratedGeneralTemplates,
-  getTemplateById,
+  ParentCategoryId,
   TemplateCategory,
   TemplateDefinition,
+  getSubcategoriesForParent,
+  getSubcategoryById,
+  getTemplatesForSubcategory,
+  getBlankCanvasForSubcategory,
+  getFoilBadge,
+  getTemplateById,
 } from "@/data/templates";
-import { Menu, Search, X, Paintbrush } from "lucide-react";
+import { getUserCards, deleteCardDraft } from "@/lib/cards";
+import { saveActiveDraftSession } from "@/hooks/useCardDraftSync";
+import { Menu, Search, X, Paintbrush, FolderHeart, ArrowRight } from "lucide-react";
 import { useCardEditor } from "@/hooks/useCardEditor";
 import { useCardDraftSync } from "@/hooks/useCardDraftSync";
 import { useCardAutosave } from "@/hooks/useCardAutosave";
 import { useCardPhotoUpload } from "@/hooks/useCardPhotoUpload";
 import { useCardPublish } from "@/hooks/useCardPublish";
 import { recordStudioVisit } from "@/lib/badges/service";
-import { BgPaletteId, StickerId } from "@/types/card";
+import { BgPaletteId, DbCard, StickerId } from "@/types/card";
 import { cn } from "@/lib/utils";
 
 // Foil Finishes
@@ -180,12 +188,12 @@ function CreateCardStudio() {
     return "choices";
   });
 
-  const [activeCategory, setActiveCategory] = React.useState<TemplateCategory>("general");
-  const [smartTab, setSmartTab] = React.useState<SmartTab>("life");
-  const [quickFilter, setQuickFilter] = React.useState<QuickFilter>("all");
+  const [activeParent, setActiveParent] = React.useState<StudioNavSelection>("life");
+  const [activeSubcategory, setActiveSubcategory] = React.useState<string>("birthday");
+  const [savedDrafts, setSavedDrafts] = React.useState<DbCard[]>([]);
+  const [isLoadingDrafts, setIsLoadingDrafts] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
-  const [shuffleSeed, setShuffleSeed] = React.useState(42);
 
   // Canonical reducer-backed card editor hook
   const {
@@ -365,55 +373,95 @@ function CreateCardStudio() {
     }
   };
 
-  const displayedTemplates = React.useMemo(() => {
-    let list: TemplateDefinition[];
-    if (activeCategory === "general") {
-      list = getCuratedGeneralTemplates(shuffleSeed);
+  const fetchUserDrafts = React.useCallback(async () => {
+    if (!user) {
+      setSavedDrafts([]);
+      return;
+    }
+    try {
+      setIsLoadingDrafts(true);
+      const drafts = await getUserCards({ status: "draft" });
+      setSavedDrafts(drafts || []);
+    } catch (err) {
+      console.error("Failed to load drafts:", err);
+    } finally {
+      setIsLoadingDrafts(false);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    fetchUserDrafts();
+  }, [fetchUserDrafts, activeParent]);
+
+  const handleSelectParent = (parent: StudioNavSelection) => {
+    setActiveParent(parent);
+    if (parent !== "saved-templates") {
+      const subs = getSubcategoriesForParent(parent);
+      if (subs.length > 0) {
+        setActiveSubcategory(subs[0].id);
+      }
+    }
+  };
+
+  const handleContinueDraft = (draft: DbCard) => {
+    saveActiveDraftSession(draft.id, draft.slug);
+    setField("recipientName", draft.recipient_name);
+    setField("senderName", draft.sender_name);
+    setField("occasionTag", draft.occasion_tag);
+    setField("primaryMessage", draft.primary_message);
+    setField("secondaryMessage", draft.secondary_message || "");
+    setField("foilStyle", draft.foil_style);
+    setField("coverText", draft.cover_text);
+    setField("bgPalette", draft.bg_palette as BgPaletteId);
+    setField("sticker", draft.sticker as StickerId);
+    if (draft.template_id) {
+      setField("templateId", draft.template_id);
+      setField("creationMode", "template");
     } else {
-      list = SU_PRILO_TEMPLATES.filter((t) => t.category === activeCategory);
+      setField("templateId", null);
+      setField("creationMode", "scratch");
     }
+    setViewState("editor");
+    router.push(`/create?draft=${draft.id}`);
+  };
 
-    // Apply Quick Filter chips
-    if (quickFilter === "trending") {
-      list = list.filter(
-        (t) =>
-          t.category === "holidays" ||
-          t.category === "celebrations" ||
-          /diwali|christmas|new year|valentine|halloween|thanksgiving|easter/i.test(
-            t.title + t.tag + t.categoryLabel
-          )
-      );
-    } else if (quickFilter === "emotional") {
-      list = list.filter(
-        (t) =>
-          ["heartfelt", "love", "friendship"].includes(t.category) ||
-          /hug|love|thank|grateful|comfort|sister|miss|sanctuary/i.test(t.message + t.title)
-      );
-    } else if (quickFilter === "funny") {
-      list = list.filter(
-        (t) =>
-          t.category === "funny" ||
-          /roast|joke|sarcas|laugh|damage|burn|scam|adult/i.test(
-            t.title + t.description + t.tag
-          )
-      );
-    } else if (quickFilter === "vouchers") {
-      list = list.filter(
-        (t) =>
-          t.category === "reveals" ||
-          /voucher|coupon|treat|coffee|pass|flight|concert|spa|dinner|keys/i.test(
-            t.title + t.message + t.tag
-          )
-      );
-    } else if (quickFilter === "minimalist") {
-      list = list.filter(
-        (t) =>
-          t.coverStyle === "golden-foil" ||
-          t.bgGradient.includes("stone") ||
-          /minimal|chic|vintage|toast|sanctuary/i.test(t.title + t.description)
-      );
+  const handleDeleteDraft = async (draftId: string) => {
+    if (!user) return;
+    try {
+      await deleteCardDraft(draftId);
+      await fetchUserDrafts();
+    } catch (err) {
+      console.error("Failed to delete draft:", err);
     }
+  };
 
+  const handleSelectBlankForSubcategory = (subId: string, foilId?: CoverStyle) => {
+    const blank = getBlankCanvasForSubcategory(subId, foilId);
+    if (!user) {
+      openAuthModal(`/create?mode=scratch&sub=${subId}`);
+    } else {
+      applyTemplate(blank);
+      setViewState("editor");
+      router.push(`/create?mode=scratch&sub=${subId}`);
+    }
+  };
+
+  const currentParentMeta = React.useMemo(() => {
+    if (activeParent === "saved-templates") return null;
+    return PARENT_CATEGORIES.find((p) => p.id === activeParent) || PARENT_CATEGORIES[0];
+  }, [activeParent]);
+
+  const currentSubMeta = React.useMemo(() => {
+    return SUBCATEGORIES[activeSubcategory] || SUBCATEGORIES.birthday;
+  }, [activeSubcategory]);
+
+  const subcategoriesInParent = React.useMemo(() => {
+    if (activeParent === "saved-templates") return [];
+    return getSubcategoriesForParent(activeParent);
+  }, [activeParent]);
+
+  const displayedTemplates = React.useMemo(() => {
+    const list = getTemplatesForSubcategory(activeSubcategory);
     if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase().trim();
     return list.filter(
@@ -422,17 +470,9 @@ function CreateCardStudio() {
         t.description.toLowerCase().includes(q) ||
         t.message.toLowerCase().includes(q) ||
         t.recipient.toLowerCase().includes(q) ||
-        t.tag.toLowerCase().includes(q) ||
-        t.categoryLabel.toLowerCase().includes(q)
+        t.tag.toLowerCase().includes(q)
     );
-  }, [activeCategory, shuffleSeed, quickFilter, searchQuery]);
-
-  const currentCategoryMeta = React.useMemo(() => {
-    return (
-      TEMPLATE_CATEGORIES.find((c) => c.id === activeCategory) ||
-      TEMPLATE_CATEGORIES[0]
-    );
-  }, [activeCategory]);
+  }, [activeSubcategory, searchQuery]);
 
   const handleChooseAnotherMode = () => {
     clearDraft();
@@ -621,18 +661,20 @@ function CreateCardStudio() {
         <>
           {/* Left Sidebar for Desktop */}
           <StudioSidebar
-            activeCategory={activeCategory}
-            onSelectCategory={setActiveCategory}
+            activeParent={activeParent}
+            onSelectParent={handleSelectParent}
             onSelectScratch={handleStartFromScratch}
+            draftsCount={savedDrafts.length}
           />
 
           {/* Slide-over Mobile Navigation Drawer */}
           <StudioMobileNav
             isOpen={isMobileNavOpen}
             onClose={() => setIsMobileNavOpen(false)}
-            activeCategory={activeCategory}
-            onSelectCategory={setActiveCategory}
+            activeParent={activeParent}
+            onSelectParent={handleSelectParent}
             onSelectScratch={handleStartFromScratch}
+            draftsCount={savedDrafts.length}
           />
 
           {/* Main Studio Area */}
@@ -660,10 +702,24 @@ function CreateCardStudio() {
                   <span className="text-brand-warm-border">/</span>
                   <span className="text-brand-dark font-bold">Creation Studio</span>
                   <span className="text-brand-warm-border">/</span>
-                  <span className="text-brand-pink font-bold flex items-center gap-1.5">
-                    <span>{currentCategoryMeta.icon}</span>
-                    <span>{currentCategoryMeta.label}</span>
-                  </span>
+                  {activeParent === "saved-templates" ? (
+                    <span className="text-brand-purple font-bold flex items-center gap-1.5">
+                      <FolderHeart className="w-3.5 h-3.5" />
+                      <span>Saved Templates</span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-brand-dark font-bold flex items-center gap-1">
+                        <span>{currentParentMeta?.icon}</span>
+                        <span>{currentParentMeta?.label}</span>
+                      </span>
+                      <span className="text-brand-warm-border">/</span>
+                      <span className="text-brand-pink font-bold flex items-center gap-1.5">
+                        <span>{currentSubMeta?.icon}</span>
+                        <span>{currentSubMeta?.label}</span>
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -675,7 +731,7 @@ function CreateCardStudio() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search 100 templates..."
+                    placeholder="Search templates in this category..."
                     className="w-full pl-9 pr-8 py-1.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-xs text-brand-dark placeholder:text-brand-muted focus:outline-none focus:ring-1 focus:ring-brand-pink focus:border-brand-pink transition-all"
                   />
                   {searchQuery && (
@@ -723,7 +779,7 @@ function CreateCardStudio() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 100 templates..."
+                  placeholder="Search templates in this category..."
                   className="w-full pl-9 pr-8 py-2 rounded-xl border border-brand-warm-border bg-white text-xs text-brand-dark placeholder:text-brand-muted shadow-xs focus:outline-none focus:ring-1 focus:ring-brand-pink focus:border-brand-pink"
                 />
                 {searchQuery && (
@@ -737,210 +793,338 @@ function CreateCardStudio() {
                 )}
               </div>
 
-              {/* 1. THE 3 SMART TOP TABS (Modular Category Architecture) */}
-              <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-brand-warm-border shadow-xs overflow-x-auto no-scrollbar">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSmartTab("life");
-                    setActiveCategory("general");
-                    setQuickFilter("all");
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
-                    smartTab === "life"
-                      ? "bg-brand-pink text-white shadow-xs"
-                      : "text-brand-dark/70 hover:bg-brand-warm hover:text-brand-dark"
-                  )}
-                >
-                  <HeartHandshake className="w-4 h-4" />
-                  <span>Life & Milestones</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSmartTab("trending");
-                    setActiveCategory("holidays");
-                    setQuickFilter("all");
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
-                    smartTab === "trending"
-                      ? "bg-brand-pink text-white shadow-xs"
-                      : "text-brand-dark/70 hover:bg-brand-warm hover:text-brand-dark"
-                  )}
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>Trending & Calendar</span>
-                  <span className="text-[10px] bg-amber-300 text-amber-950 px-1.5 py-0.5 rounded-md font-black">
-                    HOT
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSmartTab("mystery");
-                    setActiveCategory("funny");
-                    setQuickFilter("all");
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap",
-                    smartTab === "mystery"
-                      ? "bg-brand-pink text-white shadow-xs"
-                      : "text-brand-dark/70 hover:bg-brand-warm hover:text-brand-dark"
-                  )}
-                >
-                  <Gamepad2 className="w-4 h-4" />
-                  <span>Mystery & Fun</span>
-                </button>
-              </div>
-
-              {/* 2. DYNAMIC "HAPPENING THIS WEEK" FESTIVE BANNER (Active on Trending / Holidays) */}
-              {(smartTab === "trending" || activeCategory === "holidays") && (
-                <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-brand-pink text-white shadow-lg space-y-3 relative overflow-hidden animate-in fade-in duration-300">
-                  <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1.5 max-w-xl">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 backdrop-blur-xs">
-                        <Sparkles className="w-3 h-3" />
-                        Happening This Week
+              {/* VIEW SWITCH: SAVED TEMPLATES GALLERY VS ACTIVE CATEGORY FEED */}
+              {activeParent === "saved-templates" ? (
+                <div className="space-y-6">
+                  {/* Saved Templates Header Banner */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-brand-purple border border-purple-200">
+                        <FolderHeart className="w-3.5 h-3.5" />
+                        <span>My Draft Storage</span>
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-xs">
-                        Festival & Holiday Scratch Magic 🪔✨
-                      </h3>
-                      <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
-                        Diwali Lights, Christmas Cheer, and New Year Celebrations are trending! Choose a festive card to reveal your greetings with golden foil.
+                      <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
+                        Saved Templates & Drafts
+                      </h1>
+                      <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+                        Pick up where you left off or clear a slot to create a new surprise. You have 3 draft slots capacity.
                       </p>
                     </div>
-                    <div className="shrink-0 flex items-center gap-2">
+
+                    <div className="shrink-0 flex items-center gap-3">
+                      <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-purple-50 text-brand-purple border border-purple-200">
+                        {savedDrafts.length} / 3 Slots Used
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  {!user ? (
+                    <div className="text-center py-16 bg-white rounded-3xl border border-brand-warm-border p-8 space-y-4">
+                      <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-50 flex items-center justify-center text-brand-purple">
+                        <FolderHeart className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-lg font-bold text-brand-dark">Sign In to Access Your Saved Templates</h3>
+                      <p className="text-xs text-brand-muted max-w-md mx-auto">
+                        Connect your Google account to access your 3 saved draft slots, pick up editing, and share cards with friends.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => openAuthModal("/create")}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-pink text-white font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-all"
+                      >
+                        <span>Sign In with Google</span>
+                      </button>
+                    </div>
+                  ) : isLoadingDrafts ? (
+                    <div className="text-center py-16 bg-white rounded-3xl border border-brand-warm-border p-8 space-y-3">
+                      <RefreshCw className="w-8 h-8 mx-auto text-brand-pink animate-spin" />
+                      <p className="text-xs font-semibold text-brand-muted">Loading your saved drafts...</p>
+                    </div>
+                  ) : savedDrafts.length === 0 ? (
+                    <div className="text-center py-16 bg-white rounded-3xl border border-brand-warm-border p-8 space-y-4">
+                      <div className="w-14 h-14 mx-auto rounded-2xl bg-brand-warm-subtle flex items-center justify-center text-brand-muted">
+                        <FolderHeart className="w-7 h-7" />
+                      </div>
+                      <h3 className="text-lg font-bold text-brand-dark">No Saved Drafts Yet</h3>
+                      <p className="text-xs text-brand-muted max-w-md mx-auto">
+                        You currently have all 3 draft slots open! Explore Life milestones or start from scratch to craft your surprise.
+                      </p>
                       <button
                         type="button"
                         onClick={() => {
-                          const festive =
-                            SU_PRILO_TEMPLATES.find((t) => t.id === "holiday-diwali-lights") ||
-                            SU_PRILO_TEMPLATES.find((t) => t.category === "holidays");
-                          if (festive) handleSelectTemplate(festive);
+                          setActiveParent("life");
+                          setActiveSubcategory("birthday");
                         }}
-                        className="px-4 py-2.5 rounded-2xl bg-white text-brand-dark text-xs font-black shadow-md hover:bg-stone-50 active:scale-95 transition-all"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-pink text-white font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-all"
                       >
-                        Use Festive Card 🪔
+                        <span>Browse Life Templates</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                      {savedDrafts.map((draft, idx) => {
+                        const foilBadge = getFoilBadge(draft.foil_style);
+                        return (
+                          <div
+                            key={draft.id}
+                            className="group bg-white rounded-3xl p-5 border border-brand-warm-border shadow-xs hover:shadow-card transition-all flex flex-col justify-between space-y-4"
+                          >
+                            {/* Draft Header */}
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border", foilBadge.bgClass, foilBadge.borderClass)}>
+                                <span className={cn("w-1.5 h-1.5 rounded-full ring-2", foilBadge.dotClass)} />
+                                <span>{foilBadge.label}</span>
+                              </span>
+                              <span className="text-[10px] font-bold text-brand-purple bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                                Slot {idx + 1} of 3
+                              </span>
+                            </div>
+
+                            {/* Draft Body */}
+                            <div className="p-4 rounded-2xl bg-brand-warm-subtle/50 border border-brand-warm-border/60 space-y-2">
+                              <div className="flex items-center justify-between text-[11px] text-brand-muted">
+                                <span className="font-bold text-brand-dark truncate max-w-[140px]">
+                                  To: {draft.recipient_name}
+                                </span>
+                                <span className="text-[10px] uppercase font-bold text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full">
+                                  {draft.occasion_tag}
+                                </span>
+                              </div>
+                              <p className="text-xs font-bold text-brand-dark line-clamp-2">
+                                &ldquo;{draft.primary_message}&rdquo;
+                              </p>
+                              {draft.secondary_message && (
+                                <p className="text-[10px] text-brand-muted italic line-clamp-1">
+                                  {draft.secondary_message}
+                                </p>
+                              )}
+                              <div className="pt-1 flex items-center justify-between text-[10px] text-brand-muted border-t border-brand-warm-border/40">
+                                <span>From: {draft.sender_name}</span>
+                                <span>{new Date(draft.updated_at).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => handleContinueDraft(draft)}
+                                className="flex-1 py-2.5 px-3 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-bold shadow-xs hover:shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                              >
+                                <span>Continue Editing</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDraft(draft.id)}
+                                className="p-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+                                title="Delete Draft"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6 sm:space-y-8">
+                  {/* 1. TOP RECTANGLE SUBCATEGORY BANNER BOX */}
+                  <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-white via-white to-brand-warm border border-brand-warm-border shadow-xs space-y-6 relative overflow-hidden">
+                    {/* Thematic Accent Glow */}
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-brand-pink/5 rounded-full blur-3xl pointer-events-none" />
+
+                    {/* Top Info Row */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                      <div className="space-y-3 max-w-2xl">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-brand-pink-light text-brand-pink border border-brand-pink/20">
+                            <span>{currentParentMeta?.icon}</span>
+                            <span>{currentParentMeta?.label}</span>
+                          </span>
+                          <span className="text-[11px] font-bold text-brand-muted uppercase tracking-wider bg-brand-warm-subtle px-2.5 py-1 rounded-full border border-brand-warm-border">
+                            {currentSubMeta?.heroBadge}
+                          </span>
+                        </div>
+
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-dark tracking-tight flex items-center gap-2.5">
+                          <span>{currentSubMeta?.icon}</span>
+                          <span>{currentSubMeta?.label}</span>
+                        </h1>
+
+                        <p className="text-xs sm:text-sm text-brand-muted leading-relaxed font-medium">
+                          {currentSubMeta?.description}
+                        </p>
+                      </div>
+
+                      {/* Thematic Visual Graphic */}
+                      <div className="shrink-0 flex items-center justify-center">
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr from-brand-pink/15 via-white to-brand-orange/20 border-2 border-brand-pink/30 p-2 shadow-lg flex flex-col items-center justify-center text-center group hover:rotate-3 transition-transform">
+                          <span className="text-4xl sm:text-5xl drop-shadow-xs">{currentSubMeta?.icon}</span>
+                          <span className="text-[9px] font-black tracking-wider uppercase text-brand-pink mt-1">
+                            5 FOILS READY
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Middle Foil Finishes Row */}
+                    <div className="pt-4 border-t border-brand-warm-border/70 relative z-10 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-brand-muted flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-brand-pink" />
+                          Available Exciting Foils in this Theme:
+                        </span>
+                        <span className="text-[11px] font-bold text-brand-dark/70">
+                          5 Custom Finishes
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                        {currentSubMeta?.foils.map((foil) => (
+                          <div
+                            key={foil.id}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-brand-warm-border shadow-2xs shrink-0 hover:border-brand-pink/40 transition-colors"
+                            title={foil.desc}
+                          >
+                            <div className={cn("w-3 h-3 rounded-full bg-gradient-to-br shadow-inner shrink-0", foil.previewGradient)} />
+                            <span className="text-xs font-bold text-brand-dark truncate max-w-[140px]">
+                              {foil.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Bottom Subcategory Switcher Inside the Box */}
+                    <div className="pt-4 border-t border-brand-warm-border/70 relative z-10 space-y-2">
+                      <div className="text-[10px] font-extrabold uppercase tracking-widest text-brand-muted">
+                        Switch Theme in {currentParentMeta?.label}:
+                      </div>
+
+                      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                        {subcategoriesInParent.map((sub) => {
+                          const isCurrent = sub.id === activeSubcategory;
+                          return (
+                            <button
+                              key={sub.id}
+                              type="button"
+                              onClick={() => setActiveSubcategory(sub.id)}
+                              className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 border",
+                                isCurrent
+                                  ? "bg-brand-pink text-white border-brand-pink shadow-xs font-extrabold scale-[1.02]"
+                                  : "bg-white hover:bg-brand-warm text-brand-dark/80 border-brand-warm-border hover:border-brand-pink/30 shadow-2xs"
+                              )}
+                            >
+                              <span className="text-sm shrink-0">{sub.icon}</span>
+                              <span>{sub.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Counter info */}
+                  <div className="flex items-center justify-between text-xs text-brand-muted px-1">
+                    <span>
+                      Showing <strong className="text-brand-dark font-bold">{displayedTemplates.length}</strong> themed designs + <strong className="text-brand-pink font-bold">1 Custom Blank Canvas</strong>
+                    </span>
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="text-brand-pink font-semibold hover:underline"
+                      >
+                        Clear search
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 2. TEMPLATES GRID (5 DEDICATED TEMPLATES + 6TH CUSTOM BLANK CANVAS CARD) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                    {displayedTemplates.map((template) => (
+                      <TemplateStudioCard
+                        key={template.id}
+                        template={template}
+                        onSelect={handleSelectTemplate}
+                      />
+                    ))}
+
+                    {/* 6TH CARD: THEMATIC CUSTOM BLANK CANVAS */}
+                    <div className="group bg-gradient-to-br from-white via-brand-pink-light/20 to-brand-orange/10 rounded-3xl p-4 sm:p-5 border-2 border-dashed border-brand-pink/35 hover:border-brand-pink shadow-xs hover:shadow-card hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative overflow-hidden">
+                      {/* Top Pill */}
+                      <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-pink text-white shadow-xs">
+                          <Paintbrush className="w-3 h-3" />
+                          Custom Blank Canvas
+                        </span>
+                        <span className="text-[10px] font-bold text-brand-muted bg-white/80 px-2 py-0.5 rounded-md border border-brand-warm-border">
+                          100% Freedom
+                        </span>
+                      </div>
+
+                      {/* Visual Preview */}
+                      <div
+                        onClick={() => handleSelectBlankForSubcategory(activeSubcategory)}
+                        className="cursor-pointer relative rounded-2xl p-4 border border-brand-pink/25 bg-white shadow-inner flex flex-col justify-between min-h-[176px] transition-transform group-hover:scale-[1.01] overflow-hidden"
+                      >
+                        <div className="flex items-start justify-between gap-2 relative z-10">
+                          <span className="text-[9px] font-black uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full border border-brand-pink/20">
+                            Custom {currentSubMeta?.label}
+                          </span>
+                          <span className="text-[10px] font-semibold text-brand-muted">
+                            To: Anyone
+                          </span>
+                        </div>
+
+                        <div className="my-2.5 space-y-1 relative z-10 text-center px-1">
+                          <p className="text-xs sm:text-[13px] font-bold text-brand-dark leading-snug line-clamp-2">
+                            &ldquo;Type your own custom words & secret reveal...&rdquo;
+                          </p>
+                          <p className="text-[10px] text-brand-muted leading-tight line-clamp-1 italic">
+                            Choose any of this category&apos;s 5 foils
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] text-brand-dark/60 pt-2 border-t border-brand-warm-border/40 relative z-10">
+                          <div className="flex items-center gap-1.5 text-brand-pink font-semibold">
+                            <Sparkles className="w-3 h-3 text-brand-pink" />
+                            <span>Custom Reveal</span>
+                          </div>
+                          <span className="font-mono text-[9px] text-brand-muted">
+                            From: You
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div className="mt-3.5 mb-4 space-y-1 shrink-0">
+                        <h3 className="text-sm font-extrabold text-brand-dark group-hover:text-brand-pink transition-colors truncate">
+                          Start from Scratch ({currentSubMeta?.label})
+                        </h3>
+                        <p className="text-xs text-brand-muted line-clamp-2 leading-relaxed">
+                          Craft your own surprise using any of the 5 themed foils in this category.
+                        </p>
+                      </div>
+
+                      {/* Action */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectBlankForSubcategory(activeSubcategory)}
+                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-brand-pink to-brand-orange text-white font-bold text-xs shadow-xs hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Paintbrush className="w-3.5 h-3.5" />
+                        <span>Create Custom Card</span>
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                       </button>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* 3. QUICK-FILTER HORIZONTAL CHIPS */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                <span className="text-[11px] font-bold text-brand-muted shrink-0 mr-1 flex items-center gap-1">
-                  <Sliders className="w-3.5 h-3.5" />
-                  Quick Filter:
-                </span>
-                {QUICK_FILTER_CHIPS.map((chip) => (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    onClick={() => setQuickFilter(chip.id)}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0",
-                      quickFilter === chip.id
-                        ? "bg-brand-pink text-white border-brand-pink shadow-xs font-bold"
-                        : "bg-white hover:bg-brand-warm-subtle text-brand-dark border-brand-warm-border hover:border-brand-pink/40"
-                    )}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Category Hero Banner */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-warm-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
-                <div className="space-y-2 max-w-2xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-brand-pink-light text-brand-pink border border-brand-pink/20">
-                    <span className="text-base">{currentCategoryMeta.icon}</span>
-                    <span>{currentCategoryMeta.label}</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-                    {activeCategory === "general"
-                      ? "Curated Inspiration Showcase"
-                      : currentCategoryMeta.label}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-                    {currentCategoryMeta.description}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
-                  {activeCategory === "general" && (
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={() => setShuffleSeed((s) => s + 1)}
-                      className="gap-2 text-xs font-bold border-brand-warm-border hover:border-brand-pink shadow-2xs"
-                      title="Randomize templates mix"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-brand-pink" />
-                      <span>Shuffle Mix</span>
-                    </Button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleStartFromScratch}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-pink to-brand-orange text-white text-xs font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
-                  >
-                    <Paintbrush className="w-3.5 h-3.5" />
-                    <span>Blank Canvas</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Counter info */}
-              <div className="flex items-center justify-between text-xs text-brand-muted px-1">
-                <span>
-                  Showing <strong className="text-brand-dark font-bold">{displayedTemplates.length}</strong> design{displayedTemplates.length === 1 ? "" : "s"}
-                </span>
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="text-brand-pink font-semibold hover:underline"
-                  >
-                    Clear search
-                  </button>
-                )}
-              </div>
-
-              {/* Template Cards Grid */}
-              {displayedTemplates.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-                  {displayedTemplates.map((template) => (
-                    <TemplateStudioCard
-                      key={template.id}
-                      template={template}
-                      onSelect={handleSelectTemplate}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16 bg-white rounded-3xl border border-brand-warm-border p-8 space-y-4">
-                  <div className="w-12 h-12 mx-auto rounded-2xl bg-brand-warm-subtle flex items-center justify-center text-brand-muted">
-                    <Search className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-base font-bold text-brand-dark">No matching templates found</h3>
-                  <p className="text-xs text-brand-muted max-w-sm mx-auto">
-                    We couldn&apos;t find any designs matching &ldquo;{searchQuery}&rdquo;. Try another keyword or reset your filter.
-                  </p>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setSearchQuery("")}
-                    className="text-xs"
-                  >
-                    Reset Search
-                  </Button>
                 </div>
               )}
             </main>

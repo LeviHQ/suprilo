@@ -5,7 +5,8 @@ export type CoverStyle =
   | "lavender-pink"
   | "golden-foil"
   | "cosmic-purple"
-  | "mint-fresh";
+  | "mint-fresh"
+  | (string & {});
 
 /**
  * Character limit and file constraints for card editor and media.
