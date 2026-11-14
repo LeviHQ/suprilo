@@ -45,9 +45,10 @@ import {
   getFoilsForSubcategory,
   getTemplateById,
 } from "@/data/templates";
-import { getUserCards, deleteCardDraft } from "@/lib/cards";
+import { getUserCards, deleteCardDraft, createCardDraft, updateCardDraft } from "@/lib/cards";
 import { saveActiveDraftSession } from "@/hooks/useCardDraftSync";
-import { Menu, Search, X, Paintbrush, FolderHeart, ArrowRight } from "lucide-react";
+import { Menu, Search, X, Paintbrush, FolderHeart, ArrowRight, AlertTriangle } from "lucide-react";
+import { FoilAvatar } from "@/components/create/FoilAvatar";
 import { useCardEditor } from "@/hooks/useCardEditor";
 import { useCardDraftSync } from "@/hooks/useCardDraftSync";
 import { useCardAutosave } from "@/hooks/useCardAutosave";
@@ -64,41 +65,59 @@ const BG_PALETTES: {
   gradient: string;
   textColor: string;
   border: string;
+  swatchBg: string;
+  swatchBorder: string;
+  badgeBg: string;
 }[] = [
     {
       id: "soft-pink",
       name: "Soft Pink",
       gradient: "from-pink-50 via-white to-rose-50",
       textColor: "text-rose-950",
-      border: "border-pink-200",
+      border: "border-pink-300",
+      swatchBg: "linear-gradient(135deg, #FCE7F3 0%, #F472B6 100%)",
+      swatchBorder: "#F472B6",
+      badgeBg: "bg-pink-50/70",
     },
     {
       id: "warm-sunshine",
       name: "Sunshine",
       gradient: "from-amber-50 via-white to-orange-50",
       textColor: "text-amber-950",
-      border: "border-amber-200",
+      border: "border-amber-300",
+      swatchBg: "linear-gradient(135deg, #FEF3C7 0%, #F59E0B 100%)",
+      swatchBorder: "#F59E0B",
+      badgeBg: "bg-amber-50/70",
     },
     {
       id: "royal-amethyst",
       name: "Amethyst",
       gradient: "from-purple-50 via-white to-indigo-50",
       textColor: "text-indigo-950",
-      border: "border-purple-200",
+      border: "border-purple-300",
+      swatchBg: "linear-gradient(135deg, #EDE9FE 0%, #8B5CF6 100%)",
+      swatchBorder: "#8B5CF6",
+      badgeBg: "bg-purple-50/70",
     },
     {
       id: "mint-fresh",
       name: "Mint Fresh",
       gradient: "from-emerald-50 via-white to-teal-50",
       textColor: "text-emerald-950",
-      border: "border-emerald-200",
+      border: "border-emerald-300",
+      swatchBg: "linear-gradient(135deg, #D1FAE5 0%, #10B981 100%)",
+      swatchBorder: "#10B981",
+      badgeBg: "bg-emerald-50/70",
     },
     {
       id: "pure-ivory",
       name: "Pure Ivory",
       gradient: "from-brand-warm-subtle via-white to-brand-warm",
       textColor: "text-brand-dark",
-      border: "border-brand-warm-border",
+      border: "border-amber-300",
+      swatchBg: "linear-gradient(135deg, #FFFBEB 0%, #FDE68A 100%)",
+      swatchBorder: "#F59E0B",
+      badgeBg: "bg-amber-50/60",
     },
   ];
 
@@ -144,13 +163,14 @@ function CreateCardStudio() {
 
   const templateParam = searchParams.get("template");
   const modeParam = searchParams.get("mode");
+  const draftParam = searchParams.get("draft");
 
   // Determine user first name for default sender assignment
   const userFirstName = user?.displayName ? user.displayName.split(" ")[0] : "Alex";
 
   // Flow State: 'choices' (with animated intro) or 'editor'
   const [viewState, setViewState] = React.useState<"choices" | "editor">(() => {
-    if (templateParam || modeParam) return "editor";
+    if (templateParam || modeParam || draftParam) return "editor";
     return "choices";
   });
 
@@ -160,7 +180,11 @@ function CreateCardStudio() {
   const [isLoadingDrafts, setIsLoadingDrafts] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
-  const [showAllFoils, setShowAllFoils] = React.useState(false);
+
+  // Exit & Draft confirmation modal state
+  const [isExitModalOpen, setIsExitModalOpen] = React.useState(false);
+  const [isSavingDraftFromModal, setIsSavingDraftFromModal] = React.useState(false);
+  const [modalDraftError, setModalDraftError] = React.useState<string | null>(null);
 
   // Canonical reducer-backed card editor hook
   const {
@@ -184,6 +208,7 @@ function CreateCardStudio() {
   });
 
   // Supabase Draft Synchronization (Task 2C-5.3.1)
+  // Strictly inactive on fresh card design to avoid auto-creating drafts or triggering premature limits
   const {
     draftId,
     syncStatus,
@@ -193,7 +218,7 @@ function CreateCardStudio() {
     clearActiveDraft,
   } = useCardDraftSync({
     user,
-    isActive: viewState === "editor",
+    isActive: Boolean(draftParam),
     editorState: state,
     templateParam,
   });
@@ -305,14 +330,113 @@ function CreateCardStudio() {
 
   const handleBack = () => {
     if (viewState === "editor") {
-      setViewState("choices");
-      router.push("/create");
+      if (isPublished) {
+        setViewState("choices");
+        router.push("/create");
+        return;
+      }
+      setIsExitModalOpen(true);
+      setModalDraftError(null);
       return;
     }
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
     } else {
       router.push("/");
+    }
+  };
+
+  const handleChooseAnotherMode = () => {
+    if (isPublished) {
+      setViewState("choices");
+      router.push("/create");
+      return;
+    }
+    setIsExitModalOpen(true);
+    setModalDraftError(null);
+  };
+
+  const handleExitWithoutSaving = () => {
+    clearDraft();
+    clearActiveDraft();
+    setIsExitModalOpen(false);
+    setModalDraftError(null);
+    setViewState("choices");
+    router.push("/create");
+  };
+
+  const handleSaveDraftAndExit = async () => {
+    if (!user) {
+      openAuthModal("/create");
+      return;
+    }
+
+    try {
+      setIsSavingDraftFromModal(true);
+      setModalDraftError(null);
+
+      // Check draft slot limit
+      const activeDrafts = await getUserCards({ status: "draft" });
+      const hasSlotFree = (activeDrafts?.length || 0) < 3;
+
+      if (!draftId && !hasSlotFree) {
+        setModalDraftError("DRAFT_LIMIT_REACHED");
+        setIsSavingDraftFromModal(false);
+        return;
+      }
+
+      if (draftId) {
+        await updateCardDraft(draftId, {
+          recipient_name: state.recipientName,
+          sender_name: state.senderName,
+          occasion_tag: state.occasionTag,
+          primary_message: state.primaryMessage,
+          secondary_message: state.secondaryMessage,
+          foil_style: state.foilStyle,
+          cover_text: state.coverText,
+          bg_palette: state.bgPalette,
+          sticker: state.sticker,
+          font_family: state.fontFamily,
+          sound_enabled: state.soundEnabled,
+        });
+      } else {
+        await createCardDraft({
+          creation_mode: state.creationMode,
+          template_id: state.templateId,
+          recipient_name: state.recipientName,
+          sender_name: state.senderName,
+          occasion_tag: state.occasionTag,
+          primary_message: state.primaryMessage,
+          secondary_message: state.secondaryMessage,
+          foil_style: state.foilStyle,
+          cover_text: state.coverText,
+          bg_palette: state.bgPalette,
+          sticker: state.sticker,
+          font_family: state.fontFamily,
+          photo_path: state.photoPath,
+          sound_enabled: state.soundEnabled,
+        });
+      }
+
+      await fetchUserDrafts();
+      clearDraft();
+      clearActiveDraft();
+      setIsExitModalOpen(false);
+      setViewState("choices");
+      router.push("/create");
+    } catch (err: unknown) {
+      console.error("Save draft error:", err);
+      const msg =
+        typeof err === "object" && err !== null && "message" in err
+          ? String((err as { message: unknown }).message)
+          : String(err);
+      if (/DRAFT_LIMIT_REACHED|maximum of 3|limit/i.test(msg)) {
+        setModalDraftError("DRAFT_LIMIT_REACHED");
+      } else {
+        setModalDraftError(msg || "Failed to save draft. Please try again.");
+      }
+    } finally {
+      setIsSavingDraftFromModal(false);
     }
   };
 
@@ -452,13 +576,6 @@ function CreateCardStudio() {
         t.tag.toLowerCase().includes(q)
     );
   }, [activeSubcategory, searchQuery]);
-
-  const handleChooseAnotherMode = () => {
-    clearDraft();
-    clearActiveDraft();
-    setViewState("choices");
-    router.replace("/create");
-  };
 
   // Loading Screen only when entering active editor studio
   if (loading && viewState === "editor") {
@@ -973,7 +1090,7 @@ function CreateCardStudio() {
                             title={`Click to design a card with ${foil.name}`}
                           >
                             <div className="flex items-center gap-2 mb-1.5">
-                              <div className={cn("w-6 h-6 rounded-lg bg-gradient-to-br shadow-inner shrink-0 border border-white/80 ring-1 ring-brand-warm-border", foil.previewGradient)} />
+                              <FoilAvatar foilId={foil.id} size="sm" />
                               <span className="text-[11px] font-black text-brand-dark truncate group-hover/foil:text-brand-pink transition-colors">
                                 {foil.name}
                               </span>
@@ -1046,7 +1163,7 @@ function CreateCardStudio() {
                       />
                     ))}
 
-                    {/* 6TH CARD: THEMATIC CUSTOM BLANK CANVAS */}
+                    {/* 6TH CARD: THEMATIC CUSTOM BLANK CANVAS (Vertical Rectangle) */}
                     <div className="group bg-gradient-to-br from-white via-brand-pink-light/20 to-brand-orange/10 rounded-3xl p-4 sm:p-5 border-2 border-dashed border-brand-pink/35 hover:border-brand-pink shadow-xs hover:shadow-card hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative overflow-hidden">
                       {/* Top Pill */}
                       <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
@@ -1059,10 +1176,10 @@ function CreateCardStudio() {
                         </span>
                       </div>
 
-                      {/* Visual Preview with 5 Foil Quick-Picks */}
-                      <div className="relative rounded-2xl p-3.5 border border-brand-pink/25 bg-white shadow-inner flex flex-col justify-between min-h-[190px] overflow-hidden">
+                      {/* Visual Preview: Proper Vertical Rectangle */}
+                      <div className="relative rounded-3xl w-full aspect-[4/5] min-h-[360px] sm:min-h-[390px] p-5 border border-brand-pink/25 bg-white/95 shadow-inner flex flex-col justify-between overflow-hidden">
                         <div className="flex items-start justify-between gap-2 relative z-10">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full border border-brand-pink/20">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2.5 py-1 rounded-full border border-brand-pink/20 shadow-2xs">
                             Pick From {currentSubMeta?.label} Foils
                           </span>
                           <span className="text-[10px] font-bold text-brand-muted">
@@ -1070,43 +1187,53 @@ function CreateCardStudio() {
                           </span>
                         </div>
 
-                        {/* 5 Swatches direct picker */}
-                        <div className="grid grid-cols-5 gap-1.5 my-auto py-2">
-                          {currentSubMeta?.foils.map((foil) => (
-                            <button
-                              key={foil.id}
-                              type="button"
-                              onClick={() => handleSelectBlankForSubcategory(activeSubcategory, foil.id)}
-                              className="group/swatch flex flex-col items-center gap-1 p-1 rounded-xl hover:bg-brand-warm transition-all"
-                              title={`Create blank card with ${foil.name}`}
-                            >
-                              <div
-                                className={cn(
-                                  "w-9 h-9 rounded-xl bg-gradient-to-br shadow-xs border border-white/80 ring-1 ring-brand-warm-border group-hover/swatch:scale-110 transition-transform",
-                                  foil.previewGradient
-                                )}
-                              />
-                              <span className="text-[8px] font-bold text-brand-dark/80 truncate max-w-[48px] text-center">
-                                {foil.name.split(" ")[0]}
-                              </span>
-                            </button>
-                          ))}
+                        {/* 5 Swatches direct picker with visible avatars */}
+                        <div className="my-auto space-y-3 text-center">
+                          <div className="space-y-1">
+                            <span className="text-xs font-black text-brand-dark block">
+                              5 Signature {currentSubMeta?.label} Foils
+                            </span>
+                            <p className="text-[11px] text-brand-muted">
+                              Choose a finish to start your custom card:
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-5 gap-1.5 py-2">
+                            {currentSubMeta?.foils.map((foil) => (
+                              <button
+                                key={foil.id}
+                                type="button"
+                                onClick={() => handleSelectBlankForSubcategory(activeSubcategory, foil.id)}
+                                className="group/swatch flex flex-col items-center gap-1.5 p-1 rounded-2xl hover:bg-brand-warm transition-all active:scale-95"
+                                title={`Create blank card with ${foil.name}`}
+                              >
+                                <FoilAvatar foilId={foil.id} size="md" className="group-hover/swatch:scale-110" />
+                                <span className="text-[9px] font-bold text-brand-dark truncate max-w-[50px] text-center">
+                                  {foil.name.split(" ")[0]}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="text-[10px] text-brand-muted font-medium italic">
+                            100% creative freedom with photos & notes
+                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-[10px] text-brand-dark/60 pt-2 border-t border-brand-warm-border/40 relative z-10">
-                          <div className="flex items-center gap-1 text-brand-pink font-semibold text-[9px]">
-                            <Sparkles className="w-3 h-3 text-brand-pink shrink-0" />
-                            <span>100% Custom Freedom</span>
+                        <div className="flex items-center justify-between text-xs text-brand-dark/70 pt-3 border-t border-brand-warm-border/50 relative z-10">
+                          <div className="flex items-center gap-1.5 text-brand-pink font-bold text-xs">
+                            <Sparkles className="w-3.5 h-3.5 text-brand-pink shrink-0" />
+                            <span>Custom Scratch Pass</span>
                           </div>
-                          <span className="font-mono text-[9px] text-brand-muted">
-                            Voice Note & Photo
+                          <span className="font-mono text-xs text-brand-muted font-bold">
+                            From: You
                           </span>
                         </div>
                       </div>
 
                       {/* Description */}
-                      <div className="mt-3.5 mb-4 space-y-1 shrink-0">
-                        <h3 className="text-sm font-extrabold text-brand-dark group-hover:text-brand-pink transition-colors truncate">
+                      <div className="mt-4 mb-4 space-y-1 shrink-0">
+                        <h3 className="text-base font-extrabold text-brand-dark group-hover:text-brand-pink transition-colors truncate">
                           Start from Scratch ({currentSubMeta?.label})
                         </h3>
                         <p className="text-xs text-brand-muted line-clamp-2 leading-relaxed">
@@ -1118,11 +1245,11 @@ function CreateCardStudio() {
                       <button
                         type="button"
                         onClick={() => handleSelectBlankForSubcategory(activeSubcategory)}
-                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-brand-pink to-brand-orange text-white font-bold text-xs shadow-xs hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+                        className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-brand-pink to-brand-orange text-white font-bold text-xs shadow-xs hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                       >
-                        <Paintbrush className="w-3.5 h-3.5" />
+                        <Paintbrush className="w-4 h-4" />
                         <span>Create Custom Card</span>
-                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </button>
                     </div>
                   </div>
@@ -1250,7 +1377,7 @@ function CreateCardStudio() {
                           )}
                         </>
                       )}
-                      {syncStatus === "error" && (
+                      {draftParam && syncStatus === "error" && (
                         <Badge variant="neutral" className="text-[10px] py-0 bg-rose-50 text-rose-700 border-rose-200">
                           {isLimitReached ? "Draft Limit Reached" : "Sync Offline"}
                         </Badge>
@@ -1274,8 +1401,8 @@ function CreateCardStudio() {
                 </div>
               </div>
 
-              {/* Draft Sync Error Alert Banner */}
-              {syncStatus === "error" && syncError && (
+              {/* Draft Sync Error Alert Banner (Only when actively loading a specific draft via draftParam) */}
+              {draftParam && syncStatus === "error" && syncError && (
                 <div
                   role="alert"
                   className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
@@ -1481,21 +1608,10 @@ function CreateCardStudio() {
                         </p>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setShowAllFoils(!showAllFoils)}
-                        className="text-xs font-bold text-brand-purple hover:text-brand-pink transition-colors flex items-center gap-1.5"
-                      >
-                        <Sliders className="w-3.5 h-3.5" />
-                        <span>{showAllFoils ? "Show 5 Category Foils" : "Browse All 85 Foils"}</span>
-                      </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      {(showAllFoils
-                        ? Object.values(SUBCATEGORIES).flatMap((s) => s.foils)
-                        : categoryFoils
-                      ).map((foil) => {
+                      {categoryFoils.map((foil) => {
                         const isSelected = state.foilStyle === foil.id;
                         return (
                           <button
@@ -1508,12 +1624,7 @@ function CreateCardStudio() {
                                 : "border-brand-warm-border bg-brand-warm-subtle/40 hover:border-brand-pink/30 hover:bg-white"
                             }`}
                           >
-                            <div
-                              className={cn(
-                                "w-9 h-9 rounded-xl bg-gradient-to-br shadow-inner shrink-0 mt-0.5 border border-white/60",
-                                foil.previewGradient
-                              )}
-                            />
+                            <FoilAvatar foilId={foil.id} size="md" className="mt-0.5" />
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-1">
                                 <span className="text-xs font-bold text-brand-dark truncate">
@@ -1550,7 +1661,7 @@ function CreateCardStudio() {
                         maxLength={limits.COVER_TEXT_MAX}
                         value={state.coverText}
                         onChange={(e) => setField("coverText", e.target.value)}
-                        placeholder="e.g. Scratch to reveal your surprise ✨"
+                        placeholder="e.g. Scratch for golden wish ✦"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-brand-warm-border bg-brand-warm-subtle/50 text-brand-dark text-xs focus:outline-none focus:border-brand-pink focus:ring-1 focus:ring-brand-pink"
                       />
                     </div>
@@ -1563,10 +1674,10 @@ function CreateCardStudio() {
                       <p className="text-xs text-brand-muted">Customize the revealed backdrop and decorative icon</p>
                     </div>
 
-                    {/* Palette Selector */}
+                    {/* Palette Selector with Visible Swatches */}
                     <div className="space-y-2">
                       <span className="text-xs font-semibold text-brand-dark">Card Background Theme</span>
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                         {BG_PALETTES.map((palette) => {
                           const isSelected = state.bgPalette === palette.id;
                           return (
@@ -1575,13 +1686,21 @@ function CreateCardStudio() {
                               type="button"
                               onClick={() => setBgPalette(palette.id)}
                               className={cn(
-                                "p-2.5 rounded-xl border text-center transition-all text-xs font-semibold bg-gradient-to-br",
-                                palette.gradient,
+                                "p-2.5 rounded-2xl border flex items-center justify-center gap-2 transition-all text-xs font-bold",
+                                palette.badgeBg,
+                                palette.border,
                                 isSelected
-                                  ? "ring-2 ring-brand-pink border-brand-pink shadow-sm scale-105"
-                                  : "border-brand-warm-border opacity-85 hover:opacity-100"
+                                  ? "ring-2 ring-brand-pink border-brand-pink shadow-md scale-105 bg-white"
+                                  : "hover:scale-[1.02] hover:bg-white"
                               )}
                             >
+                              <div
+                                style={{
+                                  background: palette.swatchBg,
+                                  borderColor: palette.swatchBorder,
+                                }}
+                                className="w-4 h-4 rounded-full border shadow-2xs shrink-0"
+                              />
                               <span className={palette.textColor}>{palette.name}</span>
                             </button>
                           );
@@ -1800,7 +1919,37 @@ function CreateCardStudio() {
                           setIsShareModalOpen(true);
                           return;
                         }
-                        await publishCard();
+
+                        let targetId = draftId;
+                        if (!targetId) {
+                          try {
+                            const newDraft = await createCardDraft({
+                              creation_mode: state.creationMode,
+                              template_id: state.templateId,
+                              recipient_name: state.recipientName,
+                              sender_name: state.senderName,
+                              occasion_tag: state.occasionTag,
+                              primary_message: state.primaryMessage,
+                              secondary_message: state.secondaryMessage,
+                              foil_style: state.foilStyle,
+                              cover_text: state.coverText,
+                              bg_palette: state.bgPalette,
+                              sticker: state.sticker,
+                              font_family: state.fontFamily,
+                              photo_path: state.photoPath,
+                              sound_enabled: state.soundEnabled,
+                            });
+                            targetId = newDraft.id;
+                          } catch (err) {
+                            console.error("Draft creation before publish error:", err);
+                          }
+                        }
+
+                        if (targetId) {
+                          await publishCard(targetId);
+                        } else {
+                          await publishCard();
+                        }
                       }}
                       className="w-full justify-center gap-2 font-bold shadow-md hover:shadow-brand-pink/25"
                     >
@@ -1881,6 +2030,100 @@ function CreateCardStudio() {
             >
               Close
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Exit / Save Draft Confirmation Modal */}
+      {isExitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-brand-dark/60 backdrop-blur-sm"
+            onClick={() => setIsExitModalOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="relative bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-brand-warm-border space-y-5 z-10 animate-in zoom-in-95 duration-150">
+            {/* Modal Header with Close Button */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-brand-pink-light text-brand-pink flex items-center justify-center shadow-inner shrink-0">
+                  <FolderHeart className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-brand-dark">Save as Draft?</h3>
+                  <p className="text-xs text-brand-muted">You have unpublished changes on this card</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsExitModalOpen(false)}
+                className="p-1.5 rounded-full hover:bg-brand-warm text-brand-muted hover:text-brand-dark transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Error Banner if Draft Limit Reached */}
+            {modalDraftError === "DRAFT_LIMIT_REACHED" ? (
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 space-y-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-amber-900">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Draft Slots Full (3/3 Used)</span>
+                </div>
+                <p className="leading-relaxed">
+                  You already have 3 active drafts saved in your account. To save this card, please free up a slot by publishing or deleting an old draft in your profile.
+                </p>
+                <div className="pt-1 flex items-center gap-2">
+                  <Link
+                    href="/profile"
+                    className="inline-flex items-center gap-1 font-bold text-brand-pink hover:underline"
+                  >
+                    <span>Manage Drafts in Profile</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            ) : modalDraftError ? (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+                {modalDraftError}
+              </div>
+            ) : (
+              <p className="text-xs text-brand-muted leading-relaxed">
+                Would you like to save this card to your drafts before leaving? You can come back and edit or publish it anytime from your studio.
+              </p>
+            )}
+
+            {/* Modal Action Buttons */}
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-2 border-t border-brand-warm-border/60">
+              <button
+                type="button"
+                onClick={handleExitWithoutSaving}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-brand-warm-border hover:bg-brand-warm text-brand-muted hover:text-brand-dark text-xs font-bold transition-all text-center"
+              >
+                Exit Without Saving
+              </button>
+
+              {modalDraftError !== "DRAFT_LIMIT_REACHED" && (
+                <button
+                  type="button"
+                  disabled={isSavingDraftFromModal}
+                  onClick={handleSaveDraftAndExit}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-brand-pink hover:bg-brand-pink-dark text-white text-xs font-bold shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSavingDraftFromModal ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving Draft...</span>
+                    </>
+                  ) : (
+                    <span>Save Draft & Exit</span>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -21,7 +21,7 @@ export const CARD_LIMITS = {
   TAG_MAX: 25,
   PRIMARY_MESSAGE_MAX: 160,
   SECONDARY_MESSAGE_MAX: 90, // Set to 90 to comfortably accommodate the longest template (84 chars)
-  COVER_TEXT_MAX: 60,
+  COVER_TEXT_MAX: 30, // Standardized 30 character ceiling for tactile scratch overlay instructions
   MAX_PHOTO_SIZE_BYTES: 2 * 1024 * 1024, // 2 MB (2,097,152 bytes) matching card-photos bucket limit
 } as const;
 

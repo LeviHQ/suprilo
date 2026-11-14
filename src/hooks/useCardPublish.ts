@@ -29,7 +29,7 @@ export interface UseCardPublishReturn {
   publishedCard: DbCard | null;
   publishedUrl: string | null;
   isPublishing: boolean;
-  publishCard: () => Promise<boolean>;
+  publishCard: (overrideDraftId?: string) => Promise<boolean>;
   clearPublishError: () => void;
   resetPublishState: () => void;
 }
@@ -125,7 +125,7 @@ export function useCardPublish({
   }, [isActive]);
 
   // 4. Primary publish action handler
-  const publishCard = React.useCallback(async (): Promise<boolean> => {
+  const publishCard = React.useCallback(async (overrideDraftId?: string): Promise<boolean> => {
     // Duplicate click guard: block if another publish request is actively in-flight
     if (inFlightTokenRef.current !== null) {
       return false;
@@ -135,12 +135,12 @@ export function useCardPublish({
     if (
       publishStatus === "published" &&
       publishedCard &&
-      publishedCard.id === activeDraftIdRef.current
+      publishedCard.id === (overrideDraftId || activeDraftIdRef.current)
     ) {
       return true;
     }
 
-    const targetDraftId = activeDraftIdRef.current;
+    const targetDraftId = overrideDraftId || activeDraftIdRef.current;
     const targetUserId = activeUserIdRef.current;
 
     // Authentication guard
@@ -151,7 +151,7 @@ export function useCardPublish({
     }
 
     // Confirmed remote draft readiness guard
-    if (!targetDraftId || !isDraftReadyRef.current) {
+    if (!targetDraftId || (!overrideDraftId && !isDraftReadyRef.current)) {
       setPublishStatus("error");
       setPublishError("Draft is not ready to publish. Please wait for draft sync.");
       return false;
@@ -199,7 +199,7 @@ export function useCardPublish({
       // Staleness check after autosave flush
       const isStaleAfterFlush =
         token !== publishTokenRef.current ||
-        activeDraftIdRef.current !== targetDraftId ||
+        (!overrideDraftId && activeDraftIdRef.current !== targetDraftId) ||
         activeUserIdRef.current !== targetUserId ||
         !isActiveRef.current;
 
@@ -235,7 +235,7 @@ export function useCardPublish({
       // Post-RPC staleness check
       const isStaleAfterRpc =
         token !== publishTokenRef.current ||
-        activeDraftIdRef.current !== targetDraftId ||
+        (!overrideDraftId && activeDraftIdRef.current !== targetDraftId) ||
         activeUserIdRef.current !== targetUserId ||
         !isActiveRef.current;
 

@@ -77,42 +77,54 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
         </div>
       </div>
 
-      {/* Tactile Scratch Card Visual Preview */}
+      {/* Tactile Scratch Card Visual Preview: Proper Vertical Rectangle (portrait card) */}
       <div
         onClick={() => onSelect(template)}
-        className="cursor-pointer relative rounded-2xl min-h-[190px] border border-brand-warm-border/80 shadow-inner overflow-hidden transition-transform group-hover:scale-[1.01]"
+        className="cursor-pointer relative rounded-3xl w-full aspect-[4/5] min-h-[360px] sm:min-h-[390px] border border-brand-warm-border/80 shadow-md overflow-hidden transition-transform group-hover:scale-[1.01]"
       >
         {/* VIEW A: TACTILE SCRATCH FOIL FINISH (Exact matches to reference picture) */}
         {!showUnderneath ? (
-          <div className="w-full h-full min-h-[190px] p-4 flex flex-col justify-between relative select-none">
+          <div className="w-full h-full p-4 sm:p-5 flex flex-col justify-between relative select-none">
             {/* 1. 24K CHAMPAGNE GOLD */}
             {isChampagneGold && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FFF7C2] via-[#F59E0B] to-[#92400E]" />
-                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#FFFFFF_1px,transparent_1px)] [background-size:12px_12px]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#FFFFFF_1.5px,transparent_1.5px)] [background-size:14px_14px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
                 {/* Stars border frame */}
-                <div className="relative z-10 border border-amber-200/60 rounded-xl p-2.5 flex flex-col items-center justify-between h-full bg-amber-950/15 backdrop-blur-[1px]">
-                  <div className="text-[9px] font-black tracking-[3px] text-amber-100 uppercase flex items-center gap-1">
+                <div className="relative z-10 border-2 border-amber-200/70 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-amber-950/20 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[4px] text-amber-100 uppercase flex items-center gap-1.5 drop-shadow">
                     <span>★ ★ ★</span>
                     <span>24K GOLD WISH</span>
                     <span>★ ★ ★</span>
                   </div>
 
-                  <div className="my-auto text-center px-2 py-1 bg-white/95 rounded-xl border border-amber-300 shadow-sm w-full max-w-[230px]">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-amber-900">
+                  {/* Center Luxury Embossed Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-white/95 rounded-2xl border-2 border-amber-300 shadow-lg w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-amber-900 leading-tight">
                       ✦ SCRATCH FOR YOUR GOLDEN WISH ✦
                     </div>
-                    <div className="text-[9px] font-bold text-amber-700 mt-0.5 truncate">
-                      To: {template.recipient}
+                    <div className="my-2 border-t border-amber-200/80 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-600 block">
+                        HONORING
+                      </span>
+                      <span className="text-sm font-black text-amber-950 truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-amber-700 italic">
+                      Champagne & Gold Leaf Pass
                     </div>
                   </div>
 
                   {/* Corner scratch peel illustration */}
-                  <div className="w-full flex items-center justify-between text-[8px] font-extrabold uppercase text-amber-100/90 pt-1 border-t border-amber-200/30">
-                    <span>✨ Gold Leaf Finish</span>
-                    <span className="bg-amber-900/60 text-amber-200 px-1.5 py-0.5 rounded">
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-amber-100/95 pt-2 border-t border-amber-200/40">
+                    <span className="flex items-center gap-1">
+                      <span>✨</span>
+                      <span>Gold Leaf Flakes</span>
+                    </span>
+                    <span className="bg-amber-950/80 text-amber-200 px-2 py-0.5 rounded-md border border-amber-300/40 shadow-xs">
                       Scratch to reveal
                     </span>
                   </div>
@@ -124,28 +136,40 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
             {isHoloParty && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-[#E879F9] via-[#6366F1] to-[#06B6D4]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-pink-400/40 via-transparent to-cyan-500/30" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-pink-400/45 via-transparent to-cyan-500/35" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-                <div className="relative z-10 border border-cyan-300/70 rounded-xl p-2.5 flex flex-col items-center justify-between h-full bg-black/25 backdrop-blur-[1px] shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                  <div className="text-[9px] font-black tracking-[2px] text-cyan-200 uppercase flex items-center gap-1.5">
+                <div className="relative z-10 border-2 border-cyan-300/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-black/35 backdrop-blur-[1px] shadow-[0_0_20px_rgba(6,182,212,0.35)]">
+                  <div className="text-[10px] font-black tracking-[3px] text-cyan-200 uppercase flex items-center gap-2 drop-shadow-[0_0_6px_rgba(34,211,238,0.7)]">
                     <span>⚡ ♫</span>
                     <span>NIGHT-CLUB PRISM</span>
                     <span>♫ ⚡</span>
                   </div>
 
-                  <div className="my-auto text-center px-2 py-1.5 bg-black/75 rounded-xl border-2 border-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.5)] w-full max-w-[240px]">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+                  {/* Center Glowing Neon Sign */}
+                  <div className="my-auto text-center px-3 py-3 bg-black/85 rounded-2xl border-2 border-cyan-300 shadow-[0_0_18px_rgba(6,182,212,0.6)] w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,0.9)] leading-tight">
                       ⚡ SWIPE TO UNLOCK THE PARTY ⚡
                     </div>
-                    <div className="text-[9px] font-bold text-fuchsia-300 mt-0.5 truncate">
-                      Nightclub VIP Pass • {template.recipient}
+                    <div className="my-2 border-t border-fuchsia-500/40 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-fuchsia-400 block">
+                        VIP PASS
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-fuchsia-300">
+                      Nightclub VIP Birthday 2026
                     </div>
                   </div>
 
-                  <div className="w-full flex items-center justify-between text-[8px] font-extrabold uppercase text-cyan-100/90 pt-1 border-t border-cyan-400/30">
-                    <span>⚡ Neon Hologram</span>
-                    <span className="bg-fuchsia-950/80 text-fuchsia-300 px-1.5 py-0.5 rounded border border-fuchsia-500/40">
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-cyan-100/95 pt-2 border-t border-cyan-400/40">
+                    <span className="flex items-center gap-1">
+                      <span>⚡</span>
+                      <span>Neon Hologram</span>
+                    </span>
+                    <span className="bg-fuchsia-950/90 text-fuchsia-200 px-2 py-0.5 rounded-md border border-fuchsia-400/50 shadow-xs">
                       Scratch to reveal
                     </span>
                   </div>
@@ -157,28 +181,40 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
             {isBalloonPop && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-[#38BDF8] via-[#FB7185] to-[#FBBF24]" />
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#FFFFFF_2px,transparent_2px)] [background-size:16px_16px]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#FFFFFF_2px,transparent_2px)] [background-size:18px_18px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-                <div className="relative z-10 border border-white/70 rounded-xl p-2.5 flex flex-col items-center justify-between h-full bg-white/20 backdrop-blur-[1px]">
-                  <div className="text-[9px] font-black tracking-[2px] text-white uppercase flex items-center gap-1.5 drop-shadow">
+                <div className="relative z-10 border-2 border-white/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-white/25 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-white uppercase flex items-center gap-2 drop-shadow-md">
                     <span>🎈 🎂</span>
                     <span>3D BALLOON DROP</span>
                     <span>🎂 🎈</span>
                   </div>
 
-                  <div className="my-auto text-center px-2 py-1.5 bg-white/95 rounded-xl border border-orange-300 shadow-md w-full max-w-[240px]">
-                    <div className="text-[11px] font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-rose-500 to-amber-500">
+                  {/* Center 3D Puffed Candy Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-white/95 rounded-2xl border-2 border-orange-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-xs font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-rose-500 to-amber-500 leading-snug">
                       TAP & SCRATCH THE CELEBRATION
                     </div>
-                    <div className="text-[9px] font-bold text-slate-700 mt-0.5 truncate">
-                      Special for: {template.recipient} 🎈
+                    <div className="my-2 border-t border-orange-200 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 block">
+                        SPECIAL FOR
+                      </span>
+                      <span className="text-sm font-black text-slate-900 truncate block">
+                        {template.recipient} 🎈
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-amber-700">
+                      3D Balloons, Candles & Ribbons
                     </div>
                   </div>
 
-                  <div className="w-full flex items-center justify-between text-[8px] font-extrabold uppercase text-white drop-shadow pt-1 border-t border-white/40">
-                    <span>🎈 3D Balloons & Confetti</span>
-                    <span className="bg-rose-500/80 text-white px-1.5 py-0.5 rounded">
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-white drop-shadow pt-2 border-t border-white/40">
+                    <span className="flex items-center gap-1">
+                      <span>🎈</span>
+                      <span>3D Balloons</span>
+                    </span>
+                    <span className="bg-rose-500/90 text-white px-2 py-0.5 rounded-md shadow-xs">
                       Scratch to reveal
                     </span>
                   </div>
@@ -190,29 +226,40 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
             {isMintShimmer && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-[#34D399] via-[#0D9488] to-[#064E3B]" />
-                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#A7F3D0_1px,transparent_1px)] [background-size:10px_10px]" />
+                <div className="absolute inset-0 opacity-35 bg-[radial-gradient(#A7F3D0_1.5px,transparent_1.5px)] [background-size:12px_12px]" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-                <div className="relative z-10 border border-emerald-300/70 rounded-xl p-2.5 flex flex-col items-center justify-between h-full bg-emerald-950/20 backdrop-blur-[1px]">
-                  <div className="text-[9px] font-black tracking-[2px] text-emerald-100 uppercase flex items-center gap-1.5">
+                <div className="relative z-10 border-2 border-emerald-300/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-emerald-950/25 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-emerald-100 uppercase flex items-center gap-2 drop-shadow">
                     <span>✦ 🎁</span>
                     <span>MINT GLITTER PASS</span>
                     <span>🎁 ✦</span>
                   </div>
 
                   {/* Satin Mint Emerald Ribbon across the card */}
-                  <div className="my-auto text-center px-2 py-1.5 bg-emerald-900/90 rounded-xl border border-emerald-300 shadow-md w-full max-w-[240px]">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-emerald-100">
+                  <div className="my-auto text-center px-3 py-3 bg-emerald-900/95 rounded-2xl border-2 border-emerald-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-emerald-100 leading-tight">
                       🎁 SCRATCH TO CLAIM YOUR SURPRISE 🎁
                     </div>
-                    <div className="text-[9px] font-bold text-emerald-300 mt-0.5 truncate">
-                      Voucher Gift • {template.recipient}
+                    <div className="my-2 border-t border-emerald-700/80 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-400 block">
+                        VOUCHER ENTITLED TO
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-emerald-300">
+                      Official Birthday Voucher Ribbon
                     </div>
                   </div>
 
-                  <div className="w-full flex items-center justify-between text-[8px] font-extrabold uppercase text-emerald-100 pt-1 border-t border-emerald-300/30">
-                    <span>🎁 Emerald Ribbon Foil</span>
-                    <span className="bg-emerald-950/80 text-emerald-300 px-1.5 py-0.5 rounded">
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-emerald-100 pt-2 border-t border-emerald-300/40">
+                    <span className="flex items-center gap-1">
+                      <span>🎁</span>
+                      <span>Satin Ribbon Foil</span>
+                    </span>
+                    <span className="bg-emerald-950/90 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-400/40 shadow-xs">
                       Scratch to reveal
                     </span>
                   </div>
@@ -224,29 +271,40 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
             {isRoastRevelry && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B] via-[#EA580C] to-[#DC2626]" />
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:12px_12px]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#000000_1.5px,transparent_1.5px)] [background-size:14px_14px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-                <div className="relative z-10 border border-yellow-300/70 rounded-xl p-2.5 flex flex-col items-center justify-between h-full bg-black/25 backdrop-blur-[1px]">
-                  <div className="text-[9px] font-black tracking-[2px] text-yellow-200 uppercase flex items-center gap-1.5">
+                <div className="relative z-10 border-2 border-yellow-300/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-black/30 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-yellow-200 uppercase flex items-center gap-2 drop-shadow">
                     <span>💀 🔥</span>
                     <span>SAVAGE ROAST & REVELRY</span>
                     <span>🔥 💀</span>
                   </div>
 
                   {/* Comic warning box & hazard bar */}
-                  <div className="my-auto text-center px-2 py-1.5 bg-black/85 rounded-xl border border-yellow-400 shadow-md w-full max-w-[240px]">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-yellow-300">
+                  <div className="my-auto text-center px-3 py-3 bg-black/90 rounded-2xl border-2 border-yellow-400 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-yellow-300 leading-tight">
                       🔥 WARNING: NOSTALGIA AHEAD 🔥
                     </div>
-                    <div className="mt-1 px-1 py-0.5 bg-yellow-400 text-black text-[9px] font-black tracking-widest rounded uppercase">
+                    <div className="my-2 border-t border-yellow-500/40 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-400 block">
+                        ROAST TARGET
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="mt-1 px-2 py-0.5 bg-yellow-400 text-black text-[9px] font-black tracking-widest rounded-md uppercase">
                       ⚠️ AGING ALERT ⚠️
                     </div>
                   </div>
 
-                  <div className="w-full flex items-center justify-between text-[8px] font-extrabold uppercase text-yellow-100 pt-1 border-t border-yellow-400/30">
-                    <span>🔥 Comic Hazard Tape</span>
-                    <span className="bg-red-950 text-yellow-300 px-1.5 py-0.5 rounded">
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-yellow-100 pt-2 border-t border-yellow-400/40">
+                    <span className="flex items-center gap-1">
+                      <span>🔥</span>
+                      <span>Comic Hazard Tape</span>
+                    </span>
+                    <span className="bg-red-950 text-yellow-300 px-2 py-0.5 rounded-md border border-yellow-400/40 shadow-xs">
                       Scratch to reveal
                     </span>
                   </div>
@@ -260,23 +318,25 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
                 <div className={cn("absolute inset-0 bg-gradient-to-br", foilInfo.previewGradient)} />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-                <div className="relative z-10 border border-white/60 rounded-xl p-2.5 flex flex-col items-center justify-between h-full bg-black/20 backdrop-blur-[1px]">
-                  <div className="text-[9px] font-black tracking-widest text-white uppercase truncate max-w-[200px]">
+                <div className="relative z-10 border-2 border-white/70 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-black/25 backdrop-blur-[1px]">
+                  <div className="text-[10px] font-black tracking-widest text-white uppercase truncate max-w-[200px]">
                     ✦ {foilInfo.label} ✦
                   </div>
 
-                  <div className="my-auto text-center px-3 py-1.5 bg-white/90 rounded-xl shadow-sm w-full max-w-[230px]">
-                    <div className="text-[10px] font-black uppercase tracking-wider text-brand-dark">
+                  <div className="my-auto text-center px-3 py-3 bg-white/95 rounded-2xl shadow-md w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-brand-dark">
                       ✦ SCRATCH TO REVEAL ✦
                     </div>
-                    <div className="text-[9px] font-semibold text-brand-muted mt-0.5 truncate">
-                      To: {template.recipient}
+                    <div className="my-2 border-t border-brand-warm-border pt-1.5">
+                      <span className="text-sm font-black text-brand-dark truncate block">
+                        To: {template.recipient}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="w-full flex items-center justify-between text-[8px] font-extrabold uppercase text-white/90 pt-1 border-t border-white/30">
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-white/95 pt-2 border-t border-white/40">
                     <span>Suprilo Scratch Finish</span>
-                    <span className="bg-black/40 text-white px-1.5 py-0.5 rounded">
+                    <span className="bg-black/50 text-white px-2 py-0.5 rounded-md">
                       Scratch to reveal
                     </span>
                   </div>
@@ -285,36 +345,39 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
             )}
           </div>
         ) : (
-          /* VIEW B: INNER SURPRISE MESSAGE PREVIEW */
+          /* VIEW B: INNER SURPRISE MESSAGE PREVIEW (Vertical Greeting Card Inside) */
           <div
             className={cn(
-              "w-full h-full min-h-[190px] p-4 flex flex-col justify-between relative",
+              "w-full h-full p-5 sm:p-6 flex flex-col justify-between relative",
               `bg-gradient-to-br ${template.bgGradient}`
             )}
           >
             <div className="flex items-start justify-between gap-2 relative z-10">
-              <span className="inline-block text-[9px] font-black uppercase tracking-wider text-brand-dark/70 bg-white/80 px-2 py-0.5 rounded-full border border-brand-warm-border/50">
+              <span className="inline-block text-[10px] font-black uppercase tracking-wider text-brand-dark/80 bg-white/90 px-2.5 py-1 rounded-full border border-brand-warm-border/60 shadow-xs">
                 {template.tag}
               </span>
-              <span className="text-[10px] font-semibold text-brand-dark/60 truncate max-w-[90px]">
+              <span className="text-xs font-bold text-brand-dark/70 truncate max-w-[120px]">
                 To: {template.recipient}
               </span>
             </div>
 
-            <div className="my-2 space-y-1 relative z-10 text-center px-1">
-              <p className="text-xs sm:text-[13px] font-bold text-brand-dark leading-snug line-clamp-2">
+            <div className="my-auto space-y-2 relative z-10 text-center px-2 py-3 bg-white/80 rounded-2xl border border-brand-warm-border/50 shadow-xs">
+              <p className="text-sm sm:text-base font-extrabold text-brand-dark leading-snug line-clamp-4">
                 &ldquo;{template.message}&rdquo;
               </p>
-              <p className="text-[10px] text-brand-muted leading-tight line-clamp-1 italic">
-                {template.secondary}
-              </p>
+              {template.secondary && (
+                <p className="text-xs text-brand-muted leading-relaxed line-clamp-2 italic pt-1 border-t border-brand-warm-border/40">
+                  {template.secondary}
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center justify-between text-[10px] text-brand-dark/60 pt-2 border-t border-brand-warm-border/40 relative z-10">
-              <span className="font-semibold text-brand-pink text-[10px] capitalize">
-                Under the Foil 🎁
+            <div className="flex items-center justify-between text-xs text-brand-dark/70 pt-3 border-t border-brand-warm-border/50 relative z-10">
+              <span className="font-bold text-brand-pink text-xs capitalize flex items-center gap-1">
+                <span>🎁</span>
+                <span>Revealed Surprise</span>
               </span>
-              <span className="font-mono text-[9px] text-brand-muted">
+              <span className="font-mono text-xs text-brand-muted font-bold">
                 From: {template.sender}
               </span>
             </div>
@@ -323,8 +386,8 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
       </div>
 
       {/* Title & Description */}
-      <div className="mt-3.5 mb-4 space-y-1 shrink-0">
-        <h3 className="text-sm font-extrabold text-brand-dark group-hover:text-brand-pink transition-colors truncate">
+      <div className="mt-4 mb-4 space-y-1 shrink-0">
+        <h3 className="text-base font-extrabold text-brand-dark group-hover:text-brand-pink transition-colors truncate">
           {template.title}
         </h3>
         <p className="text-xs text-brand-muted line-clamp-2 leading-relaxed">
@@ -336,10 +399,10 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
       <button
         type="button"
         onClick={() => onSelect(template)}
-        className="w-full py-2.5 px-4 rounded-xl bg-brand-warm hover:bg-brand-pink text-brand-dark hover:text-white border border-brand-warm-border hover:border-brand-pink font-bold text-xs shadow-2xs hover:shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 group-hover:bg-brand-pink group-hover:text-white group-hover:border-brand-pink"
+        className="w-full py-3 px-4 rounded-2xl bg-brand-warm hover:bg-brand-pink text-brand-dark hover:text-white border border-brand-warm-border hover:border-brand-pink font-bold text-xs shadow-2xs hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 group-hover:bg-brand-pink group-hover:text-white group-hover:border-brand-pink"
       >
         <span>Use This Template</span>
-        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
       </button>
     </div>
   );
