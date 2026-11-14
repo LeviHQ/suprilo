@@ -6,6 +6,7 @@ import { CelebrationConfetti } from "./CelebrationConfetti";
 import { CardStatsDock } from "./CardStatsDock";
 import { cn } from "@/lib/utils";
 import type { CoverStyle } from "@/types/card";
+import { getFoilDefinition } from "@/data/templates";
 
 export type { CoverStyle };
 
@@ -110,56 +111,12 @@ export function ScratchCard({
       ctx.scale(dpr, dpr);
       ctx.globalCompositeOperation = "source-over";
 
-      const foilLower = (coverStyle || "").toLowerCase();
-      const isCyber =
-        foilLower === "cosmic-purple" ||
-        foilLower.includes("cyber") ||
-        foilLower.includes("matrix") ||
-        foilLower.includes("glitch") ||
-        foilLower.includes("future") ||
-        foilLower.includes("neon") ||
-        foilLower.includes("arcade") ||
-        foilLower.includes("thunder");
-
-      const isGold =
-        foilLower === "golden-foil" ||
-        foilLower.includes("gold") ||
-        foilLower.includes("champagne") ||
-        foilLower.includes("ticket") ||
-        foilLower.includes("yellow") ||
-        foilLower.includes("sunburst") ||
-        foilLower.includes("supernova") ||
-        foilLower.includes("amber");
-
-      const isEmerald =
-        foilLower === "mint-fresh" ||
-        foilLower.includes("mint") ||
-        foilLower.includes("emerald") ||
-        foilLower.includes("green") ||
-        foilLower.includes("cash") ||
-        foilLower.includes("petrichor") ||
-        foilLower.includes("lime") ||
-        foilLower.includes("crescent");
-
-      const isRuby =
-        foilLower.includes("ruby") ||
-        foilLower.includes("red") ||
-        foilLower.includes("scarlet") ||
-        foilLower.includes("crimson") ||
-        foilLower.includes("flame") ||
-        foilLower.includes("dare");
-
-      const isSilver =
-        foilLower.includes("silver") ||
-        foilLower.includes("titanium") ||
-        foilLower.includes("mercury") ||
-        foilLower.includes("frost") ||
-        foilLower.includes("chrome") ||
-        foilLower.includes("diamond") ||
-        foilLower.includes("obsidian") ||
-        foilLower.includes("stealth") ||
-        foilLower.includes("onyx") ||
-        foilLower.includes("black");
+      const foilInfo = getFoilDefinition(coverStyle);
+      const isCyber = foilInfo.shaderFamily === "cyber";
+      const isGold = foilInfo.shaderFamily === "gold";
+      const isEmerald = foilInfo.shaderFamily === "emerald";
+      const isRuby = foilInfo.shaderFamily === "ruby";
+      const isSilver = foilInfo.shaderFamily === "silver" || foilInfo.shaderFamily === "dark";
 
       if (isCyber) {
         // ====================================================================
@@ -219,12 +176,12 @@ export function ScratchCard({
           ctx.fill();
         });
 
-        // Top Header: "FUTURE SCRATCH"
+        // Top Header
         ctx.textAlign = "center";
         ctx.fillStyle = "#22D3EE";
         ctx.font = "900 12px system-ui, -apple-system, sans-serif";
-        ctx.letterSpacing = "2px";
-        ctx.fillText("⚡ FUTURE SCRATCH ⚡", width / 2, 44);
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText(foilInfo.stampHeader, width / 2, 44);
 
         // Center Ticket Box with Corner Brackets
         const boxW = Math.min(width * 0.82, 290);
@@ -250,12 +207,16 @@ export function ScratchCard({
 
         // Center Text
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
-        ctx.fillText(coverText || "JACKPOT REVEAL!", width / 2, boxY + 40);
+        ctx.font = "800 14px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.name.toUpperCase(), width / 2, boxY + 36);
+
+        ctx.fillStyle = "#22D3EE";
+        ctx.font = "700 12px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
 
         ctx.fillStyle = "#A78BFA";
-        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("SECRET CODE VERIFIED", width / 2, boxY + 62);
+        ctx.font = "600 10px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.stampSubtext, width / 2, boxY + 74);
 
         // Bottom Animated Action Banner
         ctx.fillStyle = "#22D3EE";
@@ -297,7 +258,7 @@ export function ScratchCard({
         ctx.textAlign = "center";
         ctx.fillStyle = "#5C4003";
         ctx.font = "900 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("★ 24K GOLDEN VIP PASS ★", width / 2, 44);
+        ctx.fillText(foilInfo.stampHeader, width / 2, 44);
 
         // Center Gold Embossed Plate
         const boxW = Math.min(width * 0.82, 290);
@@ -315,12 +276,16 @@ export function ScratchCard({
         ctx.stroke();
 
         ctx.fillStyle = "#78350F";
-        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
-        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+        ctx.font = "800 14px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.name.toUpperCase(), width / 2, boxY + 36);
+
+        ctx.fillStyle = "#B45309";
+        ctx.font = "700 12px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
 
         ctx.fillStyle = "#92400E";
-        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("SCRATCH WITH FINGER OR MOUSE", width / 2, boxY + 60);
+        ctx.font = "600 10px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.stampSubtext, width / 2, boxY + 74);
 
         // Bottom CTA
         ctx.fillStyle = "#78350F";
@@ -359,7 +324,7 @@ export function ScratchCard({
         ctx.textAlign = "center";
         ctx.fillStyle = "#6EE7B7";
         ctx.font = "900 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("❖ LUCKY EMERALD PASS ❖", width / 2, 44);
+        ctx.fillText(foilInfo.stampHeader, width / 2, 44);
 
         // Center Box
         const boxW = Math.min(width * 0.82, 290);
@@ -377,12 +342,16 @@ export function ScratchCard({
         ctx.stroke();
 
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
-        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+        ctx.font = "800 14px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.name.toUpperCase(), width / 2, boxY + 36);
+
+        ctx.fillStyle = "#6EE7B7";
+        ctx.font = "700 12px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
 
         ctx.fillStyle = "#A7F3D0";
-        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("SURPRISE INSIDE", width / 2, boxY + 60);
+        ctx.font = "600 10px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.stampSubtext, width / 2, boxY + 74);
 
         // Bottom CTA
         ctx.fillStyle = "#6EE7B7";
@@ -414,7 +383,7 @@ export function ScratchCard({
         ctx.textAlign = "center";
         ctx.fillStyle = "#FECDD3";
         ctx.font = "900 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("♥ VELVET RUBY PASS ♥", width / 2, 44);
+        ctx.fillText(foilInfo.stampHeader, width / 2, 44);
 
         // Center Box
         const boxW = Math.min(width * 0.82, 290);
@@ -432,12 +401,16 @@ export function ScratchCard({
         ctx.stroke();
 
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
-        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+        ctx.font = "800 14px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.name.toUpperCase(), width / 2, boxY + 36);
+
+        ctx.fillStyle = "#FDA4AF";
+        ctx.font = "700 12px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
 
         ctx.fillStyle = "#FECDD3";
-        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("SECRET SURPRISE ENCLOSED", width / 2, boxY + 60);
+        ctx.font = "600 10px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.stampSubtext, width / 2, boxY + 74);
 
         // Bottom CTA
         ctx.fillStyle = "#FECDD3";
@@ -469,7 +442,7 @@ export function ScratchCard({
         ctx.textAlign = "center";
         ctx.fillStyle = "#E2E8F0";
         ctx.font = "900 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("◈ PLATINUM STEALTH PASS ◈", width / 2, 44);
+        ctx.fillText(foilInfo.stampHeader, width / 2, 44);
 
         // Center Box
         const boxW = Math.min(width * 0.82, 290);
@@ -487,12 +460,16 @@ export function ScratchCard({
         ctx.stroke();
 
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
-        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+        ctx.font = "800 14px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.name.toUpperCase(), width / 2, boxY + 36);
+
+        ctx.fillStyle = "#94A3B8";
+        ctx.font = "700 12px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
 
         ctx.fillStyle = "#CBD5E1";
-        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("TOP SECRET CLEARANCE", width / 2, boxY + 60);
+        ctx.font = "600 10px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.stampSubtext, width / 2, boxY + 74);
 
         // Bottom CTA
         ctx.fillStyle = "#E2E8F0";
@@ -500,7 +477,7 @@ export function ScratchCard({
         ctx.fillText("◈ SCRATCH TO REVEAL ◈", width / 2, height - 34);
       } else {
         // ====================================================================
-        // THEME: HOLOGRAPHIC ROSE VELVET (Iridescent Pastel Pink & Violet)
+        // THEME: HOLOGRAPHIC ROSE VELVET / SUNSET
         // ====================================================================
         const grad = ctx.createLinearGradient(0, 0, width, height);
         grad.addColorStop(0, "#FF758C");
@@ -533,7 +510,7 @@ export function ScratchCard({
         ctx.textAlign = "center";
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "900 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("♡ SECRET SURPRISE PASS ♡", width / 2, 44);
+        ctx.fillText(foilInfo.stampHeader, width / 2, 44);
 
         // Center Box
         const boxW = Math.min(width * 0.82, 290);
@@ -551,12 +528,16 @@ export function ScratchCard({
         ctx.stroke();
 
         ctx.fillStyle = "#1E1B4B";
-        ctx.font = "800 15px system-ui, -apple-system, sans-serif";
-        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 38);
+        ctx.font = "800 14px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.name.toUpperCase(), width / 2, boxY + 36);
+
+        ctx.fillStyle = "#E11D48";
+        ctx.font = "700 12px system-ui, -apple-system, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
 
         ctx.fillStyle = "#FF4D6D";
-        ctx.font = "600 11px system-ui, -apple-system, sans-serif";
-        ctx.fillText("PERSONAL SURPRISE MESSAGE", width / 2, boxY + 60);
+        ctx.font = "600 10px system-ui, -apple-system, sans-serif";
+        ctx.fillText(foilInfo.stampSubtext, width / 2, boxY + 74);
 
         // Bottom CTA
         ctx.fillStyle = "#FFFFFF";
@@ -881,15 +862,30 @@ export function ScratchCard({
     }
   };
 
-  // Border & Glow Class based on active Foil Style
-  const glowBorderClass =
-    coverStyle === "cosmic-purple"
-      ? "border-cyan-400/80 shadow-[0_0_35px_rgba(34,211,238,0.35),0_0_15px_rgba(168,85,247,0.4)]"
-      : coverStyle === "golden-foil"
-        ? "border-amber-400/90 shadow-[0_0_35px_rgba(245,158,11,0.35),0_0_15px_rgba(251,191,36,0.3)]"
-        : coverStyle === "mint-fresh"
-          ? "border-emerald-400/80 shadow-[0_0_35px_rgba(52,211,153,0.35),0_0_15px_rgba(16,185,129,0.3)]"
-          : "border-pink-400/80 shadow-[0_0_35px_rgba(255,77,109,0.35),0_0_15px_rgba(192,132,252,0.3)]";
+  const foilInfo = React.useMemo(() => getFoilDefinition(coverStyle), [coverStyle]);
+
+  // Dynamic Border & Glow based on active Foil Theme
+  const glowBorderClass = React.useMemo(() => {
+    switch (foilInfo.shaderFamily) {
+      case "gold":
+        return "border-amber-400/90 shadow-[0_0_35px_rgba(245,158,11,0.45),0_0_15px_rgba(251,191,36,0.3)]";
+      case "cyber":
+        return "border-cyan-400/90 shadow-[0_0_35px_rgba(34,211,238,0.45),0_0_15px_rgba(168,85,247,0.4)]";
+      case "ruby":
+        return "border-red-500/90 shadow-[0_0_35px_rgba(239,68,68,0.45),0_0_15px_rgba(244,63,94,0.3)]";
+      case "emerald":
+        return "border-emerald-400/90 shadow-[0_0_35px_rgba(52,211,153,0.45),0_0_15px_rgba(16,185,129,0.3)]";
+      case "dark":
+        return "border-slate-500/80 shadow-[0_0_35px_rgba(148,163,184,0.35),0_0_15px_rgba(71,85,105,0.4)]";
+      case "silver":
+        return "border-slate-300/90 shadow-[0_0_35px_rgba(226,232,240,0.45),0_0_15px_rgba(203,213,225,0.3)]";
+      case "sunset":
+        return "border-orange-400/90 shadow-[0_0_35px_rgba(249,115,22,0.45),0_0_15px_rgba(251,146,60,0.3)]";
+      case "rose":
+      default:
+        return "border-pink-400/90 shadow-[0_0_35px_rgba(255,77,109,0.45),0_0_15px_rgba(192,132,252,0.3)]";
+    }
+  }, [foilInfo.shaderFamily]);
 
   return (
     <div className={`relative w-full select-none ${className}`}>

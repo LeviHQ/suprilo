@@ -100,64 +100,25 @@ When a user scratches the foil, the engine dynamically spawns **sparkle particle
 
 ---
 
-## 3. Foil Shader Architecture & Thematic Families
+## 3. Foil Shader Architecture & Dynamic Identity Engine
 
-Suprilo maps every foil dynamically to a tailored shader family inside `ScratchCard.tsx`'s `drawCover` engine:
+Suprilo maps every foil dynamically to a tailored shader family inside `ScratchCard.tsx`'s `drawCover` engine via `getFoilDefinition(coverStyle)`:
 
-### 3.1 Cyber / Future Scratch Family (`cosmic-purple`, `cyber-*`, `neon-*`, `matrix-*`, `hacker-*`)
-- **Aesthetic**: Inspired by high-stakes futuristic jackpot tickets with cyan & purple circuits.
-- **Visual Elements**:
-  - Isometric cyber grid pattern (`rgba(139, 92, 246, 0.18)`).
-  - Glowing cyan circuit traces (`#22D3EE`) with bright electrical contact nodes (`#A5F3FC`).
-  - Terminal code watermark text (`0100 1011 JACKPOT!`).
-  - Header: `⚡ FUTURE SCRATCH ⚡`.
-  - Center: Dark glassmorphic ticket box with cyan dashed border.
-  - Bottom Stamp: `⚡ SCRATCH TO REVEAL ⚡`.
-- **Glow Bezel**: Cyan-to-purple neon glow (`shadow-[0_0_35px_rgba(34,211,238,0.35)]`).
+### 3.1 Dynamic Foil Identity & Thematic Stamping
+Instead of hardcoding generic labels on the scratch canvas, each of the 85 custom foils dynamically injects its own:
+- **Stamp Header**: e.g. `★ 24K GOLD PLAY BUTTON ★`, `🪔 SHUBH DIWALI GOLDEN DIYA 🪔`, `✦ MIDNIGHT STARLIGHT PASS ✦`, `🔥 SAVAGE ROAST PASS 🔥`, `💀 DARE FIRE RUBY PASS 💀`, `🎂 24K GOLD CONFETTI VIP 🎂`
+- **Authentic Foil Name**: Rendered in bold, uppercase typography across the ticket's center plaque.
+- **Thematic Subtext Stamp**: e.g. `OFFICIAL YOUTUBE CREATOR PASS`, `FESTIVE LIGHT & BLESSINGS`, `AUTHENTIC SURPRISE PASS`, `EMOTIONAL DAMAGE WARNING`.
+- **Category Watermark & Symbol**: Contextual symbols (`▶`, `🪔`, `🎂`, `🔥`, `💀`, `🌙`, `𝕏`, `🎫`, `✨`) matching the card's theme.
+- **Dynamic Glow Bezel**: The card frame's ambient neon aura automatically mirrors the active foil's shader family (Gold Amber, Cyber Cyan, Emerald Teal, Velvet Ruby, Titanium Noir, Rose Velvet, Solar Orange).
 
-### 3.2 24K Royal Gold & VIP Family (`golden-foil`, `gold-*`, `luxury-*`, `vip-*`, `champagne-*`)
-- **Aesthetic**: Luxurious metallic banknote luster with angled sheen reflections.
-- **Visual Elements**:
-  - Multi-stop metallic 24K gold gradient (`#FFF3B0` ➔ `#E0A926` ➔ `#9A6F09` ➔ `#FBE68A`).
-  - Angled specular reflection bands (`-25deg`).
-  - Starburst glints (`rgba(255, 255, 255, 0.75)`).
-  - Header: `★ 24K GOLDEN VIP PASS ★`.
-  - Center: Embossed ivory luxury badge.
-  - Bottom Stamp: `✦ SCRATCH TO REVEAL ✦`.
-- **Glow Bezel**: Warm golden amber glow (`shadow-[0_0_35px_rgba(245,158,11,0.35)]`).
-
-### 3.3 Lucky Emerald & Aurora Matrix Family (`mint-fresh`, `emerald-*`, `mint-*`, `aurora-*`)
-- **Aesthetic**: Glowing matrix lasers with iridescent green/teal silk waves.
-- **Visual Elements**:
-  - Sine wave laser ribbons (`rgba(52, 211, 153, 0.28)`).
-  - Header: `❖ LUCKY EMERALD PASS ❖`.
-  - Center: Deep forest glass ticket badge with neon mint border.
-  - Bottom Stamp: `❖ SCRATCH TO REVEAL ❖`.
-- **Glow Bezel**: Neon mint aurora glow (`shadow-[0_0_35px_rgba(52,211,153,0.35)]`).
-
-### 3.4 Holographic Rose & Pastel Velvet Family (`lavender-pink`, `rose-*`, `holographic-*`, `pastel-*`)
-- **Aesthetic**: Iridescent chrome pearl and romantic rose velvet.
-- **Visual Elements**:
-  - Multidimensional pastel gradient (`#FF758C` ➔ `#FF7EB3` ➔ `#F77062` ➔ `#8E54E9`).
-  - Holographic stardust shimmer bands (`-20deg`).
-  - Header: `♡ SECRET SURPRISE PASS ♡`.
-  - Center: Frosted white ticket pill with brand pink border.
-  - Bottom Stamp: `✨ SCRATCH TO REVEAL ✨`.
-- **Glow Bezel**: Pearlescent rose glow (`shadow-[0_0_35px_rgba(255,77,109,0.35)]`).
-
-### 3.5 Velvet Ruby & Festive Scarlet Family (`ruby-*`, `crimson-*`, `festive-*`, `diwali-*`, `fire-*`)
-- **Aesthetic**: Deep royal red velvet with warm golden flares.
-- **Visual Elements**:
-  - Deep crimson gradient (`#5B0612` ➔ `#9B111E` ➔ `#E11D48` ➔ `#4C0519`).
-  - Festive warm gold starbursts and diagonal shimmer ribbons.
-  - Bottom Stamp: `🎉 SCRATCH TO REVEAL 🎉`.
-
-### 3.6 Titanium, Obsidian & Stealth Monochrome Family (`obsidian-*`, `titanium-*`, `stealth-*`, `silver-*`)
-- **Aesthetic**: High-grade industrial carbon, brushed titanium, and deep space noir.
-- **Visual Elements**:
-  - Sleek dark titanium gradient (`#0B0F17` ➔ `#1E293B` ➔ `#334155` ➔ `#0F172A`).
-  - Subtle laser-etched horizontal hairline grain.
-  - Bottom Stamp: `◈ SCRATCH TO REVEAL ◈`.
+### 3.2 Thematic Shader Families:
+- **Cyber / Future Scratch Family** (`cyber-*`, `matrix-*`, `glitch-*`, `neon-*`): Deep indigo canvas with cyan grid lines, animated circuits, and `⚡ SCRATCH TO REVEAL ⚡`.
+- **24K Royal Gold & VIP Family** (`gold-*`, `champagne-*`, `ticket-*`): Multi-stop reflective gold bullion with diagonal luster bands, diamond sparkles, and `✦ SCRATCH TO REVEAL ✦`.
+- **Lucky Emerald & Aurora Matrix Family** (`emerald-*`, `mint-*`, `crescent-*`): Deep forest emerald with laser curves, aurora wave ribbons, and `❖ SCRATCH TO REVEAL ❖`.
+- **Velvet Ruby & Passion Flame Family** (`ruby-*`, `flame-*`, `dare-*`, `roast-*`): Deep royal crimson velvet with golden flare sparkles and `🔥 SCRATCH TO REVEAL 🔥`.
+- **Titanium, Obsidian & Stealth Monochrome Family** (`obsidian-*`, `stealth-*`, `black-*`, `silver-*`, `x-*`): Industrial carbon weave with hairline brushed titanium grain and `◈ SCRATCH TO REVEAL ◈`.
+- **Holographic Rose & Pastel Velvet Family** (`rose-*`, `pastel-*`, `candy-*`, `blush-*`): Iridescent pastel pearl and romantic rose velvet with stardust diamond glints and `✨ SCRATCH TO REVEAL ✨`.
 
 ---
 

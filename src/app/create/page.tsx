@@ -42,6 +42,7 @@ import {
   getTemplatesForSubcategory,
   getBlankCanvasForSubcategory,
   getFoilBadge,
+  getFoilsForSubcategory,
   getTemplateById,
 } from "@/data/templates";
 import { getUserCards, deleteCardDraft } from "@/lib/cards";
@@ -55,34 +56,6 @@ import { useCardPublish } from "@/hooks/useCardPublish";
 import { recordStudioVisit } from "@/lib/badges/service";
 import { BgPaletteId, DbCard, StickerId } from "@/types/card";
 import { cn } from "@/lib/utils";
-
-// Foil Finishes
-const FOIL_OPTIONS: { id: CoverStyle; name: string; previewColor: string; desc: string }[] = [
-  {
-    id: "lavender-pink",
-    name: "Lavender Pink",
-    previewColor: "from-[#FED7AA] via-[#FF4D6D] to-[#C084FC]",
-    desc: "Suprilo signature warm foil",
-  },
-  {
-    id: "golden-foil",
-    name: "Golden Foil",
-    previewColor: "from-[#FDE68A] via-[#F59E0B] to-[#D97706]",
-    desc: "Radiant metallic celebration gold",
-  },
-  {
-    id: "cosmic-purple",
-    name: "Cosmic Purple",
-    previewColor: "from-[#DDD6FE] via-[#8B5CF6] to-[#6D28D9]",
-    desc: "Vibrant royal amethyst luster",
-  },
-  {
-    id: "mint-fresh",
-    name: "Mint Emerald",
-    previewColor: "from-[#A7F3D0] via-[#10B981] to-[#059669]",
-    desc: "Fresh, playful pastel sheen",
-  },
-];
 
 // Interior Card Background Palettes
 const BG_PALETTES: {
@@ -187,6 +160,7 @@ function CreateCardStudio() {
   const [isLoadingDrafts, setIsLoadingDrafts] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
+  const [showAllFoils, setShowAllFoils] = React.useState(false);
 
   // Canonical reducer-backed card editor hook
   const {
@@ -447,6 +421,22 @@ function CreateCardStudio() {
   const currentSubMeta = React.useMemo(() => {
     return SUBCATEGORIES[activeSubcategory] || SUBCATEGORIES.birthday;
   }, [activeSubcategory]);
+
+  const activeCardSubcategory = React.useMemo(() => {
+    if (state.templateId) {
+      const tmpl = getTemplateById(state.templateId);
+      if (tmpl?.subcategoryId) return tmpl.subcategoryId;
+    }
+    return activeSubcategory || "birthday";
+  }, [state.templateId, activeSubcategory]);
+
+  const activeCardSubMeta = React.useMemo(() => {
+    return SUBCATEGORIES[activeCardSubcategory] || SUBCATEGORIES.birthday;
+  }, [activeCardSubcategory]);
+
+  const categoryFoils = React.useMemo(() => {
+    return getFoilsForSubcategory(activeCardSubcategory);
+  }, [activeCardSubcategory]);
 
   const subcategoriesInParent = React.useMemo(() => {
     if (activeParent === "saved-templates") return [];
@@ -1459,32 +1449,65 @@ function CreateCardStudio() {
 
                   {/* 3. Scratch Foil Finish Selection */}
                   <div className="bg-white rounded-3xl p-6 border border-brand-warm-border shadow-card space-y-4">
-                    <div>
-                      <h3 className="text-base font-bold text-brand-dark">3. Scratch Foil Texture</h3>
-                      <p className="text-xs text-brand-muted">Choose the metallic sheen that coats your card</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-bold text-brand-dark">3. Scratch Foil Texture</h3>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-pink-light text-brand-pink border border-brand-pink/20">
+                            <span>{activeCardSubMeta.icon}</span>
+                            <span>{activeCardSubMeta.label}</span>
+                          </span>
+                        </div>
+                        <p className="text-xs text-brand-muted mt-0.5">
+                          5 exclusive metallic foils designed specifically for {activeCardSubMeta.label}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowAllFoils(!showAllFoils)}
+                        className="text-xs font-bold text-brand-purple hover:text-brand-pink transition-colors flex items-center gap-1.5"
+                      >
+                        <Sliders className="w-3.5 h-3.5" />
+                        <span>{showAllFoils ? "Show 5 Category Foils" : "Browse All 85 Foils"}</span>
+                      </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-1">
-                      {FOIL_OPTIONS.map((foil) => {
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      {(showAllFoils
+                        ? Object.values(SUBCATEGORIES).flatMap((s) => s.foils)
+                        : categoryFoils
+                      ).map((foil) => {
                         const isSelected = state.foilStyle === foil.id;
                         return (
                           <button
                             key={foil.id}
                             type="button"
                             onClick={() => setFoilStyle(foil.id)}
-                            className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all ${isSelected
-                              ? "bg-brand-pink-light/60 border-brand-pink ring-2 ring-brand-pink/20 shadow-sm"
-                              : "border-brand-warm-border bg-brand-warm-subtle/40 hover:border-brand-pink/30 hover:bg-white"
-                              }`}
+                            className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all ${
+                              isSelected
+                                ? "bg-brand-pink-light/60 border-brand-pink ring-2 ring-brand-pink/20 shadow-sm"
+                                : "border-brand-warm-border bg-brand-warm-subtle/40 hover:border-brand-pink/30 hover:bg-white"
+                            }`}
                           >
                             <div
-                              className={`w-8 h-8 rounded-xl bg-gradient-to-br ${foil.previewColor} shadow-inner shrink-0 mt-0.5 border border-white/50`}
+                              className={cn(
+                                "w-9 h-9 rounded-xl bg-gradient-to-br shadow-inner shrink-0 mt-0.5 border border-white/60",
+                                foil.previewGradient
+                              )}
                             />
-                            <div className="min-w-0">
-                              <span className="text-xs font-bold text-brand-dark block truncate">
-                                {foil.name}
-                              </span>
-                              <span className="text-[10px] text-brand-muted line-clamp-1">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="text-xs font-bold text-brand-dark truncate">
+                                  {foil.name}
+                                </span>
+                                {isSelected && (
+                                  <span className="text-[9px] font-extrabold text-brand-pink bg-brand-pink-light px-1.5 py-0.5 rounded border border-brand-pink/20 shrink-0">
+                                    ACTIVE
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-brand-muted line-clamp-1 mt-0.5">
                                 {foil.desc}
                               </span>
                             </div>

@@ -2981,55 +2981,257 @@ export function getTemplatesForSubcategory(subcategoryId: string): TemplateDefin
   return SU_PRILO_TEMPLATES.filter((t) => t.subcategoryId === subcategoryId);
 }
 
-export function getFoilBadge(foilId: CoverStyle): {
-  label: string;
-  dotClass: string;
-  borderClass: string;
-  bgClass: string;
-} {
-  for (const sub of Object.values(SUBCATEGORIES)) {
-    const found = sub.foils.find((f) => f.id === foilId);
+export interface FoilDetails extends FoilDefinition {
+  subcategoryId: string;
+  subcategoryLabel: string;
+  parentId: ParentCategoryId;
+  stampHeader: string;
+  stampSubtext: string;
+  categoryIcon: string;
+  shaderFamily: "gold" | "cyber" | "ruby" | "emerald" | "silver" | "sunset" | "rose" | "dark";
+  glowColor: string;
+}
+
+export function getFoilDefinition(foilId?: string | null): FoilDetails {
+  const targetId = foilId || "gold-confetti";
+
+  for (const [subId, sub] of Object.entries(SUBCATEGORIES)) {
+    const found = sub.foils.find((f) => f.id === targetId);
     if (found) {
+      const idLower = targetId.toLowerCase();
+      let shaderFamily: FoilDetails["shaderFamily"] = "gold";
+      let icon = sub.icon || "✨";
+      let header = `★ ${found.name.toUpperCase()} ★`;
+      let subtext = `${sub.label.toUpperCase()} PASS`;
+      let glow = "rgba(245, 158, 11, 0.4)";
+
+      if (
+        idLower.includes("cyber") ||
+        idLower.includes("glitch") ||
+        idLower.includes("matrix") ||
+        idLower.includes("neon") ||
+        idLower.includes("terminal") ||
+        idLower.includes("truth") ||
+        idLower.includes("cyan") ||
+        idLower.includes("arcade")
+      ) {
+        shaderFamily = "cyber";
+        icon = "⚡";
+        header = `⚡ ${found.name.toUpperCase()} ⚡`;
+        glow = "rgba(34, 211, 238, 0.45)";
+      } else if (
+        idLower.includes("emerald") ||
+        idLower.includes("mint") ||
+        idLower.includes("green") ||
+        idLower.includes("crescent") ||
+        idLower.includes("cash") ||
+        idLower.includes("petrichor")
+      ) {
+        shaderFamily = "emerald";
+        icon = idLower.includes("crescent") ? "🌙" : "❖";
+        header = `❖ ${found.name.toUpperCase()} ❖`;
+        glow = "rgba(52, 211, 153, 0.45)";
+      } else if (
+        idLower.includes("ruby") ||
+        idLower.includes("red") ||
+        idLower.includes("flame") ||
+        idLower.includes("dare") ||
+        idLower.includes("roast") ||
+        idLower.includes("crimson") ||
+        idLower.includes("scarlet")
+      ) {
+        shaderFamily = "ruby";
+        icon = idLower.includes("roast") || idLower.includes("flame") ? "🔥" : idLower.includes("dare") ? "💀" : "♥";
+        header = `${icon} ${found.name.toUpperCase()} ${icon}`;
+        glow = "rgba(239, 68, 68, 0.45)";
+      } else if (
+        idLower.includes("silver") ||
+        idLower.includes("titanium") ||
+        idLower.includes("stealth") ||
+        idLower.includes("obsidian") ||
+        idLower.includes("black") ||
+        idLower.includes("carbon") ||
+        idLower.includes("onyx") ||
+        idLower.includes("vault")
+      ) {
+        shaderFamily = idLower.includes("black") || idLower.includes("stealth") || idLower.includes("obsidian") || idLower.includes("onyx") ? "dark" : "silver";
+        icon = idLower.includes("x-") ? "𝕏" : "◈";
+        header = `◈ ${found.name.toUpperCase()} ◈`;
+        glow = shaderFamily === "dark" ? "rgba(148, 163, 184, 0.35)" : "rgba(203, 213, 225, 0.5)";
+      } else if (
+        idLower.includes("sunset") ||
+        idLower.includes("orange") ||
+        idLower.includes("amber") ||
+        idLower.includes("solar") ||
+        idLower.includes("tangerine") ||
+        idLower.includes("copper")
+      ) {
+        shaderFamily = "sunset";
+        icon = "☀️";
+        header = `✦ ${found.name.toUpperCase()} ✦`;
+        glow = "rgba(249, 115, 22, 0.45)";
+      } else if (
+        idLower.includes("rose") ||
+        idLower.includes("pink") ||
+        idLower.includes("pastel") ||
+        idLower.includes("candy") ||
+        idLower.includes("blush") ||
+        idLower.includes("bubblegum") ||
+        idLower.includes("lilac") ||
+        idLower.includes("sweetheart") ||
+        idLower.includes("quartz")
+      ) {
+        shaderFamily = "rose";
+        icon = "♡";
+        header = `♡ ${found.name.toUpperCase()} ♡`;
+        glow = "rgba(255, 117, 140, 0.45)";
+      } else {
+        shaderFamily = "gold";
+        icon = idLower.includes("diwali") || idLower.includes("diya") ? "🪔" : idLower.includes("yt-") ? "▶" : idLower.includes("ticket") ? "🎫" : "★";
+        header = `${icon} ${found.name.toUpperCase()} ${icon}`;
+        glow = "rgba(245, 158, 11, 0.45)";
+      }
+
+      if (idLower.includes("yt-")) {
+        subtext = "OFFICIAL YOUTUBE CREATOR PASS";
+        icon = "▶";
+      } else if (idLower.includes("diwali")) {
+        subtext = "SHUBH DIWALI LIGHT & JOY";
+        icon = "🪔";
+      } else if (idLower.includes("eid")) {
+        subtext = "EID MUBARAK BLESSING PASS";
+        icon = "🌙";
+      } else if (idLower.includes("roast")) {
+        subtext = "CERTIFIED EMOTIONAL DAMAGE";
+        icon = "🔥";
+      } else if (idLower.includes("dare")) {
+        subtext = "HIGH STAKES DARE CHALLENGE";
+        icon = "💀";
+      } else if (idLower.includes("truth")) {
+        subtext = "100% UNFILTERED TRUTH";
+        icon = "🤫";
+      } else if (idLower.includes("ticket") || idLower.includes("voucher")) {
+        subtext = "OFFICIAL SURPRISE VOUCHER";
+        icon = "🎫";
+      }
+
       return {
-        label: found.name,
-        dotClass: found.dotClass,
-        borderClass: found.borderClass,
-        bgClass: found.bgClass,
+        ...found,
+        subcategoryId: subId,
+        subcategoryLabel: sub.label,
+        parentId: sub.parentId,
+        stampHeader: header,
+        stampSubtext: subtext,
+        categoryIcon: icon,
+        shaderFamily,
+        glowColor: glow,
       };
     }
   }
 
   // Fallbacks for legacy foil style names
-  if (foilId === "golden-foil") {
+  if (targetId === "golden-foil") {
     return {
-      label: "24K Gold Foil",
+      id: "golden-foil",
+      name: "24K Golden VIP Pass",
       dotClass: "bg-amber-400 ring-amber-300",
       borderClass: "border-amber-200/80",
       bgClass: "bg-amber-50/80 text-amber-900",
+      previewGradient: "from-amber-300 via-yellow-400 to-amber-600",
+      desc: "24K Luxury gold glitter",
+      subcategoryId: "birthday",
+      subcategoryLabel: "Birthdays & Milestones",
+      parentId: "life",
+      stampHeader: "★ 24K GOLDEN VIP PASS ★",
+      stampSubtext: "AUTHENTIC SURPRISE PASS",
+      categoryIcon: "★",
+      shaderFamily: "gold",
+      glowColor: "rgba(245, 158, 11, 0.45)",
     };
   }
-  if (foilId === "cosmic-purple") {
+  if (targetId === "cosmic-purple") {
     return {
-      label: "Cosmic Purple",
+      id: "cosmic-purple",
+      name: "Cosmic Cyber Glow",
       dotClass: "bg-purple-500 ring-purple-300",
       borderClass: "border-purple-200/80",
       bgClass: "bg-purple-50/80 text-purple-900",
+      previewGradient: "from-fuchsia-600 via-purple-600 to-cyan-500",
+      desc: "Deep galaxy iridescent",
+      subcategoryId: "birthday",
+      subcategoryLabel: "Birthdays & Milestones",
+      parentId: "life",
+      stampHeader: "⚡ FUTURE SCRATCH ⚡",
+      stampSubtext: "SECRET CODE VERIFIED",
+      categoryIcon: "⚡",
+      shaderFamily: "cyber",
+      glowColor: "rgba(34, 211, 238, 0.45)",
     };
   }
-  if (foilId === "mint-fresh") {
+  if (targetId === "mint-fresh") {
     return {
-      label: "Mint Emerald",
+      id: "mint-fresh",
+      name: "Lucky Mint Emerald",
       dotClass: "bg-emerald-400 ring-emerald-300",
       borderClass: "border-emerald-200/80",
       bgClass: "bg-emerald-50/80 text-emerald-900",
+      previewGradient: "from-emerald-300 via-teal-400 to-emerald-600",
+      desc: "Crisp emerald shimmer",
+      subcategoryId: "friendship",
+      subcategoryLabel: "Friendship & Besties",
+      parentId: "life",
+      stampHeader: "❖ LUCKY EMERALD PASS ❖",
+      stampSubtext: "SURPRISE INSIDE",
+      categoryIcon: "❖",
+      shaderFamily: "emerald",
+      glowColor: "rgba(52, 211, 153, 0.45)",
     };
   }
 
   return {
-    label: "Lavender Pink",
+    id: "lavender-pink",
+    name: "Holographic Rose Velvet",
     dotClass: "bg-rose-400 ring-rose-300",
     borderClass: "border-rose-200/80",
     bgClass: "bg-rose-50/80 text-rose-900",
+    previewGradient: "from-rose-200 via-pink-400 to-rose-500",
+    desc: "Suprilo signature warm foil",
+    subcategoryId: "anniversary",
+    subcategoryLabel: "Love & Anniversaries",
+    parentId: "life",
+    stampHeader: "♡ SECRET SURPRISE PASS ♡",
+    stampSubtext: "OPEN WITH LOVE",
+    categoryIcon: "♡",
+    shaderFamily: "rose",
+    glowColor: "rgba(255, 77, 109, 0.45)",
+  };
+}
+
+export function getFoilsForSubcategory(subcategoryId?: string | null): FoilDefinition[] {
+  if (!subcategoryId) return SUBCATEGORIES.birthday.foils;
+  const sub = SUBCATEGORIES[subcategoryId];
+  if (sub && sub.foils && sub.foils.length > 0) {
+    return sub.foils;
+  }
+  return SUBCATEGORIES.birthday.foils;
+}
+
+export function getFoilBadge(foilId: CoverStyle): {
+  label: string;
+  dotClass: string;
+  borderClass: string;
+  bgClass: string;
+  previewGradient: string;
+  desc: string;
+} {
+  const foil = getFoilDefinition(foilId);
+  return {
+    label: foil.name,
+    dotClass: foil.dotClass,
+    borderClass: foil.borderClass,
+    bgClass: foil.bgClass,
+    previewGradient: foil.previewGradient,
+    desc: foil.desc,
   };
 }
 
