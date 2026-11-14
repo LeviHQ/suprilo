@@ -317,6 +317,13 @@ export interface UpdateCardDraftFields {
  * Fixes the issue where template selection did not hydrate card background theme.
  */
 export const TEMPLATE_PALETTE_MAP: Record<string, BgPaletteId> = {
+  // 5 Dedicated Birthday Templates
+  "bday-champagne-gold": "warm-sunshine",
+  "bday-holo-party-prism": "soft-pink",
+  "bday-balloon-pop": "warm-sunshine",
+  "bday-mint-shimmer": "mint-fresh",
+  "bday-roast-revelry": "warm-sunshine",
+
   // Legacy Catalog
   "bday-midnight-celebration": "warm-sunshine",
   "bday-party-confetti": "soft-pink",

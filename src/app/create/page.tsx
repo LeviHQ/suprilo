@@ -404,13 +404,9 @@ function CreateCardStudio() {
 
   const handleSelectBlankForSubcategory = (subId: string, foilId?: CoverStyle) => {
     const blank = getBlankCanvasForSubcategory(subId, foilId);
-    if (!user) {
-      openAuthModal(`/create?mode=scratch&sub=${subId}`);
-    } else {
-      applyTemplate(blank);
-      setViewState("editor");
-      router.push(`/create?mode=scratch&sub=${subId}`);
-    }
+    applyTemplate(blank);
+    setViewState("editor");
+    router.push(`/create?mode=scratch&sub=${subId}`);
   };
 
   const currentParentMeta = React.useMemo(() => {
@@ -956,29 +952,40 @@ function CreateCardStudio() {
                     </div>
 
                     {/* Middle Foil Finishes Row */}
-                    <div className="pt-4 border-t border-brand-warm-border/70 relative z-10 space-y-2">
+                    <div className="pt-4 border-t border-brand-warm-border/70 relative z-10 space-y-2.5">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-brand-muted flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5 text-brand-pink" />
-                          Available Exciting Foils in this Theme:
+                          5 Signature Foils for {currentSubMeta?.label}:
                         </span>
                         <span className="text-[11px] font-bold text-brand-dark/70">
-                          5 Custom Finishes
+                          Handcrafted Finishes
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 py-1">
                         {currentSubMeta?.foils.map((foil) => (
-                          <div
+                          <button
                             key={foil.id}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-brand-warm-border shadow-2xs shrink-0 hover:border-brand-pink/40 transition-colors"
-                            title={foil.desc}
+                            type="button"
+                            onClick={() => handleSelectBlankForSubcategory(activeSubcategory, foil.id)}
+                            className="group/foil relative rounded-2xl p-2.5 bg-white border border-brand-warm-border hover:border-brand-pink/50 shadow-2xs hover:shadow-xs text-left transition-all hover:-translate-y-0.5 overflow-hidden flex flex-col justify-between"
+                            title={`Click to design a card with ${foil.name}`}
                           >
-                            <div className={cn("w-3 h-3 rounded-full bg-gradient-to-br shadow-inner shrink-0", foil.previewGradient)} />
-                            <span className="text-xs font-bold text-brand-dark truncate max-w-[140px]">
-                              {foil.name}
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <div className={cn("w-6 h-6 rounded-lg bg-gradient-to-br shadow-inner shrink-0 border border-white/80 ring-1 ring-brand-warm-border", foil.previewGradient)} />
+                              <span className="text-[11px] font-black text-brand-dark truncate group-hover/foil:text-brand-pink transition-colors">
+                                {foil.name}
+                              </span>
+                            </div>
+                            <span className="text-[9px] text-brand-muted line-clamp-1 leading-tight">
+                              {foil.desc}
                             </span>
-                          </div>
+                            <div className="mt-2 pt-1 border-t border-brand-warm-border/50 flex items-center justify-between text-[8px] font-bold text-brand-pink">
+                              <span>Use Foil</span>
+                              <ArrowRight className="w-2.5 h-2.5 transition-transform group-hover/foil:translate-x-0.5" />
+                            </div>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -1052,36 +1059,47 @@ function CreateCardStudio() {
                         </span>
                       </div>
 
-                      {/* Visual Preview */}
-                      <div
-                        onClick={() => handleSelectBlankForSubcategory(activeSubcategory)}
-                        className="cursor-pointer relative rounded-2xl p-4 border border-brand-pink/25 bg-white shadow-inner flex flex-col justify-between min-h-[176px] transition-transform group-hover:scale-[1.01] overflow-hidden"
-                      >
+                      {/* Visual Preview with 5 Foil Quick-Picks */}
+                      <div className="relative rounded-2xl p-3.5 border border-brand-pink/25 bg-white shadow-inner flex flex-col justify-between min-h-[190px] overflow-hidden">
                         <div className="flex items-start justify-between gap-2 relative z-10">
                           <span className="text-[9px] font-black uppercase tracking-wider text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full border border-brand-pink/20">
-                            Custom {currentSubMeta?.label}
+                            Pick From {currentSubMeta?.label} Foils
                           </span>
-                          <span className="text-[10px] font-semibold text-brand-muted">
-                            To: Anyone
+                          <span className="text-[10px] font-bold text-brand-muted">
+                            Tap to start
                           </span>
                         </div>
 
-                        <div className="my-2.5 space-y-1 relative z-10 text-center px-1">
-                          <p className="text-xs sm:text-[13px] font-bold text-brand-dark leading-snug line-clamp-2">
-                            &ldquo;Type your own custom words & secret reveal...&rdquo;
-                          </p>
-                          <p className="text-[10px] text-brand-muted leading-tight line-clamp-1 italic">
-                            Choose any of this category&apos;s 5 foils
-                          </p>
+                        {/* 5 Swatches direct picker */}
+                        <div className="grid grid-cols-5 gap-1.5 my-auto py-2">
+                          {currentSubMeta?.foils.map((foil) => (
+                            <button
+                              key={foil.id}
+                              type="button"
+                              onClick={() => handleSelectBlankForSubcategory(activeSubcategory, foil.id)}
+                              className="group/swatch flex flex-col items-center gap-1 p-1 rounded-xl hover:bg-brand-warm transition-all"
+                              title={`Create blank card with ${foil.name}`}
+                            >
+                              <div
+                                className={cn(
+                                  "w-9 h-9 rounded-xl bg-gradient-to-br shadow-xs border border-white/80 ring-1 ring-brand-warm-border group-hover/swatch:scale-110 transition-transform",
+                                  foil.previewGradient
+                                )}
+                              />
+                              <span className="text-[8px] font-bold text-brand-dark/80 truncate max-w-[48px] text-center">
+                                {foil.name.split(" ")[0]}
+                              </span>
+                            </button>
+                          ))}
                         </div>
 
                         <div className="flex items-center justify-between text-[10px] text-brand-dark/60 pt-2 border-t border-brand-warm-border/40 relative z-10">
-                          <div className="flex items-center gap-1.5 text-brand-pink font-semibold">
-                            <Sparkles className="w-3 h-3 text-brand-pink" />
-                            <span>Custom Reveal</span>
+                          <div className="flex items-center gap-1 text-brand-pink font-semibold text-[9px]">
+                            <Sparkles className="w-3 h-3 text-brand-pink shrink-0" />
+                            <span>100% Custom Freedom</span>
                           </div>
                           <span className="font-mono text-[9px] text-brand-muted">
-                            From: You
+                            Voice Note & Photo
                           </span>
                         </div>
                       </div>

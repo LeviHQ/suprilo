@@ -602,9 +602,7 @@ export function ScratchCard({
         ctx.font = "900 12px system-ui, sans-serif";
         ctx.letterSpacing = "1px";
         ctx.fillText("🔥 SCRATCH TO REVEAL 🔥", width / 2, height - 32);
-      }
-
-      if (isCyber) {
+      } else if (isCyber) {
         // ====================================================================
         // THEME: CYBER JACKPOT / FUTURE SCRATCH (Neon Cyan & Violet Circuits)
         // ====================================================================
