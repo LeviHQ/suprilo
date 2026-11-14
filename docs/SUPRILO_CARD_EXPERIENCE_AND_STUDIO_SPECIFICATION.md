@@ -123,6 +123,11 @@ In the Creation Studio, templates do not render as flat plain text quote boxes. 
 - **Interactive Peek Feature**: A `Peek Inside / Foil View` toggle allows creators to toggle between the outer scratch foil pass and the secret reveal message underneath.
 - **Top Rectangle Banner & Quick Picker**: Prominently displays all 5 custom finishes with direct 1-click creation shortcuts.
 - **Canvas Shader Execution**: Guaranteed non-overlapping execution where dedicated subcategory foil shaders run without falling through to generic fallback shaders.
+- **Vertical Rectangle Standard**: Studio showcase cards and the custom canvas adopt a true vertical greeting card aspect ratio (`aspect-[4/5]` / `min-h-[360px]`), mirroring physical scratch cards and phone preview proportions.
+- **Foil Avatar Rendering Engine (`FoilAvatar.tsx`)**: Foil avatars use explicit inline CSS linear-gradients, reflections, and icons (`✦`, `⚡`, `🎈`, `🎁`, `🔥`) to guarantee 100% rendering reliability across all browsers and devices without CSS tree-shaking vulnerabilities.
+- **Interior Styling & Theme Visibility**: Background palette selectors render vivid round color swatches (`w-4 h-4`) encased in themed tinted pills and colored borders.
+- **Controlled Draft Lifecycle**: Drafts are no longer auto-created or auto-saved when opening the studio. An Exit Confirmation Modal intercepts navigation when leaving with unpublished changes, prompting creators to save or discard while gracefully checking active draft slot limits (3/3).
+- **Foil Overlay Instruction Limit**: Standardized to 30 characters (`COVER_TEXT_MAX = 30`).
 
 Designed and implemented in 1:1 fidelity with the official Suprilo Birthday Reference Design:
 
