@@ -620,7 +620,7 @@ export function ScratchCard({
     if (typeof navigator !== "undefined" && navigator.vibrate) {
       try {
         navigator.vibrate([40, 60, 100]);
-      } catch {}
+      } catch { }
     }
 
     onReveal?.();
@@ -655,10 +655,10 @@ export function ScratchCard({
         coverStyle === "cosmic-purple"
           ? ["#22D3EE", "#A855F7", "#EC4899", "#FFFFFF"]
           : coverStyle === "golden-foil"
-          ? ["#FDE047", "#F59E0B", "#FEF08A", "#FFFFFF"]
-          : coverStyle === "mint-fresh"
-          ? ["#34D399", "#10B981", "#6EE7B7", "#FFFFFF"]
-          : ["#FF4D6D", "#FF9F1C", "#C084FC", "#FFFFFF"];
+            ? ["#FDE047", "#F59E0B", "#FEF08A", "#FFFFFF"]
+            : coverStyle === "mint-fresh"
+              ? ["#34D399", "#10B981", "#6EE7B7", "#FFFFFF"]
+              : ["#FF4D6D", "#FF9F1C", "#C084FC", "#FFFFFF"];
 
       for (let i = 0; i < 4; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -779,7 +779,7 @@ export function ScratchCard({
 
     try {
       canvas.setPointerCapture(e.pointerId);
-    } catch {}
+    } catch { }
 
     isDrawingRef.current = true;
     setIsScratching(true);
@@ -868,7 +868,7 @@ export function ScratchCard({
       if (canvasRef.current?.hasPointerCapture(e.pointerId)) {
         canvasRef.current.releasePointerCapture(e.pointerId);
       }
-    } catch {}
+    } catch { }
 
     if (!hasRevealedRef.current) {
       const pct = calculateScratchPercent();
@@ -886,10 +886,10 @@ export function ScratchCard({
     coverStyle === "cosmic-purple"
       ? "border-cyan-400/80 shadow-[0_0_35px_rgba(34,211,238,0.35),0_0_15px_rgba(168,85,247,0.4)]"
       : coverStyle === "golden-foil"
-      ? "border-amber-400/90 shadow-[0_0_35px_rgba(245,158,11,0.35),0_0_15px_rgba(251,191,36,0.3)]"
-      : coverStyle === "mint-fresh"
-      ? "border-emerald-400/80 shadow-[0_0_35px_rgba(52,211,153,0.35),0_0_15px_rgba(16,185,129,0.3)]"
-      : "border-pink-400/80 shadow-[0_0_35px_rgba(255,77,109,0.35),0_0_15px_rgba(192,132,252,0.3)]";
+        ? "border-amber-400/90 shadow-[0_0_35px_rgba(245,158,11,0.35),0_0_15px_rgba(251,191,36,0.3)]"
+        : coverStyle === "mint-fresh"
+          ? "border-emerald-400/80 shadow-[0_0_35px_rgba(52,211,153,0.35),0_0_15px_rgba(16,185,129,0.3)]"
+          : "border-pink-400/80 shadow-[0_0_35px_rgba(255,77,109,0.35),0_0_15px_rgba(192,132,252,0.3)]";
 
   return (
     <div className={`relative w-full select-none ${className}`}>
