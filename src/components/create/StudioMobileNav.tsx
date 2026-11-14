@@ -35,39 +35,39 @@ const PARENT_NAV_ITEMS: {
   badge?: string;
   badgeClass?: string;
 }[] = [
-  {
-    id: "life",
-    label: "Life",
-    sublabel: "Milestones & personal joys",
-    icon: HeartHandshake,
-    badge: "5 Themes",
-    badgeClass: "bg-brand-pink-light text-brand-pink border border-brand-pink/20",
-  },
-  {
-    id: "trending",
-    label: "Trending & Calendar",
-    sublabel: "Holidays, seasons & dates",
-    icon: Calendar,
-    badge: "HOT",
-    badgeClass: "bg-amber-100 text-amber-900 border border-amber-200 font-extrabold",
-  },
-  {
-    id: "social",
-    label: "Social Media",
-    sublabel: "YouTube, X, Insta & Startups",
-    icon: Share2,
-    badge: "CREATORS",
-    badgeClass: "bg-purple-100 text-purple-900 border border-purple-200 font-extrabold",
-  },
-  {
-    id: "surprise",
-    label: "Surprise",
-    sublabel: "Vouchers, games, roasts & secrets",
-    icon: Gamepad2,
-    badge: "FUN",
-    badgeClass: "bg-rose-100 text-rose-900 border border-rose-200 font-extrabold",
-  },
-];
+    {
+      id: "life",
+      label: "Life",
+      sublabel: "Milestones & personal joys",
+      icon: HeartHandshake,
+      badge: "5 Themes",
+      badgeClass: "bg-brand-pink-light text-brand-pink border border-brand-pink/20",
+    },
+    {
+      id: "trending",
+      label: "Trending & Calendar",
+      sublabel: "Holidays, seasons & dates",
+      icon: Calendar,
+      badge: "HOT",
+      badgeClass: "bg-amber-100 text-amber-900 border border-amber-200 font-extrabold",
+    },
+    {
+      id: "social",
+      label: "Social Media",
+      sublabel: "YouTube, X, Insta & Startups",
+      icon: Share2,
+      badge: "CREATORS",
+      badgeClass: "bg-purple-100 text-purple-900 border border-purple-200 font-extrabold",
+    },
+    {
+      id: "surprise",
+      label: "Surprise",
+      sublabel: "Vouchers, games, roasts & secrets",
+      icon: Gamepad2,
+      badge: "FUN",
+      badgeClass: "bg-rose-100 text-rose-900 border border-rose-200 font-extrabold",
+    },
+  ];
 
 export function StudioMobileNav({
   isOpen,

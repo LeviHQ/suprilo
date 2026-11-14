@@ -13,7 +13,6 @@ import {
   Star,
 } from "lucide-react";
 import { TemplateDefinition, getFoilBadge } from "@/data/templates";
-import { CoverStyle } from "@/types/card";
 import { cn } from "@/lib/utils";
 
 interface TemplateStudioCardProps {

@@ -3100,7 +3100,7 @@ export function getTemplateById(id: string): TemplateDefinition | undefined {
   return SU_PRILO_TEMPLATES.find((t) => t.id === id);
 }
 
-export function getCuratedGeneralTemplates(seed = 42): TemplateDefinition[] {
+export function getCuratedGeneralTemplates(): TemplateDefinition[] {
   return SU_PRILO_TEMPLATES;
 }
 
