@@ -112,7 +112,17 @@ Instead of hardcoding generic labels on the scratch canvas, each of the 85 custo
 - **Category Watermark & Symbol**: Contextual symbols (`▶`, `🪔`, `🎂`, `🔥`, `💀`, `🌙`, `𝕏`, `🎫`, `✨`) matching the card's theme.
 - **Dynamic Glow Bezel**: The card frame's ambient neon aura automatically mirrors the active foil's shader family (Gold Amber, Cyber Cyan, Emerald Teal, Velvet Ruby, Titanium Noir, Rose Velvet, Solar Orange).
 
-### 3.3 The 5 Master Birthday Foils (Official Reference Specification)
+### 3.4 Studio Template Showcase & Foil Visual Engine (`TemplateStudioCard.tsx`)
+
+In the Creation Studio, templates do not render as flat plain text quote boxes. Instead, **each template card directly renders its authentic tactile scratch foil finish**:
+- **24K Champagne Gold**: Rendered with multi-tone gold metallic gradient, gold confetti, starry frame, and `✦ SCRATCH FOR YOUR GOLDEN WISH ✦`.
+- **Holo Party Prism**: Rendered with glowing holographic iridescent violet/cyan neon glow, nightclub notes, and `⚡ SWIPE TO UNLOCK THE PARTY ⚡`.
+- **Celebration Balloon Pop**: Rendered with 3D glossy metallic balloons, confetti streamers, and `TAP & SCRATCH THE CELEBRATION`.
+- **Mint Emerald Shimmer**: Rendered with stardust diamond glints, satin emerald ribbon, and `🎁 SCRATCH TO CLAIM YOUR SURPRISE 🎁`.
+- **Roast & Revelry**: Rendered with fiery comic book doodles (skulls, flames, laughing emojis), comic headline `🔥 WARNING: NOSTALGIA AHEAD 🔥`, and hazard tape `⚠️ AGING ALERT ⚠️`.
+- **Interactive Peek Feature**: A `Peek Inside / Foil View` toggle allows creators to toggle between the outer scratch foil pass and the secret reveal message underneath.
+- **Top Rectangle Banner & Quick Picker**: Prominently displays all 5 custom finishes with direct 1-click creation shortcuts.
+- **Canvas Shader Execution**: Guaranteed non-overlapping execution where dedicated subcategory foil shaders run without falling through to generic fallback shaders.
 
 Designed and implemented in 1:1 fidelity with the official Suprilo Birthday Reference Design:
 
