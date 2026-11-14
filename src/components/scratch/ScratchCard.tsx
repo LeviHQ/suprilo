@@ -112,11 +112,497 @@ export function ScratchCard({
       ctx.globalCompositeOperation = "source-over";
 
       const foilInfo = getFoilDefinition(coverStyle);
+      const foilLower = (coverStyle || "").toLowerCase();
+      const isChampagneGold =
+        foilLower.includes("champagne-gold") ||
+        foilLower === "gold-confetti" ||
+        foilLower === "birthday-champagne-gold";
+      const isHoloParty =
+        foilLower.includes("holo-party") ||
+        foilLower.includes("night-club") ||
+        foilLower === "birthday-holo-party-prism" ||
+        foilLower === "neon-cyber-glow";
+      const isBalloonPop =
+        foilLower.includes("balloon-pop") ||
+        foilLower === "birthday-balloon-pop" ||
+        foilLower === "pastel-candy-pop";
+      const isMintShimmer =
+        foilLower.includes("mint-shimmer") ||
+        foilLower === "birthday-mint-shimmer";
+      const isRoastRevelry =
+        foilLower.includes("roast-revelry") ||
+        foilLower.includes("aging-alert") ||
+        foilLower === "birthday-roast-revelry";
+
       const isCyber = foilInfo.shaderFamily === "cyber";
       const isGold = foilInfo.shaderFamily === "gold";
       const isEmerald = foilInfo.shaderFamily === "emerald";
       const isRuby = foilInfo.shaderFamily === "ruby";
       const isSilver = foilInfo.shaderFamily === "silver" || foilInfo.shaderFamily === "dark";
+
+      if (isChampagneGold) {
+        // ====================================================================
+        // THEME: 24K CHAMPAGNE GOLD (Exact Reference Foil #1)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#FFF7C2");
+        grad.addColorStop(0.2, "#F59E0B");
+        grad.addColorStop(0.45, "#B45309");
+        grad.addColorStop(0.7, "#FDE68A");
+        grad.addColorStop(0.9, "#D97706");
+        grad.addColorStop(1, "#92400E");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Angled Luxury Sheen Bands
+        ctx.save();
+        ctx.rotate((-25 * Math.PI) / 180);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+        for (let x = -width; x < width * 2; x += 40) {
+          ctx.fillRect(x, -height, 14, height * 3);
+        }
+        ctx.restore();
+
+        // Scattered Gold Leaf Confetti Flakes
+        for (let i = 0; i < 48; i++) {
+          const fx = (i * 47) % width;
+          const fy = (i * 83) % height;
+          ctx.fillStyle = i % 2 === 0 ? "rgba(255, 255, 255, 0.75)" : "rgba(180, 83, 9, 0.45)";
+          ctx.beginPath();
+          if (i % 3 === 0) {
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(fx + 6, fy + 2);
+            ctx.lineTo(fx + 3, fy + 7);
+          } else {
+            ctx.arc(fx, fy, i % 2 === 0 ? 1.8 : 1, 0, Math.PI * 2);
+          }
+          ctx.fill();
+        }
+
+        // Top Star-Studded Plaque
+        const plaqueW = Math.min(width * 0.88, 300);
+        const plaqueH = 68;
+        const plaqueX = (width - plaqueW) / 2;
+        const plaqueY = 28;
+
+        ctx.fillStyle = "rgba(254, 243, 199, 0.95)";
+        ctx.beginPath();
+        ctx.roundRect(plaqueX, plaqueY, plaqueW, plaqueH, 14);
+        ctx.fill();
+        ctx.strokeStyle = "#B45309";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#B45309";
+        ctx.font = "700 8px system-ui, sans-serif";
+        ctx.letterSpacing = "4px";
+        ctx.fillText("★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★", width / 2, plaqueY + 16);
+
+        ctx.fillStyle = "#78350F";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("✦ SCRATCH FOR YOUR GOLDEN WISH ✦", width / 2, plaqueY + 38);
+
+        ctx.fillStyle = "#B45309";
+        ctx.font = "700 8px system-ui, sans-serif";
+        ctx.fillText("★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★", width / 2, plaqueY + 56);
+
+        // Center Gold Embossed Plate
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#B45309";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#92400E";
+        ctx.font = "900 15px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("HAPPY BIRTHDAY", width / 2, boxY + 32);
+
+        ctx.fillStyle = "#B45309";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 54);
+
+        ctx.fillStyle = "#78350F";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("24K CHAMPAGNE GOLD", width / 2, boxY + 72);
+
+        // Bottom CTA
+        ctx.fillStyle = "#78350F";
+        ctx.font = "800 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("✦ SCRATCH TO REVEAL ✦", width / 2, height - 32);
+      } else if (isHoloParty) {
+        // ====================================================================
+        // THEME: HOLO PARTY PRISM (Exact Reference Foil #2)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#E879F9");
+        grad.addColorStop(0.25, "#818CF8");
+        grad.addColorStop(0.5, "#22D3EE");
+        grad.addColorStop(0.75, "#F472B6");
+        grad.addColorStop(1, "#C084FC");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Holographic Rainbow Sheen
+        ctx.save();
+        ctx.rotate((-20 * Math.PI) / 180);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        for (let x = -width; x < width * 2; x += 32) {
+          ctx.fillRect(x, -height, 10, height * 3);
+        }
+        ctx.restore();
+
+        // Prismatic Stars & Music Notes
+        ctx.fillStyle = "#FFFFFF";
+        const symbols = ["✦", "★", "♪", "♫", "✨", "★"];
+        for (let i = 0; i < 28; i++) {
+          const sx = (i * 53) % (width - 20) + 10;
+          const sy = (i * 71) % (height - 40) + 20;
+          ctx.font = `${i % 2 === 0 ? 13 : 9}px system-ui, sans-serif`;
+          ctx.fillText(symbols[i % symbols.length], sx, sy);
+        }
+
+        // Top Neon Double-Outlined Box Sign
+        const signW = Math.min(width * 0.88, 300);
+        const signH = 68;
+        const signX = (width - signW) / 2;
+        const signY = 28;
+
+        ctx.fillStyle = "rgba(20, 10, 45, 0.85)";
+        ctx.beginPath();
+        ctx.roundRect(signX, signY, signW, signH, 14);
+        ctx.fill();
+
+        ctx.strokeStyle = "#22D3EE";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.strokeStyle = "#F472B6";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(signX + 4, signY + 4, signW - 8, signH - 8);
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FDF4FF";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("⚡ SWIPE TO UNLOCK ⚡", width / 2, signY + 28);
+
+        ctx.fillStyle = "#22D3EE";
+        ctx.font = "900 15px system-ui, sans-serif";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("THE PARTY", width / 2, signY + 50);
+
+        // Center Nightclub Black Ticket Plaque
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(10, 8, 30, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+
+        ctx.strokeStyle = "#E879F9";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = "#22D3EE";
+        ctx.font = "900 14px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("NIGHT-CLUB BIRTHDAY", width / 2, boxY + 32);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ⚡", width / 2, boxY + 54);
+
+        ctx.fillStyle = "#F472B6";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("HOLO PARTY PRISM", width / 2, boxY + 72);
+
+        // Bottom CTA
+        ctx.fillStyle = "#22D3EE";
+        ctx.font = "800 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("⚡ SCRATCH TO REVEAL ⚡", width / 2, height - 32);
+      } else if (isBalloonPop) {
+        // ====================================================================
+        // THEME: CELEBRATION BALLOON POP (Exact Reference Foil #3)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#F43F5E");
+        grad.addColorStop(0.3, "#FB923C");
+        grad.addColorStop(0.7, "#FBBF24");
+        grad.addColorStop(1, "#38BDF8");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw 3D Glossy Balloons
+        const balloons = [
+          { x: 38, y: 70, r: 24, color: "#38BDF8" },
+          { x: width - 42, y: 80, r: 28, color: "#FB923C" },
+          { x: 50, y: height - 90, r: 26, color: "#FB7185" },
+          { x: width - 44, y: height - 100, r: 24, color: "#FBBF24" },
+          { x: width / 2, y: 44, r: 22, color: "#60A5FA" },
+        ];
+
+        balloons.forEach((b) => {
+          const bGrad = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.3, 2, b.x, b.y, b.r);
+          bGrad.addColorStop(0, "#FFFFFF");
+          bGrad.addColorStop(0.3, b.color);
+          bGrad.addColorStop(1, "#1E1B4B");
+          ctx.fillStyle = bGrad;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+          ctx.beginPath();
+          ctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.25, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Floating Confetti Ribbons
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * 70 + 20, 20);
+          ctx.bezierCurveTo(i * 70 + 40, 60, i * 70, 90, i * 70 + 30, 140);
+          ctx.stroke();
+        }
+
+        // Center 3D Extruded Letters Banner
+        const boxW = Math.min(width * 0.86, 296);
+        const boxH = 100;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 - 4;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+        ctx.fill();
+        ctx.strokeStyle = "#F43F5E";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#E11D48";
+        ctx.font = "900 16px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("TAP & SCRATCH", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#0284C7";
+        ctx.font = "900 16px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("THE CELEBRATION", width / 2, boxY + 58);
+
+        ctx.fillStyle = "#FB923C";
+        ctx.font = "700 11px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL 🎈", width / 2, boxY + 80);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🎈 SCRATCH TO REVEAL 🎈", width / 2, height - 32);
+      } else if (isMintShimmer) {
+        // ====================================================================
+        // THEME: MINT EMERALD SHIMMER (Exact Reference Foil #4)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#0F766E");
+        grad.addColorStop(0.35, "#14B8A6");
+        grad.addColorStop(0.7, "#2DD4BF");
+        grad.addColorStop(1, "#042F2E");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Radiant 4-point Diamond Star Glints
+        for (let i = 0; i < 36; i++) {
+          const gx = (i * 61) % width;
+          const gy = (i * 79) % height;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+
+          if (i % 3 === 0) {
+            const arm = i % 2 === 0 ? 8 : 5;
+            ctx.beginPath();
+            ctx.moveTo(gx, gy - arm);
+            ctx.lineTo(gx + 1.5, gy);
+            ctx.lineTo(gx, gy + arm);
+            ctx.lineTo(gx - 1.5, gy);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(gx - arm, gy);
+            ctx.lineTo(gx, gy + 1.5);
+            ctx.lineTo(gx + arm, gy);
+            ctx.lineTo(gx, gy - 1.5);
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.arc(gx, gy, 1, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Horizontal Silk Ribbon Band Across the Card
+        const ribbonH = 46;
+        const ribbonY = height * 0.38;
+
+        ctx.fillStyle = "rgba(204, 251, 241, 0.95)";
+        ctx.fillRect(0, ribbonY, width, ribbonH);
+
+        ctx.strokeStyle = "#0D9488";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, ribbonY);
+        ctx.lineTo(width, ribbonY);
+        ctx.moveTo(0, ribbonY + ribbonH);
+        ctx.lineTo(width, ribbonY + ribbonH);
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#0F766E";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🎁 SCRATCH TO CLAIM YOUR SURPRISE 🎁", width / 2, ribbonY + 28);
+
+        // Center Deep Emerald Luxury Pass Badge
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 82;
+        const boxX = (width - boxW) / 2;
+        const boxY = height * 0.54;
+
+        ctx.fillStyle = "rgba(4, 47, 46, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#2DD4BF";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#5EEAD4";
+        ctx.font = "900 15px system-ui, sans-serif";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("BIRTHDAY VOUCHER", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#CCFBF1";
+        ctx.font = "700 11px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        // Bottom CTA
+        ctx.fillStyle = "#5EEAD4";
+        ctx.font = "800 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("❖ SCRATCH TO REVEAL ❖", width / 2, height - 32);
+      } else if (isRoastRevelry) {
+        // ====================================================================
+        // THEME: ROAST & REVELRY (Exact Reference Foil #5)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#7F1D1D");
+        grad.addColorStop(0.3, "#DC2626");
+        grad.addColorStop(0.7, "#EA580C");
+        grad.addColorStop(1, "#F59E0B");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Comic Doodle Graffiti
+        ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+        const doodles = ["🔥", "💀", "😂", "🎉", "🔥", "💀", "😂", "🎉"];
+        for (let i = 0; i < 24; i++) {
+          const dx = (i * 59) % (width - 30) + 15;
+          const dy = (i * 73) % (height - 60) + 30;
+          ctx.font = `${i % 2 === 0 ? 18 : 14}px system-ui, sans-serif`;
+          ctx.fillText(doodles[i % doodles.length], dx, dy);
+        }
+
+        // Savage Bestie Pill Tag at Top
+        const pillW = 120;
+        const pillH = 26;
+        const pillX = width - pillW - 20;
+        const pillY = 24;
+        ctx.fillStyle = "rgba(254, 240, 138, 0.95)";
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 12);
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#000000";
+        ctx.font = "900 10px system-ui, sans-serif";
+        ctx.letterSpacing = "0.5px";
+        ctx.fillText("SAVAGE BESTIE 🔥", pillX + pillW / 2, pillY + 17);
+
+        // Center Warning Sign
+        const boxW = Math.min(width * 0.88, 300);
+        const boxH = 96;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 - 10;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 18);
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#DC2626";
+        ctx.font = "900 15px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🔥 WARNING: NOSTALGIA AHEAD 🔥", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#18181B";
+        ctx.font = "800 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 58);
+
+        ctx.fillStyle = "#B91C1C";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("ROAST & REVELRY", width / 2, boxY + 78);
+
+        // Diagonal Black & Yellow Hazard Tape Banner
+        const tapeW = Math.min(width * 0.82, 270);
+        const tapeH = 34;
+        const tapeX = (width - tapeW) / 2;
+        const tapeY = boxY + boxH + 16;
+
+        ctx.fillStyle = "#FACC15";
+        ctx.beginPath();
+        ctx.roundRect(tapeX, tapeY, tapeW, tapeH, 8);
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#000000";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("⚠️ AGING ALERT ⚠️", width / 2, tapeY + 22);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FEF08A";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🔥 SCRATCH TO REVEAL 🔥", width / 2, height - 32);
+      }
 
       if (isCyber) {
         // ====================================================================

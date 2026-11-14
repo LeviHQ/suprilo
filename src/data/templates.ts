@@ -127,54 +127,54 @@ export const SUBCATEGORIES: Record<string, SubcategoryDefinition> = {
     label: "Birthdays & Milestones",
     icon: "🎂",
     tagline: "Midnight galas, decade milestones & sweet party moments",
-    description: "Celebrate another lap around the sun with dazzling starlight foils, golden confetti, and personal surprises.",
+    description: "Celebrate another lap around the sun with 5 handcrafted birthday foils inspired by luxury champagne, holographic party prisms, 3D balloons, mint vouchers, and savage comic roasts.",
     heroBadge: "EVERGREEN JOY",
     heroVisualTheme: "birthday",
     foils: [
       {
-        id: "gold-confetti",
-        name: "24K Gold Confetti",
+        id: "birthday-champagne-gold",
+        name: "24K Champagne Gold",
         dotClass: "bg-amber-400 ring-amber-300",
         borderClass: "border-amber-300",
         bgClass: "bg-amber-50 text-amber-900",
         previewGradient: "from-amber-200 via-amber-400 to-yellow-500",
-        desc: "Radiant golden leaf with multi-color festive confetti flecks",
+        desc: "✦ Scratch for your golden wish ✦ Luxury gold leaf & festive flakes",
       },
       {
-        id: "midnight-starlight",
-        name: "Midnight Starlight",
-        dotClass: "bg-indigo-400 ring-indigo-300",
-        borderClass: "border-indigo-300",
-        bgClass: "bg-indigo-50 text-indigo-900",
-        previewGradient: "from-slate-900 via-indigo-900 to-purple-950",
-        desc: "Deep indigo cosmos with shimmering celestial constellations",
+        id: "birthday-holo-party-prism",
+        name: "Holo Party Prism",
+        dotClass: "bg-fuchsia-400 ring-cyan-300",
+        borderClass: "border-fuchsia-300",
+        bgClass: "bg-purple-50 text-purple-900",
+        previewGradient: "from-fuchsia-500 via-cyan-400 to-pink-500",
+        desc: "⚡ Swipe to unlock the party ⚡ Neon holographic night-club prism",
       },
       {
-        id: "neon-cyber-glow",
-        name: "Neon Cyber Glow",
-        dotClass: "bg-cyan-400 ring-cyan-300",
-        borderClass: "border-cyan-300",
-        bgClass: "bg-cyan-50 text-cyan-900",
-        previewGradient: "from-fuchsia-600 via-purple-600 to-cyan-500",
-        desc: "Futuristic ultraviolet with electric cyan party beams",
-      },
-      {
-        id: "champagne-sparkle",
-        name: "Champagne Sparkle",
-        dotClass: "bg-orange-300 ring-orange-200",
+        id: "birthday-balloon-pop",
+        name: "Celebration Balloon Pop",
+        dotClass: "bg-orange-400 ring-sky-300",
         borderClass: "border-orange-300",
-        bgClass: "bg-orange-50 text-orange-900",
-        previewGradient: "from-amber-100 via-orange-200 to-yellow-300",
-        desc: "Warm bubbly sparkling crystal glitz for classy toasts",
+        bgClass: "bg-orange-50 text-orange-950",
+        previewGradient: "from-rose-400 via-orange-300 to-sky-400",
+        desc: "🎈 Tap & scratch the celebration 🎈 3D glossy balloons & candles",
       },
       {
-        id: "pastel-candy-pop",
-        name: "Pastel Candy Pop",
-        dotClass: "bg-pink-400 ring-pink-300",
-        borderClass: "border-pink-300",
-        bgClass: "bg-pink-50 text-pink-900",
-        previewGradient: "from-pink-300 via-rose-300 to-indigo-300",
-        desc: "Playful cotton candy pink with rainbow luster sheen",
+        id: "birthday-mint-shimmer",
+        name: "Mint Emerald Shimmer",
+        dotClass: "bg-emerald-400 ring-teal-300",
+        borderClass: "border-emerald-300",
+        bgClass: "bg-emerald-50 text-emerald-950",
+        previewGradient: "from-emerald-300 via-teal-400 to-cyan-500",
+        desc: "🎁 Scratch to claim your surprise 🎁 Glitter mint & voucher ribbon",
+      },
+      {
+        id: "birthday-roast-revelry",
+        name: "Roast & Revelry",
+        dotClass: "bg-red-500 ring-yellow-400",
+        borderClass: "border-red-400",
+        bgClass: "bg-red-50 text-red-950",
+        previewGradient: "from-red-600 via-orange-500 to-amber-400",
+        desc: "🔥 Warning: nostalgia ahead 🔥 Savage doodle roasts & aging alert",
       },
     ],
   },
@@ -1103,112 +1103,112 @@ export const SUBCATEGORIES: Record<string, SubcategoryDefinition> = {
 // ============================================================================
 export const SU_PRILO_TEMPLATES: TemplateDefinition[] = [
   // --------------------------------------------------------------------------
-  // LIFE -> BIRTHDAY (5 TEMPLATES)
+  // LIFE -> BIRTHDAY (5 EXACT REFERENCE TEMPLATES)
   // --------------------------------------------------------------------------
   {
-    id: "bday-midnight-gala",
-    title: "Level Up & Midnight Gala",
+    id: "bday-champagne-gold-wish",
+    title: "24K Champagne Golden Wish",
     category: "birthday",
     parentId: "life",
     subcategoryId: "birthday",
-    categoryLabel: "Birthdays",
-    description: "A cosmic, star-studded midnight wish with deep indigo foil and constellation glow.",
-    tag: "LEVEL UP 🎂",
-    recipient: "Alex",
-    sender: "Jordan",
-    message: "Another lap around the sun completed. May this upcoming chapter be your biggest masterpiece yet! ✨",
-    secondary: "Here's to late-night drives, bold dreams, and celebrating you tonight.",
-    coverStyle: "midnight-starlight",
-    coverText: "Scratch to reveal your birthday wish ✨",
-    bgGradient: "from-purple-50 via-white to-indigo-50",
-    textColor: "text-indigo-950",
-    badgeColor: "purple",
-    sticker: "cake",
-    accentColor: "#8B5CF6",
-  },
-  {
-    id: "bday-golden-jubilee",
-    title: "The Golden Decade Milestone",
-    category: "birthday",
-    parentId: "life",
-    subcategoryId: "birthday",
-    categoryLabel: "Milestones",
-    description: "24K Gold Confetti foil for landmark birthdays and celebrating a decade of excellence.",
-    tag: "GOLDEN MILESTONE 🏆",
-    recipient: "Mom",
+    categoryLabel: "Champagne Gold",
+    description: "Star-studded 24K gold foil pass with luxury gold leaf flakes and champagne elegance.",
+    tag: "GOLDEN WISH ✦",
+    recipient: "Albert",
     sender: "With Love",
-    message: "Happy Milestone Birthday! You illuminate every single room you enter with your boundless grace.",
-    secondary: "A special family dinner is locked in for tonight at 7:30 PM.",
-    coverStyle: "gold-confetti",
-    coverText: "Scratch to reveal your milestone 🏆",
-    bgGradient: "from-amber-50 via-white to-orange-50",
+    message: "Happy Birthday Albert! May this golden year bring you immense success, endless health, and pure luxury. 🥂✨",
+    secondary: "Your exclusive champagne birthday dinner is officially reserved for tonight!",
+    coverStyle: "birthday-champagne-gold",
+    coverText: "Scratch to reveal your golden wish ✨",
+    bgGradient: "from-amber-50 via-white to-yellow-50",
     textColor: "text-amber-950",
     badgeColor: "yellow",
-    sticker: "trophy",
+    sticker: "cake",
     accentColor: "#F59E0B",
   },
   {
-    id: "bday-cyber-surprise",
-    title: "Next-Gen Cyber Wish",
+    id: "bday-holo-party-prism",
+    title: "Night-Club Holo Birthday Party",
     category: "birthday",
     parentId: "life",
     subcategoryId: "birthday",
-    categoryLabel: "Cyber Birthday",
-    description: "Ultraviolet cyber neon foil with high-voltage festive energy.",
-    tag: "CYBER BIRTHDAY ⚡",
-    recipient: "Bro",
-    sender: "Sam",
-    message: "New level officially unlocked! Claiming the high score in life every single day.",
-    secondary: "Secret steam gift card code loaded inside.",
-    coverStyle: "neon-cyber-glow",
-    coverText: "Scratch to reveal the secret gift ⚡",
-    bgGradient: "from-cyan-50 via-white to-fuchsia-50",
+    categoryLabel: "Party Prism",
+    description: "Prismatic neon holographic foil with nightclub lights, lightning bolts, and music vibes.",
+    tag: "VIP PARTY ⚡",
+    recipient: "Party Star",
+    sender: "The Crew",
+    message: "Night-Club Birthday Pass unlocked! Put your dancing shoes on—tonight the entire party is on us! 🪩🎉",
+    secondary: "VIP booth confirmed. Free drinks loaded and ready to pour.",
+    coverStyle: "birthday-holo-party-prism",
+    coverText: "Scratch to reveal the party pass ⚡",
+    bgGradient: "from-purple-50 via-white to-fuchsia-50",
     textColor: "text-purple-950",
-    badgeColor: "pink",
+    badgeColor: "purple",
     sticker: "sparkles",
-    accentColor: "#06B6D4",
+    accentColor: "#D946EF",
   },
   {
-    id: "bday-champagne-cheers",
-    title: "Aged to Absolute Perfection",
+    id: "bday-celebration-balloon-pop",
+    title: "Celebration Balloon Pop",
     category: "birthday",
     parentId: "life",
     subcategoryId: "birthday",
-    categoryLabel: "Classic Gala",
-    description: "Sophisticated champagne sparkle foil for elegant celebrations.",
-    tag: "VINTAGE EDITION 🥂",
-    recipient: "Dad",
-    sender: "Emma",
-    message: "Like fine wine, you only get sharper, wiser, and more wonderful with every passing year.",
-    secondary: "Pour yourself a glass—we are celebrating you in style today.",
-    coverStyle: "champagne-sparkle",
-    coverText: "Scratch to reveal the toast 🥂",
-    bgGradient: "from-stone-50 via-white to-amber-50",
+    categoryLabel: "Balloon Pop",
+    description: "Vibrant 3D glossy balloons, glowing birthday candles, and joyful celebration streamers.",
+    tag: "BALLOON POP 🎈",
+    recipient: "Birthday Star",
+    sender: "All of Us",
+    message: "Pop! Wishing you the happiest birthday filled with sweet cake, loud laughs, warm hugs, and zero stress! 🎂🥳",
+    secondary: "Make a big wish and blow out the candles—the best is yet to come!",
+    coverStyle: "birthday-balloon-pop",
+    coverText: "Scratch to reveal the balloon drop 🎈",
+    bgGradient: "from-rose-50 via-white to-sky-50",
+    textColor: "text-rose-950",
+    badgeColor: "orange",
+    sticker: "confetti",
+    accentColor: "#FB923C",
+  },
+  {
+    id: "bday-mint-emerald-voucher",
+    title: "Mint Emerald Birthday Voucher",
+    category: "birthday",
+    parentId: "life",
+    subcategoryId: "birthday",
+    categoryLabel: "Emerald Voucher",
+    description: "Glittering mint teal foil with diamond star glints and an elegant surprise gift voucher ribbon.",
+    tag: "BIRTHDAY VOUCHER 🎁",
+    recipient: "Special Someone",
+    sender: "Your Bestie",
+    message: "Official Birthday Voucher Claimed! Redeem 1 free gourmet dinner, shopping spree, or movie night anytime this month. ☕🍿",
+    secondary: "Valid for 365 days with zero expiration date. Enjoy your day!",
+    coverStyle: "birthday-mint-shimmer",
+    coverText: "Scratch to reveal your surprise voucher 🎁",
+    bgGradient: "from-emerald-50 via-white to-teal-50",
+    textColor: "text-emerald-950",
+    badgeColor: "neutral",
+    sticker: "gift",
+    accentColor: "#14B8A6",
+  },
+  {
+    id: "bday-roast-revelry-aging",
+    title: "Roast & Revelry: Aging Alert",
+    category: "birthday",
+    parentId: "life",
+    subcategoryId: "birthday",
+    categoryLabel: "Roast & Revelry",
+    description: "Fiery red comic doodle graffiti with warning hazards, laughing skulls, and savage birthday banter.",
+    tag: "AGING ALERT 💀",
+    recipient: "Oldie",
+    sender: "Savage Bestie",
+    message: "Warning: Nostalgia Ahead! You are officially one year closer to complaining about back pain. Happy Birthday! 😂💀",
+    secondary: "Aging alert activated! Don't worry, you still don't look a day over fantastic.",
+    coverStyle: "birthday-roast-revelry",
+    coverText: "Scratch to reveal the aging roast 🔥",
+    bgGradient: "from-red-50 via-white to-amber-50",
     textColor: "text-stone-900",
     badgeColor: "yellow",
-    sticker: "star",
-    accentColor: "#D97706",
-  },
-  {
-    id: "bday-candy-carnival",
-    title: "Sweetest Year Yet!",
-    category: "birthday",
-    parentId: "life",
-    subcategoryId: "birthday",
-    categoryLabel: "Sweet Joy",
-    description: "Playful pastel candy pop foil with rainbow luster and sprinkle joy.",
-    tag: "SWEET JOY 🍭",
-    recipient: "Maya",
-    sender: "Chloe",
-    message: "Wishing you the sweetest, most confetti-filled birthday ever! Let's eat way too much cake today.",
-    secondary: "Boba run after work is on me!",
-    coverStyle: "pastel-candy-pop",
-    coverText: "Scratch to reveal sweet treats 🍭",
-    bgGradient: "from-pink-50 via-white to-rose-50",
-    textColor: "text-rose-950",
-    badgeColor: "pink",
-    sticker: "confetti",
-    accentColor: "#FF4D6D",
+    sticker: "trophy",
+    accentColor: "#EF4444",
   },
 
   // --------------------------------------------------------------------------
@@ -2993,7 +2993,7 @@ export interface FoilDetails extends FoilDefinition {
 }
 
 export function getFoilDefinition(foilId?: string | null): FoilDetails {
-  const targetId = foilId || "gold-confetti";
+  const targetId = foilId || "birthday-champagne-gold";
 
   for (const [subId, sub] of Object.entries(SUBCATEGORIES)) {
     const found = sub.foils.find((f) => f.id === targetId);
@@ -3005,7 +3005,37 @@ export function getFoilDefinition(foilId?: string | null): FoilDetails {
       let subtext = `${sub.label.toUpperCase()} PASS`;
       let glow = "rgba(245, 158, 11, 0.4)";
 
-      if (
+      if (idLower === "birthday-champagne-gold" || idLower === "24k-champagne-gold") {
+        shaderFamily = "gold";
+        icon = "✦";
+        header = "✦ SCRATCH FOR YOUR GOLDEN WISH ✦";
+        subtext = "24K LUXURY GOLD LEAF PASS";
+        glow = "rgba(245, 158, 11, 0.45)";
+      } else if (idLower === "birthday-holo-party-prism" || idLower === "holo-party-prism") {
+        shaderFamily = "cyber";
+        icon = "⚡";
+        header = "⚡ SWIPE TO UNLOCK THE PARTY ⚡";
+        subtext = "NIGHT-CLUB BIRTHDAY PASS";
+        glow = "rgba(217, 70, 239, 0.45)";
+      } else if (idLower === "birthday-balloon-pop" || idLower === "celebration-balloon-pop") {
+        shaderFamily = "sunset";
+        icon = "🎈";
+        header = "🎈 TAP & SCRATCH THE CELEBRATION 🎈";
+        subtext = "3D GLOSSY BALLOON POP";
+        glow = "rgba(251, 146, 60, 0.45)";
+      } else if (idLower === "birthday-mint-shimmer" || idLower === "mint-emerald-shimmer") {
+        shaderFamily = "emerald";
+        icon = "🎁";
+        header = "🎁 SCRATCH TO CLAIM YOUR SURPRISE 🎁";
+        subtext = "OFFICIAL BIRTHDAY VOUCHER";
+        glow = "rgba(20, 184, 166, 0.45)";
+      } else if (idLower === "birthday-roast-revelry" || idLower === "roast-revelry") {
+        shaderFamily = "ruby";
+        icon = "🔥";
+        header = "🔥 WARNING: NOSTALGIA AHEAD 🔥";
+        subtext = "⚠️ AGING ALERT WARNING ⚠️";
+        glow = "rgba(239, 68, 68, 0.45)";
+      } else if (
         idLower.includes("cyber") ||
         idLower.includes("glitch") ||
         idLower.includes("matrix") ||
@@ -3130,42 +3160,65 @@ export function getFoilDefinition(foilId?: string | null): FoilDetails {
   }
 
   // Fallbacks for legacy foil style names
-  if (targetId === "golden-foil") {
+  if (targetId === "gold-confetti" || targetId === "golden-foil") {
     return {
-      id: "golden-foil",
-      name: "24K Golden VIP Pass",
+      id: "birthday-champagne-gold",
+      name: "24K Champagne Gold",
       dotClass: "bg-amber-400 ring-amber-300",
-      borderClass: "border-amber-200/80",
-      bgClass: "bg-amber-50/80 text-amber-900",
-      previewGradient: "from-amber-300 via-yellow-400 to-amber-600",
-      desc: "24K Luxury gold glitter",
+      borderClass: "border-amber-300",
+      bgClass: "bg-amber-50 text-amber-900",
+      previewGradient: "from-amber-200 via-amber-400 to-yellow-500",
+      desc: "✦ Scratch for your golden wish ✦ Luxury gold leaf & festive flakes",
       subcategoryId: "birthday",
       subcategoryLabel: "Birthdays & Milestones",
       parentId: "life",
-      stampHeader: "★ 24K GOLDEN VIP PASS ★",
-      stampSubtext: "AUTHENTIC SURPRISE PASS",
-      categoryIcon: "★",
+      stampHeader: "✦ SCRATCH FOR YOUR GOLDEN WISH ✦",
+      stampSubtext: "24K LUXURY GOLD LEAF PASS",
+      categoryIcon: "✦",
       shaderFamily: "gold",
       glowColor: "rgba(245, 158, 11, 0.45)",
     };
   }
-  if (targetId === "cosmic-purple") {
+  if (
+    targetId === "neon-cyber-glow" ||
+    targetId === "cosmic-purple" ||
+    targetId === "midnight-starlight"
+  ) {
     return {
-      id: "cosmic-purple",
-      name: "Cosmic Cyber Glow",
-      dotClass: "bg-purple-500 ring-purple-300",
-      borderClass: "border-purple-200/80",
-      bgClass: "bg-purple-50/80 text-purple-900",
-      previewGradient: "from-fuchsia-600 via-purple-600 to-cyan-500",
-      desc: "Deep galaxy iridescent",
+      id: "birthday-holo-party-prism",
+      name: "Holo Party Prism",
+      dotClass: "bg-fuchsia-400 ring-cyan-300",
+      borderClass: "border-fuchsia-300",
+      bgClass: "bg-purple-50 text-purple-900",
+      previewGradient: "from-fuchsia-500 via-cyan-400 to-pink-500",
+      desc: "⚡ Swipe to unlock the party ⚡ Neon holographic night-club prism",
       subcategoryId: "birthday",
       subcategoryLabel: "Birthdays & Milestones",
       parentId: "life",
-      stampHeader: "⚡ FUTURE SCRATCH ⚡",
-      stampSubtext: "SECRET CODE VERIFIED",
+      stampHeader: "⚡ SWIPE TO UNLOCK THE PARTY ⚡",
+      stampSubtext: "NIGHT-CLUB BIRTHDAY PASS",
       categoryIcon: "⚡",
       shaderFamily: "cyber",
-      glowColor: "rgba(34, 211, 238, 0.45)",
+      glowColor: "rgba(217, 70, 239, 0.45)",
+    };
+  }
+  if (targetId === "pastel-candy-pop") {
+    return {
+      id: "birthday-balloon-pop",
+      name: "Celebration Balloon Pop",
+      dotClass: "bg-orange-400 ring-sky-300",
+      borderClass: "border-orange-300",
+      bgClass: "bg-orange-50 text-orange-950",
+      previewGradient: "from-rose-400 via-orange-300 to-sky-400",
+      desc: "🎈 Tap & scratch the celebration 🎈 3D glossy balloons & candles",
+      subcategoryId: "birthday",
+      subcategoryLabel: "Birthdays & Milestones",
+      parentId: "life",
+      stampHeader: "🎈 TAP & SCRATCH THE CELEBRATION 🎈",
+      stampSubtext: "3D GLOSSY BALLOON DROP",
+      categoryIcon: "🎈",
+      shaderFamily: "sunset",
+      glowColor: "rgba(251, 146, 60, 0.45)",
     };
   }
   if (targetId === "mint-fresh") {
@@ -3280,7 +3333,7 @@ export const DEFAULT_SCRATCH_TEMPLATE: TemplateDefinition = {
   sender: "You",
   message: "Your secret surprise message goes right here! ✨",
   secondary: "Add a personal note, a hint, coordinates, or secret instructions for your recipient.",
-  coverStyle: "gold-confetti",
+  coverStyle: "birthday-champagne-gold",
   coverText: "Scratch to reveal your surprise ✨",
   bgGradient: "from-brand-warm-subtle via-white to-brand-warm",
   textColor: "text-brand-dark",

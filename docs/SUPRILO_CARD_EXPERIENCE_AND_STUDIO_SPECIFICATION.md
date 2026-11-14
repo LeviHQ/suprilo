@@ -112,13 +112,41 @@ Instead of hardcoding generic labels on the scratch canvas, each of the 85 custo
 - **Category Watermark & Symbol**: Contextual symbols (`▶`, `🪔`, `🎂`, `🔥`, `💀`, `🌙`, `𝕏`, `🎫`, `✨`) matching the card's theme.
 - **Dynamic Glow Bezel**: The card frame's ambient neon aura automatically mirrors the active foil's shader family (Gold Amber, Cyber Cyan, Emerald Teal, Velvet Ruby, Titanium Noir, Rose Velvet, Solar Orange).
 
-### 3.2 Thematic Shader Families:
-- **Cyber / Future Scratch Family** (`cyber-*`, `matrix-*`, `glitch-*`, `neon-*`): Deep indigo canvas with cyan grid lines, animated circuits, and `⚡ SCRATCH TO REVEAL ⚡`.
-- **24K Royal Gold & VIP Family** (`gold-*`, `champagne-*`, `ticket-*`): Multi-stop reflective gold bullion with diagonal luster bands, diamond sparkles, and `✦ SCRATCH TO REVEAL ✦`.
-- **Lucky Emerald & Aurora Matrix Family** (`emerald-*`, `mint-*`, `crescent-*`): Deep forest emerald with laser curves, aurora wave ribbons, and `❖ SCRATCH TO REVEAL ❖`.
-- **Velvet Ruby & Passion Flame Family** (`ruby-*`, `flame-*`, `dare-*`, `roast-*`): Deep royal crimson velvet with golden flare sparkles and `🔥 SCRATCH TO REVEAL 🔥`.
-- **Titanium, Obsidian & Stealth Monochrome Family** (`obsidian-*`, `stealth-*`, `black-*`, `silver-*`, `x-*`): Industrial carbon weave with hairline brushed titanium grain and `◈ SCRATCH TO REVEAL ◈`.
-- **Holographic Rose & Pastel Velvet Family** (`rose-*`, `pastel-*`, `candy-*`, `blush-*`): Iridescent pastel pearl and romantic rose velvet with stardust diamond glints and `✨ SCRATCH TO REVEAL ✨`.
+### 3.3 The 5 Master Birthday Foils (Official Reference Specification)
+
+Designed and implemented in 1:1 fidelity with the official Suprilo Birthday Reference Design:
+
+1. **24K Champagne Gold (`birthday-champagne-gold`)**:
+   - **Visuals**: Multi-stop metallic 24K gold foil with scattered gold leaf flakes and confetti specks.
+   - **Header Plaque**: Double star-studded golden plaque reading `✦ SCRATCH FOR YOUR GOLDEN WISH ✦`.
+   - **Center Plate**: Embossed ivory plaque with `HAPPY BIRTHDAY` luxury lettering.
+   - **Template**: `24K Champagne Golden Wish` (Recipient: Albert, Tag: `GOLDEN WISH ✦`).
+
+2. **Holo Party Prism (`birthday-holo-party-prism`)**:
+   - **Visuals**: Iridescent holographic cyan/fuchsia/violet neon gradient with floating stars and musical notes (`♪ ♫ ★ ✨`).
+   - **Header Sign**: Double neon glowing sign reading `⚡ SWIPE TO UNLOCK THE PARTY ⚡`.
+   - **Center Plate**: Deep nightclub indigo ticket reading `NIGHT-CLUB BIRTHDAY PARTY`.
+   - **Template**: `Night-Club Holo Birthday Party` (Tag: `VIP PARTY ⚡`).
+
+3. **Celebration Balloon Pop (`birthday-balloon-pop`)**:
+   - **Visuals**: Warm coral/peach festive sunset with floating 3D glossy spheres/balloons (coral, sky blue, orange with curved specular gloss highlights) and ribbons.
+   - **Center Sign**: 3D extruded lettering reading `TAP & SCRATCH THE CELEBRATION`.
+   - **Template**: `Celebration Balloon Pop` (Tag: `BALLOON POP 🎈`).
+
+4. **Mint Emerald Shimmer (`birthday-mint-shimmer`)**:
+   - **Visuals**: Mint emerald teal glitter foil with 4-point diamond cross starbursts and fine stardust.
+   - **Ribbon Band**: Horizontal stitched silk ribbon reading `🎁 SCRATCH TO CLAIM YOUR SURPRISE 🎁`.
+   - **Center Plate**: Deep emerald glass pass reading `BIRTHDAY VOUCHER`.
+   - **Template**: `Mint Emerald Birthday Voucher` (Tag: `BIRTHDAY VOUCHER 🎁`).
+
+5. **Roast & Revelry (`birthday-roast-revelry`)**:
+   - **Visuals**: Fiery comic red-orange gradient with black doodle graffiti (flames, skulls, party hats, laughing emojis) and `SAVAGE BESTIE 🔥` badge.
+   - **Warning Sign**: Bold bordered warning reading `🔥 WARNING: NOSTALGIA AHEAD 🔥`.
+   - **Hazard Tape**: Diagonal black & yellow hazard tape reading `⚠️ AGING ALERT ⚠️`.
+   - **Template**: `Roast & Revelry: Aging Alert` (Tag: `AGING ALERT 💀`).
+
+6. **Custom Birthday Canvas (`custom-birthday`)**:
+   - The 6th card in the grid allowing creators to start blank and choose from any of these **5 exact Birthday foils** in the editor!
 
 ---
 
