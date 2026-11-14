@@ -81,8 +81,7 @@ export function getFoilAvatarTheme(foilId?: string | null): FoilAvatarTheme {
   if (
     id.includes("roast-revelry") ||
     id.includes("aging-alert") ||
-    id === "birthday-roast-revelry" ||
-    id.includes("flame")
+    id === "birthday-roast-revelry"
   ) {
     return {
       background: "linear-gradient(135deg, #FBBF24 0%, #EA580C 45%, #DC2626 80%, #991B1B 100%)",
@@ -90,6 +89,122 @@ export function getFoilAvatarTheme(foilId?: string | null): FoilAvatarTheme {
       icon: "🔥",
       glow: "rgba(220, 38, 38, 0.45)",
       textColor: "#7F1D1D",
+    };
+  }
+
+  // ==========================================================================
+  // LOVE FOILS (Exact Reference Image Row 1)
+  // ==========================================================================
+  // 6. The Glowing Heartbeat
+  if (id.includes("glowing-heartbeat") || id.includes("heartbeat")) {
+    return {
+      background: "linear-gradient(135deg, #FDA4AF 0%, #E11D48 45%, #9F1239 80%, #4C0519 100%)",
+      borderColor: "#FB7185",
+      icon: "💖",
+      glow: "rgba(225, 29, 72, 0.55)",
+      textColor: "#4C0519",
+    };
+  }
+
+  // 7. The Sunset Soulmate
+  if (id.includes("sunset-soulmate") || (id.includes("sunset") && id.includes("love"))) {
+    return {
+      background: "linear-gradient(135deg, #7C3AED 0%, #C026D3 35%, #FB923C 70%, #FBBF24 100%)",
+      borderColor: "#F472B6",
+      icon: "♡",
+      glow: "rgba(192, 38, 211, 0.5)",
+      textColor: "#581C87",
+    };
+  }
+
+  // 8. The Rose Gold Chronicles
+  if (id.includes("rose-gold-chronicles") || id.includes("rose-gold")) {
+    return {
+      background: "linear-gradient(135deg, #FFE4E6 0%, #FB7185 40%, #E11D48 70%, #BE123C 100%)",
+      borderColor: "#FECDD3",
+      icon: "💌",
+      glow: "rgba(251, 113, 133, 0.45)",
+      textColor: "#881337",
+    };
+  }
+
+  // 9. The Pastel Cupid's Dream
+  if (id.includes("cupids-dream") || id.includes("cupid")) {
+    return {
+      background: "linear-gradient(135deg, #BAE6FD 0%, #FBCFE8 50%, #FDE047 100%)",
+      borderColor: "#F9A8D4",
+      icon: "🏹",
+      glow: "rgba(244, 114, 182, 0.45)",
+      textColor: "#831843",
+    };
+  }
+
+  // 10. The Savage Romance
+  if (id.includes("savage-romance") || (id.includes("savage") && id.includes("love"))) {
+    return {
+      background: "linear-gradient(135deg, #EF4444 0%, #DC2626 40%, #991B1B 80%, #18181B 100%)",
+      borderColor: "#F87171",
+      icon: "🔥",
+      glow: "rgba(220, 38, 38, 0.55)",
+      textColor: "#7F1D1D",
+    };
+  }
+
+  // ==========================================================================
+  // ANNIVERSARY FOILS (Exact Reference Image Row 2)
+  // ==========================================================================
+  // 11. The Forever Gold 24K
+  if (id.includes("forever-gold") || (id.includes("gold") && id.includes("anniv"))) {
+    return {
+      background: "linear-gradient(135deg, #FEF08A 0%, #EAB308 35%, #CA8A04 70%, #713F12 100%)",
+      borderColor: "#FACC15",
+      icon: "👑",
+      glow: "rgba(234, 179, 8, 0.5)",
+      textColor: "#713F12",
+    };
+  }
+
+  // 12. The Holographic Universe
+  if (id.includes("holographic-universe") || (id.includes("holo") && id.includes("anniv"))) {
+    return {
+      background: "linear-gradient(135deg, #C7D2FE 0%, #DDD6FE 30%, #FBCFE8 60%, #BAE6FD 100%)",
+      borderColor: "#A5B4FC",
+      icon: "🌌",
+      glow: "rgba(165, 180, 252, 0.5)",
+      textColor: "#312E81",
+    };
+  }
+
+  // 13. The Midnight Stars
+  if (id.includes("midnight-stars") || id.includes("stars-love")) {
+    return {
+      background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 40%, #4338CA 75%, #0F172A 100%)",
+      borderColor: "#818CF8",
+      icon: "✨",
+      glow: "rgba(67, 56, 202, 0.55)",
+      textColor: "#E0E7FF",
+    };
+  }
+
+  // 14. The Emerald Bond
+  if (id.includes("emerald-bond") || (id.includes("emerald") && id.includes("anniv"))) {
+    return {
+      background: "linear-gradient(135deg, #D1FAE5 0%, #059669 40%, #047857 75%, #064E3B 100%)",
+      borderColor: "#FDE047",
+      icon: "🥂",
+      glow: "rgba(5, 150, 105, 0.45)",
+      textColor: "#064E3B",
+    };
+  }
+
+  // 15. The Cinematic Memories
+  if (id.includes("cinematic-memories") || id.includes("cinematic")) {
+    return {
+      background: "linear-gradient(135deg, #E2E8F0 0%, #94A3B8 35%, #475569 70%, #0F172A 100%)",
+      borderColor: "#CBD5E1",
+      icon: "🎬",
+      glow: "rgba(148, 163, 184, 0.45)",
+      textColor: "#0F172A",
     };
   }
 

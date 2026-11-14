@@ -134,6 +134,30 @@ export function ScratchCard({
         foilLower.includes("aging-alert") ||
         foilLower === "birthday-roast-revelry";
 
+      // Love Foils
+      const isGlowingHeartbeat =
+        foilLower.includes("glowing-heartbeat") || foilLower.includes("heartbeat");
+      const isSunsetSoulmate =
+        foilLower.includes("sunset-soulmate") || (foilLower.includes("sunset") && foilLower.includes("love"));
+      const isRoseGoldChronicles =
+        foilLower.includes("rose-gold-chronicles") || foilLower.includes("rose-gold");
+      const isPastelCupidsDream =
+        foilLower.includes("cupids-dream") || foilLower.includes("cupid");
+      const isSavageRomance =
+        foilLower.includes("savage-romance") || (foilLower.includes("savage") && foilLower.includes("love"));
+
+      // Anniversary Foils
+      const isForeverGold =
+        foilLower.includes("forever-gold") || (foilLower.includes("gold") && foilLower.includes("anniv"));
+      const isHoloUniverse =
+        foilLower.includes("holographic-universe") || (foilLower.includes("holo") && foilLower.includes("anniv"));
+      const isMidnightStars =
+        foilLower.includes("midnight-stars") || foilLower.includes("stars-love");
+      const isEmeraldBond =
+        foilLower.includes("emerald-bond") || (foilLower.includes("emerald") && foilLower.includes("anniv"));
+      const isCinematicMemories =
+        foilLower.includes("cinematic-memories") || foilLower.includes("cinematic");
+
       const isCyber = foilInfo.shaderFamily === "cyber";
       const isGold = foilInfo.shaderFamily === "gold";
       const isEmerald = foilInfo.shaderFamily === "emerald";
@@ -602,6 +626,573 @@ export function ScratchCard({
         ctx.font = "900 12px system-ui, sans-serif";
         ctx.letterSpacing = "1px";
         ctx.fillText("🔥 SCRATCH TO REVEAL 🔥", width / 2, height - 32);
+      } else if (isGlowingHeartbeat) {
+        // ====================================================================
+        // THEME: THE GLOWING HEARTBEAT (Exact Reference Foil Love #1)
+        // ====================================================================
+        const grad = ctx.createRadialGradient(width / 2, height / 2, 20, width / 2, height / 2, width * 0.75);
+        grad.addColorStop(0, "#FDA4AF");
+        grad.addColorStop(0.35, "#E11D48");
+        grad.addColorStop(0.7, "#881337");
+        grad.addColorStop(1, "#4C0519");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Concentric Heart Rings Glow
+        ctx.strokeStyle = "rgba(251, 113, 133, 0.4)";
+        ctx.lineWidth = 2;
+        for (let r = 40; r < width * 0.65; r += 28) {
+          ctx.beginPath();
+          ctx.arc(width / 2, height / 2 - 10, r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Top Header Plaque
+        const plaqueW = Math.min(width * 0.88, 300);
+        const plaqueH = 64;
+        const plaqueX = (width - plaqueW) / 2;
+        const plaqueY = 28;
+
+        ctx.fillStyle = "rgba(76, 5, 25, 0.88)";
+        ctx.beginPath();
+        ctx.roundRect(plaqueX, plaqueY, plaqueW, plaqueH, 14);
+        ctx.fill();
+        ctx.strokeStyle = "#FB7185";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FDA4AF";
+        ctx.font = "800 9px system-ui, sans-serif";
+        ctx.letterSpacing = "3px";
+        ctx.fillText("💖 ✦ INTIMATE CONNECTION ✦ 💖", width / 2, plaqueY + 20);
+
+        ctx.fillStyle = "#FFF1F2";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("✦ SCRATCH TO FEEL THE LOVE ✦", width / 2, plaqueY + 44);
+
+        // Center Pulsing Neon Ruby Box
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(76, 5, 25, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#F43F5E";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#FDA4AF";
+        ctx.font = "900 14px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("THE GLOWING HEARTBEAT", width / 2, boxY + 32);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 54);
+
+        ctx.fillStyle = "#F43F5E";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("PULSING NEON RUBY PASS", width / 2, boxY + 72);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FDA4AF";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("✦ SCRATCH TO REVEAL ✦", width / 2, height - 32);
+      } else if (isSunsetSoulmate) {
+        // ====================================================================
+        // THEME: THE SUNSET SOULMATE (Exact Reference Foil Love #2)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, height, 0, 0);
+        grad.addColorStop(0, "#2E1065");
+        grad.addColorStop(0.35, "#7C3AED");
+        grad.addColorStop(0.7, "#BE185D");
+        grad.addColorStop(1, "#FBBF24");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Scattered Starlight Sparkles
+        for (let i = 0; i < 35; i++) {
+          const sx = (i * 43) % width;
+          const sy = (i * 71) % height;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.beginPath();
+          ctx.arc(sx, sy, (i % 3 === 0 ? 1.8 : 1), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Center Box
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 92;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(46, 16, 101, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#FBBF24";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FDE68A";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("♡ TAP & UNLOCK OUR STORY ♡", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#F472B6";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("TWILIGHT SUNSET & STARLIGHT", width / 2, boxY + 76);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FDE68A";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("♡ SCRATCH TO REVEAL ♡", width / 2, height - 32);
+      } else if (isRoseGoldChronicles) {
+        // ====================================================================
+        // THEME: THE ROSE GOLD CHRONICLES (Exact Reference Foil Love #3)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#FFE4E6");
+        grad.addColorStop(0.3, "#FDA4AF");
+        grad.addColorStop(0.65, "#E11D48");
+        grad.addColorStop(1, "#BE123C");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Metallic Floral Sheen
+        ctx.save();
+        ctx.rotate((-20 * Math.PI) / 180);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.22)";
+        for (let x = -width; x < width * 2; x += 36) {
+          ctx.fillRect(x, -height, 12, height * 3);
+        }
+        ctx.restore();
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#FB7185";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#881337";
+        ctx.font = "900 13px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("Scratch For A Love Note 💌", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#BE123C";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#881337";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("ROSE GOLD CHRONICLES", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FFF1F2";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🌹 SCRATCH TO REVEAL 🌹", width / 2, height - 32);
+      } else if (isPastelCupidsDream) {
+        // ====================================================================
+        // THEME: THE PASTEL CUPID'S DREAM (Exact Reference Foil Love #4)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, "#BAE6FD");
+        grad.addColorStop(0.45, "#FBCFE8");
+        grad.addColorStop(0.85, "#FFF1F2");
+        grad.addColorStop(1, "#FDE047");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Cloud Doodles
+        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+        for (let i = 0; i < 18; i++) {
+          const cx = (i * 53) % width;
+          const cy = (i * 79) % height;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#F472B6";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#BE185D";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("SCRATCH FOR A CUTE SURPRISE", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#0284C7";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#BE185D";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("CUPID'S CANDY DREAM", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#831843";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🏹 SCRATCH TO REVEAL 🏹", width / 2, height - 32);
+      } else if (isSavageRomance) {
+        // ====================================================================
+        // THEME: THE SAVAGE ROMANCE (Exact Reference Foil Love #5)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, "#7F1D1D");
+        grad.addColorStop(0.35, "#DC2626");
+        grad.addColorStop(0.7, "#EA580C");
+        grad.addColorStop(1, "#18181B");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Comic Fire & Skull Doodles
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+        const doodles = ["🔥", "💀", "♡", "🔥", "💀", "♡"];
+        for (let i = 0; i < 20; i++) {
+          const dx = (i * 57) % (width - 30) + 15;
+          const dy = (i * 77) % (height - 60) + 30;
+          ctx.font = "16px system-ui, sans-serif";
+          ctx.fillText(doodles[i % doodles.length], dx, dy);
+        }
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#EF4444";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#F87171";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🔥 WARNING: NO CHEESY STUFF 🔥", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#F59E0B";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("SAVAGE ROMANCE", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FCA5A5";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🔥 SCRATCH TO REVEAL 🔥", width / 2, height - 32);
+      } else if (isForeverGold) {
+        // ====================================================================
+        // THEME: THE FOREVER GOLD 24K (Exact Reference Foil Anniv #1)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#FEF08A");
+        grad.addColorStop(0.3, "#EAB308");
+        grad.addColorStop(0.65, "#CA8A04");
+        grad.addColorStop(1, "#713F12");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Scattered Gold Leaf Confetti Flakes
+        for (let i = 0; i < 40; i++) {
+          const fx = (i * 47) % width;
+          const fy = (i * 83) % height;
+          ctx.fillStyle = i % 2 === 0 ? "rgba(255, 255, 255, 0.75)" : "rgba(113, 63, 18, 0.4)";
+          ctx.beginPath();
+          ctx.arc(fx, fy, (i % 2 === 0 ? 2 : 1), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#EAB308";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#713F12";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("👑 CELEBRATING OUR GOLDEN YEARS 👑", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#A16207";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#713F12";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "2px";
+        ctx.fillText("24K FOREVER GOLD PASS", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FEF08A";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("✦ SCRATCH TO REVEAL ✦", width / 2, height - 32);
+      } else if (isHoloUniverse) {
+        // ====================================================================
+        // THEME: THE HOLOGRAPHIC UNIVERSE (Exact Reference Foil Anniv #2)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#C7D2FE");
+        grad.addColorStop(0.3, "#DDD6FE");
+        grad.addColorStop(0.65, "#FBCFE8");
+        grad.addColorStop(1, "#BAE6FD");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Constellation Lines
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(30, 40);
+        ctx.lineTo(80, 90);
+        ctx.lineTo(130, 60);
+        ctx.lineTo(190, 110);
+        ctx.stroke();
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#818CF8";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#312E81";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("SCRATCH FOR A FOREVER MEMORY", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#4F46E5";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#312E81";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("HOLOGRAPHIC UNIVERSE", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#312E81";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🌌 SCRATCH TO REVEAL 🌌", width / 2, height - 32);
+      } else if (isMidnightStars) {
+        // ====================================================================
+        // THEME: THE MIDNIGHT STARS (Exact Reference Foil Anniv #3)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, "#0A0A1F");
+        grad.addColorStop(0.35, "#1E1B4B");
+        grad.addColorStop(0.7, "#312E81");
+        grad.addColorStop(1, "#4338CA");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Cosmic Starbursts
+        for (let i = 0; i < 40; i++) {
+          const sx = (i * 47) % width;
+          const sy = (i * 79) % height;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+          ctx.beginPath();
+          ctx.arc(sx, sy, (i % 3 === 0 ? 2 : 1), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#818CF8";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#E0E7FF";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("✨ OUR LOVE IS IN THE STARS ✨", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#A5B4FC";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#C7D2FE";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("MIDNIGHT CONSTELLATION PASS", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#E0E7FF";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("✨ SCRATCH TO REVEAL ✨", width / 2, height - 32);
+      } else if (isEmeraldBond) {
+        // ====================================================================
+        // THEME: THE EMERALD BOND (Exact Reference Foil Anniv #4)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, "#022C22");
+        grad.addColorStop(0.35, "#064E3B");
+        grad.addColorStop(0.7, "#047857");
+        grad.addColorStop(1, "#059669");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Art-Deco Geometric Border
+        ctx.strokeStyle = "#FDE047";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(14, 14, width - 28, height - 28);
+        ctx.strokeRect(18, 18, width - 36, height - 36);
+
+        const boxW = Math.min(width * 0.84, 290);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(2, 44, 34, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#FDE047";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FDE047";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🥂 SCRATCH TO TOAST OUR JOURNEY 🥂", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#6EE7B7";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#A7F3D0";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("ART-DECO EMERALD BOND", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#FDE047";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🥂 SCRATCH TO REVEAL 🥂", width / 2, height - 32);
+      } else if (isCinematicMemories) {
+        // ====================================================================
+        // THEME: THE CINEMATIC MEMORIES (Exact Reference Foil Anniv #5)
+        // ====================================================================
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, "#0F172A");
+        grad.addColorStop(0.35, "#1E293B");
+        grad.addColorStop(0.7, "#475569");
+        grad.addColorStop(1, "#94A3B8");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // 35mm filmstrip side sprockets
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        for (let y = 10; y < height - 10; y += 24) {
+          ctx.fillRect(6, y, 8, 14);
+          ctx.fillRect(width - 14, y, 8, 14);
+        }
+
+        const boxW = Math.min(width * 0.8, 270);
+        const boxH = 88;
+        const boxX = (width - boxW) / 2;
+        const boxY = (height - boxH) / 2 + 10;
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.94)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
+        ctx.fill();
+        ctx.strokeStyle = "#CBD5E1";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#F8FAFC";
+        ctx.font = "900 12px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("REVEAL OUR STORY SO FAR 🎬", width / 2, boxY + 34);
+
+        ctx.fillStyle = "#94A3B8";
+        ctx.font = "700 12px system-ui, sans-serif";
+        ctx.fillText(coverText || "SCRATCH TO REVEAL ✨", width / 2, boxY + 56);
+
+        ctx.fillStyle = "#E2E8F0";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.letterSpacing = "1.5px";
+        ctx.fillText("35MM CINEMATIC REEL", width / 2, boxY + 74);
+
+        // Bottom CTA
+        ctx.fillStyle = "#E2E8F0";
+        ctx.font = "900 11px system-ui, sans-serif";
+        ctx.letterSpacing = "1px";
+        ctx.fillText("🎬 SCRATCH TO REVEAL 🎬", width / 2, height - 32);
       } else if (isCyber) {
         // ====================================================================
         // THEME: CYBER JACKPOT / FUTURE SCRATCH (Neon Cyan & Violet Circuits)

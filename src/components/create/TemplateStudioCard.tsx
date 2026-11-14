@@ -19,6 +19,7 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
   const [showUnderneath, setShowUnderneath] = React.useState(false);
 
   const foilId = template.coverStyle.toLowerCase();
+  // Birthday Foils
   const isChampagneGold =
     foilId.includes("champagne-gold") || foilId === "gold-confetti" || foilId === "birthday-champagne-gold";
   const isHoloParty =
@@ -29,6 +30,30 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
     foilId.includes("mint-shimmer") || foilId === "birthday-mint-shimmer";
   const isRoastRevelry =
     foilId.includes("roast-revelry") || foilId.includes("aging-alert") || foilId === "birthday-roast-revelry";
+
+  // Love Foils
+  const isGlowingHeartbeat =
+    foilId.includes("glowing-heartbeat") || foilId.includes("heartbeat");
+  const isSunsetSoulmate =
+    foilId.includes("sunset-soulmate") || (foilId.includes("sunset") && foilId.includes("love"));
+  const isRoseGoldChronicles =
+    foilId.includes("rose-gold-chronicles") || foilId.includes("rose-gold");
+  const isPastelCupidsDream =
+    foilId.includes("cupids-dream") || foilId.includes("cupid");
+  const isSavageRomance =
+    foilId.includes("savage-romance") || (foilId.includes("savage") && foilId.includes("love"));
+
+  // Anniversary Foils
+  const isForeverGold =
+    foilId.includes("forever-gold") || (foilId.includes("gold") && foilId.includes("anniv"));
+  const isHoloUniverse =
+    foilId.includes("holographic-universe") || (foilId.includes("holo") && foilId.includes("anniv"));
+  const isMidnightStars =
+    foilId.includes("midnight-stars") || foilId.includes("stars-love");
+  const isEmeraldBond =
+    foilId.includes("emerald-bond") || (foilId.includes("emerald") && foilId.includes("anniv"));
+  const isCinematicMemories =
+    foilId.includes("cinematic-memories") || foilId.includes("cinematic");
 
   return (
     <div className="group bg-white rounded-3xl p-4 sm:p-5 border border-brand-warm-border shadow-xs hover:shadow-card hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative overflow-hidden">
@@ -312,8 +337,506 @@ export function TemplateStudioCard({ template, onSelect }: TemplateStudioCardPro
               </>
             )}
 
+            {/* ================================================================= */}
+            {/* LOVE FOILS (Exact Reference Image Pic 3 Row 1) */}
+            {/* ================================================================= */}
+            {/* 6. THE GLOWING HEARTBEAT */}
+            {isGlowingHeartbeat && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#E11D48] via-[#881337] to-[#4C0519]" />
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#FDA4AF_1.5px,transparent_1.5px)] [background-size:12px_12px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                {/* Silver foil ripped peel corners */}
+                <div className="absolute top-0 left-0 w-8 h-8 bg-gradient-to-br from-slate-200 to-slate-400 clip-path-polygon shadow-md z-10 opacity-90 rounded-br-xl border-b border-r border-white/60" />
+                <div className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-slate-200 to-slate-400 clip-path-polygon shadow-md z-10 opacity-90 rounded-tl-xl border-t border-l border-white/60" />
+
+                <div className="relative z-10 border-2 border-rose-400/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-rose-950/30 backdrop-blur-[1px] shadow-[0_0_25px_rgba(225,29,72,0.4)]">
+                  <div className="text-[10px] font-black tracking-[3px] text-rose-200 uppercase flex items-center gap-2 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]">
+                    <span>💖 ✦</span>
+                    <span>GLOWING HEARTBEAT</span>
+                    <span>✦ 💖</span>
+                  </div>
+
+                  {/* Concentric Neon Heart Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-rose-950/85 rounded-2xl border-2 border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.6)] w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-rose-200 drop-shadow-[0_0_8px_rgba(251,113,133,0.9)] leading-tight">
+                      ✦ SCRATCH TO FEEL THE LOVE ✦
+                    </div>
+                    <div className="my-2 border-t border-rose-500/50 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-rose-400 block">
+                        INTIMATE SURPRISE FOR
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient} 💓
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-rose-300">
+                      Pulsing Neon Ruby Heart
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-rose-100 pt-2 border-t border-rose-400/40">
+                    <span className="flex items-center gap-1">
+                      <span>💖</span>
+                      <span>Neon Ruby Rings</span>
+                    </span>
+                    <span className="bg-rose-950/90 text-rose-200 px-2 py-0.5 rounded-md border border-rose-400/50 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 7. THE SUNSET SOULMATE */}
+            {isSunsetSoulmate && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#2E1065] via-[#BE185D] to-[#FBBF24]" />
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#FFFFFF_1.5px,transparent_1.5px)] [background-size:14px_14px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                <div className="relative z-10 border-2 border-amber-300/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-purple-950/30 backdrop-blur-[1px]">
+                  {/* Upper Hand Heart Silhouette */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="text-xl drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]">🫶</div>
+                    <div className="text-[9px] font-black tracking-[3px] text-amber-200 uppercase drop-shadow">
+                      STARS & SUNSET
+                    </div>
+                  </div>
+
+                  {/* Center Sunset Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-purple-950/90 rounded-2xl border-2 border-amber-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-amber-200 drop-shadow leading-tight">
+                      ♡ TAP & UNLOCK OUR STORY ♡
+                    </div>
+                    <div className="my-2 border-t border-pink-400/40 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-pink-300 block">
+                        DEDICATED TO
+                      </span>
+                      <span className="text-sm font-black text-amber-100 truncate block">
+                        {template.recipient} 🌅
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-pink-200">
+                      Twilight Sunset & Golden Starlight
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-amber-100 pt-2 border-t border-amber-300/40">
+                    <span className="flex items-center gap-1">
+                      <span>🌅</span>
+                      <span>Hand Heart Sunset</span>
+                    </span>
+                    <span className="bg-purple-950/90 text-amber-200 px-2 py-0.5 rounded-md border border-amber-300/40 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 8. THE ROSE GOLD CHRONICLES */}
+            {isRoseGoldChronicles && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#FFE4E6] via-[#FDA4AF] to-[#E11D48]" />
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#FFFFFF_1.5px,transparent_1.5px)] [background-size:12px_12px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                <div className="relative z-10 border-2 border-rose-200/90 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-rose-950/20 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-rose-950 uppercase flex items-center gap-1.5 drop-shadow-xs">
+                    <span>🌹 💌</span>
+                    <span>ROSE GOLD CHRONICLES</span>
+                    <span>💌 🌹</span>
+                  </div>
+
+                  {/* Luxury Embossed Envelope Stamp Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-white/95 rounded-2xl border-2 border-rose-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-xs font-black italic tracking-wide text-rose-950 leading-tight">
+                      Scratch For A Love Note 💌
+                    </div>
+                    <div className="my-2 border-t border-rose-200 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-rose-500 block">
+                        WRITTEN FOR
+                      </span>
+                      <span className="text-sm font-black text-rose-950 truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-rose-700">
+                      Embossed Floral Filigree & Seal
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-rose-950 pt-2 border-t border-rose-300/60">
+                    <span className="flex items-center gap-1">
+                      <span>🌹</span>
+                      <span>Metallic Filigree</span>
+                    </span>
+                    <span className="bg-rose-900 text-rose-100 px-2 py-0.5 rounded-md shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 9. THE PASTEL CUPID'S DREAM */}
+            {isPastelCupidsDream && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#BAE6FD] via-[#FBCFE8] to-[#FFF1F2]" />
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#FFFFFF_2px,transparent_2px)] [background-size:16px_16px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                <div className="relative z-10 border-2 border-white/90 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-white/30 backdrop-blur-[1px]">
+                  <div className="text-[10px] font-black tracking-[3px] text-pink-700 uppercase flex items-center gap-2 drop-shadow-xs">
+                    <span>🏹 ☁️</span>
+                    <span>CUPID&apos;S DREAM</span>
+                    <span>☁️ 🏹</span>
+                  </div>
+
+                  {/* Center Puffed 3D Candy Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-white/95 rounded-2xl border-2 border-pink-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-rose-500 to-sky-500 leading-snug">
+                      SCRATCH FOR A CUTE SURPRISE
+                    </div>
+                    <div className="my-2 border-t border-pink-200 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 block">
+                        SWEETHEART
+                      </span>
+                      <span className="text-sm font-black text-slate-900 truncate block">
+                        {template.recipient} 💕
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-pink-600">
+                      Cotton-Candy Clouds & Golden Arrows
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-pink-800 pt-2 border-t border-white/60">
+                    <span className="flex items-center gap-1">
+                      <span>🏹</span>
+                      <span>Flying Cherub Cupids</span>
+                    </span>
+                    <span className="bg-pink-500 text-white px-2 py-0.5 rounded-md shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 10. THE SAVAGE ROMANCE */}
+            {isSavageRomance && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#991B1B] via-[#EA580C] to-[#18181B]" />
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#000000_2px,transparent_2px)] [background-size:14px_14px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                <div className="relative z-10 border-2 border-red-500/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-black/40 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-yellow-300 uppercase flex items-center gap-2 drop-shadow">
+                    <span>🔥 💀</span>
+                    <span>SAVAGE ROMANCE</span>
+                    <span>💀 🔥</span>
+                  </div>
+
+                  {/* Comic warning box */}
+                  <div className="my-auto text-center px-3 py-3 bg-black/95 rounded-2xl border-2 border-red-500 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-red-400 leading-tight">
+                      🔥 WARNING: NO CHEESY STUFF 🔥
+                    </div>
+                    <div className="my-2 border-t border-red-500/40 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-400 block">
+                        PARTNER IN CRIME
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="mt-1 px-2 py-0.5 bg-red-600 text-white text-[9px] font-black tracking-widest rounded-md uppercase">
+                      ⚠️ ZERO CHEESE ALERT ⚠️
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-yellow-200 pt-2 border-t border-red-500/40">
+                    <span className="flex items-center gap-1">
+                      <span>🔥</span>
+                      <span>Fiery Comic Banter</span>
+                    </span>
+                    <span className="bg-red-950 text-yellow-300 px-2 py-0.5 rounded-md border border-red-500/40 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ================================================================= */}
+            {/* ANNIVERSARY FOILS (Exact Reference Image Pic 3 Row 2) */}
+            {/* ================================================================= */}
+            {/* 11. THE FOREVER GOLD 24K */}
+            {isForeverGold && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#FFFBEB] via-[#F59E0B] to-[#78350F]" />
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#FFFFFF_1.5px,transparent_1.5px)] [background-size:14px_14px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                {/* Silver torn peel corner */}
+                <div className="absolute top-0 left-0 w-8 h-8 bg-gradient-to-br from-slate-200 to-slate-400 shadow-md z-10 opacity-90 rounded-br-xl border-b border-r border-white/60" />
+
+                <div className="relative z-10 border-2 border-amber-300/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-amber-950/25 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-amber-200 uppercase flex items-center gap-2 drop-shadow">
+                    <span>👑 ✦</span>
+                    <span>24K FOREVER GOLD</span>
+                    <span>✦ 👑</span>
+                  </div>
+
+                  {/* Center Golden Plaque with Royal Crown */}
+                  <div className="my-auto text-center px-3 py-3 bg-white/95 rounded-2xl border-2 border-amber-400 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-amber-900 leading-tight">
+                      👑 CELEBRATING OUR GOLDEN YEARS 👑
+                    </div>
+                    <div className="my-2 border-t border-amber-200 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-600 block">
+                        HONORING
+                      </span>
+                      <span className="text-sm font-black text-amber-950 truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-amber-800">
+                      24K Luxury Gold Foil Flakes & Crown
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-amber-100 pt-2 border-t border-amber-300/40">
+                    <span className="flex items-center gap-1">
+                      <span>👑</span>
+                      <span>Gold Leaf Flakes</span>
+                    </span>
+                    <span className="bg-amber-950/90 text-amber-200 px-2 py-0.5 rounded-md border border-amber-300/40 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 12. THE HOLOGRAPHIC UNIVERSE */}
+            {isHoloUniverse && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#C7D2FE] via-[#DDD6FE] to-[#FBCFE8]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/40 via-transparent to-purple-400/20" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                <div className="relative z-10 border-2 border-indigo-200/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-white/30 backdrop-blur-[1px] shadow-sm">
+                  <div className="text-[10px] font-black tracking-[3px] text-indigo-900 uppercase flex items-center gap-2 drop-shadow-xs">
+                    <span>🌌 ✨</span>
+                    <span>HOLOGRAPHIC UNIVERSE</span>
+                    <span>✨ 🌌</span>
+                  </div>
+
+                  {/* Prismatic Holo Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-white/90 rounded-2xl border-2 border-indigo-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-indigo-950 leading-tight">
+                      SCRATCH FOR A FOREVER MEMORY
+                    </div>
+                    <div className="my-2 border-t border-purple-200 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600 block">
+                        COSMIC BOND WITH
+                      </span>
+                      <span className="text-sm font-black text-indigo-950 truncate block">
+                        {template.recipient} 🌌
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-purple-700">
+                      Silver Stellar Constellations Sheen
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-indigo-900 pt-2 border-t border-indigo-200/60">
+                    <span className="flex items-center gap-1">
+                      <span>🌌</span>
+                      <span>Star Constellations</span>
+                    </span>
+                    <span className="bg-indigo-900 text-indigo-100 px-2 py-0.5 rounded-md shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 13. THE MIDNIGHT STARS */}
+            {isMidnightStars && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#1E1B4B] to-[#312E81]" />
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#FFFFFF_1.5px,transparent_1.5px)] [background-size:12px_12px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                {/* Silver foil ripped peel corners */}
+                <div className="absolute top-0 left-0 w-8 h-8 bg-gradient-to-br from-slate-200 to-slate-400 shadow-md z-10 opacity-90 rounded-br-xl border-b border-r border-white/60" />
+                <div className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-slate-200 to-slate-400 shadow-md z-10 opacity-90 rounded-tl-xl border-t border-l border-white/60" />
+
+                <div className="relative z-10 border-2 border-indigo-300/80 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-black/35 backdrop-blur-[1px] shadow-[0_0_20px_rgba(79,70,229,0.3)]">
+                  <div className="text-[10px] font-black tracking-[3px] text-indigo-200 uppercase flex items-center gap-2 drop-shadow">
+                    <span>✨ 🪐</span>
+                    <span>MIDNIGHT STARS</span>
+                    <span>🪐 ✨</span>
+                  </div>
+
+                  {/* Center Starburst Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-black/85 rounded-2xl border-2 border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.5)] w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-indigo-200 leading-tight">
+                      ✨ OUR LOVE IS IN THE STARS ✨
+                    </div>
+                    <div className="my-2 border-t border-indigo-500/40 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-300 block">
+                        CONSTELLATION
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-indigo-300">
+                      Deep Cosmic Sapphire Starbursts
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-indigo-100 pt-2 border-t border-indigo-400/40">
+                    <span className="flex items-center gap-1">
+                      <span>✨</span>
+                      <span>Cosmic Starfield</span>
+                    </span>
+                    <span className="bg-indigo-950 text-indigo-200 px-2 py-0.5 rounded-md border border-indigo-400/40 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 14. THE EMERALD BOND */}
+            {isEmeraldBond && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#064E3B] via-[#047857] to-[#022C22]" />
+                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#A7F3D0_1.5px,transparent_1.5px)] [background-size:12px_12px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                <div className="relative z-10 border-2 border-amber-300/90 rounded-2xl p-3 flex flex-col items-center justify-between h-full bg-emerald-950/40 backdrop-blur-[1px] shadow-inner">
+                  {/* Art-Deco Geometric Header */}
+                  <div className="text-[10px] font-black tracking-[3px] text-amber-200 uppercase flex items-center gap-2 drop-shadow">
+                    <span>🥂 ❖</span>
+                    <span>THE EMERALD BOND</span>
+                    <span>❖ 🥂</span>
+                  </div>
+
+                  {/* Center Art-Deco Gold Box */}
+                  <div className="my-auto text-center px-3 py-3 bg-emerald-950/90 rounded-2xl border-2 border-amber-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-amber-200 leading-tight">
+                      🥂 SCRATCH TO TOAST OUR JOURNEY 🥂
+                    </div>
+                    <div className="my-2 border-t border-amber-300/40 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-300 block">
+                        ETERNAL TOAST TO
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-amber-300">
+                      Art-Deco Geometric Filigree & Flutes
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-amber-100 pt-2 border-t border-amber-300/40">
+                    <span className="flex items-center gap-1">
+                      <span>🥂</span>
+                      <span>Art-Deco Filigree</span>
+                    </span>
+                    <span className="bg-emerald-900 text-amber-200 px-2 py-0.5 rounded-md border border-amber-300/40 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 15. THE CINEMATIC MEMORIES */}
+            {isCinematicMemories && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1E293B] via-[#0F172A] to-[#020617]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                {/* 35mm filmstrip side sprocket borders */}
+                <div className="absolute top-0 bottom-0 left-1 w-3 flex flex-col justify-between py-2 pointer-events-none opacity-40 z-10">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className="w-2 h-3.5 bg-white/70 rounded-xs" />
+                  ))}
+                </div>
+                <div className="absolute top-0 bottom-0 right-1 w-3 flex flex-col justify-between py-2 pointer-events-none opacity-40 z-10">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className="w-2 h-3.5 bg-white/70 rounded-xs" />
+                  ))}
+                </div>
+
+                {/* Silver torn peel corner */}
+                <div className="absolute top-0 left-0 w-8 h-8 bg-gradient-to-br from-slate-200 to-slate-400 shadow-md z-10 opacity-90 rounded-br-xl border-b border-r border-white/60" />
+
+                <div className="relative z-10 border-2 border-slate-400/80 rounded-2xl p-3 mx-2 flex flex-col items-center justify-between h-full bg-black/40 backdrop-blur-[1px] shadow-inner">
+                  <div className="text-[10px] font-black tracking-[3px] text-slate-200 uppercase flex items-center gap-2 drop-shadow">
+                    <span>🎬 🎞️</span>
+                    <span>CINEMATIC REEL</span>
+                    <span>🎞️ 🎬</span>
+                  </div>
+
+                  {/* Brushed Silver Plaque */}
+                  <div className="my-auto text-center px-3 py-3 bg-slate-900/90 rounded-2xl border-2 border-slate-300 shadow-xl w-full max-w-[240px]">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-slate-100 leading-tight">
+                      REVEAL OUR STORY SO FAR 🎬
+                    </div>
+                    <div className="my-2 border-t border-slate-600 pt-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 block">
+                        STARRING
+                      </span>
+                      <span className="text-sm font-black text-white truncate block">
+                        {template.recipient}
+                      </span>
+                    </div>
+                    <div className="text-[9px] font-bold text-slate-300">
+                      35mm Filmstrip & Silver Camera Luster
+                    </div>
+                  </div>
+
+                  <div className="w-full flex items-center justify-between text-[9px] font-extrabold uppercase text-slate-200 pt-2 border-t border-slate-500/40">
+                    <span className="flex items-center gap-1">
+                      <span>🎬</span>
+                      <span>35mm Film Strip</span>
+                    </span>
+                    <span className="bg-slate-800 text-slate-100 px-2 py-0.5 rounded-md border border-slate-400/40 shadow-xs">
+                      Scratch to reveal
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* FALLBACK FOR OTHER CATEGORIES */}
-            {!isChampagneGold && !isHoloParty && !isBalloonPop && !isMintShimmer && !isRoastRevelry && (
+            {!isChampagneGold &&
+              !isHoloParty &&
+              !isBalloonPop &&
+              !isMintShimmer &&
+              !isRoastRevelry &&
+              !isGlowingHeartbeat &&
+              !isSunsetSoulmate &&
+              !isRoseGoldChronicles &&
+              !isPastelCupidsDream &&
+              !isSavageRomance &&
+              !isForeverGold &&
+              !isHoloUniverse &&
+              !isMidnightStars &&
+              !isEmeraldBond &&
+              !isCinematicMemories && (
               <>
                 <div className={cn("absolute inset-0 bg-gradient-to-br", foilInfo.previewGradient)} />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />

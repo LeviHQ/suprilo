@@ -91,7 +91,7 @@ export const PARENT_CATEGORIES: ParentCategoryDefinition[] = [
     label: "Life",
     icon: "🌿",
     tagline: "Evergreen personal joys, big milestones & career celebrations",
-    subcategories: ["birthday", "anniversary", "friendship", "wedding-baby", "career"],
+    subcategories: ["birthday", "love", "anniversary", "friendship", "wedding-baby", "career"],
   },
   {
     id: "trending",
@@ -178,60 +178,117 @@ export const SUBCATEGORIES: Record<string, SubcategoryDefinition> = {
       },
     ],
   },
-  anniversary: {
-    id: "anniversary",
+  love: {
+    id: "love",
     parentId: "life",
-    label: "Love & Anniversaries",
+    label: "Love & Romance",
     icon: "💖",
-    tagline: "Romantic milestones, forever vows & secret flirty notes",
-    description: "Every love story is unique. Reveal intimate coordinates, anniversary memories, and eternal promises.",
-    heroBadge: "DEEP CONNECTION",
+    tagline: "Intimate confessions, secret soulmates & romantic notes",
+    description: "Celebrate deep romantic connections with 5 handcrafted intimate foils: glowing heartbeats, sunset soulmates, luxury rose gold chronicles, pastel cupid dreams, and savage playful romance.",
+    heroBadge: "INTIMATE & DEEP",
     heroVisualTheme: "love",
     foils: [
       {
-        id: "rose-gold-luster",
-        name: "Rose Gold Luster",
-        dotClass: "bg-rose-400 ring-rose-300",
+        id: "love-glowing-heartbeat",
+        name: "The Glowing Heartbeat",
+        dotClass: "bg-rose-500 ring-rose-400",
+        borderClass: "border-rose-400",
+        bgClass: "bg-rose-50 text-rose-950",
+        previewGradient: "from-rose-400 via-pink-600 to-red-900",
+        desc: "✦ Scratch to feel the love ✦ Pulsing neon ruby glowing heart",
+      },
+      {
+        id: "love-sunset-soulmate",
+        name: "The Sunset Soulmate",
+        dotClass: "bg-purple-500 ring-amber-300",
+        borderClass: "border-purple-300",
+        bgClass: "bg-purple-50 text-purple-950",
+        previewGradient: "from-purple-600 via-pink-500 to-amber-400",
+        desc: "♡ Tap & unlock our story ♡ Warm starlight sunset & hand heart silhouette",
+      },
+      {
+        id: "love-rose-gold-chronicles",
+        name: "The Rose Gold Chronicles",
+        dotClass: "bg-rose-300 ring-rose-200",
         borderClass: "border-rose-300",
         bgClass: "bg-rose-50 text-rose-900",
-        previewGradient: "from-rose-200 via-pink-400 to-rose-500",
-        desc: "Warm metallic blush with satin micro-sheen",
+        previewGradient: "from-rose-200 via-rose-300 to-rose-500",
+        desc: "Scratch for a love note 💌 Embossed metallic floral filigree & envelope seal",
       },
       {
-        id: "ruby-velvet",
-        name: "Velvet Ruby Red",
-        dotClass: "bg-red-500 ring-red-300",
-        borderClass: "border-red-300",
-        bgClass: "bg-red-50 text-red-900",
-        previewGradient: "from-red-600 via-rose-800 to-red-950",
-        desc: "Deep passion crimson with golden heart filigree",
+        id: "love-pastel-cupids-dream",
+        name: "The Pastel Cupid's Dream",
+        dotClass: "bg-sky-400 ring-pink-300",
+        borderClass: "border-pink-300",
+        bgClass: "bg-pink-50 text-pink-950",
+        previewGradient: "from-sky-300 via-pink-300 to-amber-200",
+        desc: "Scratch for a cute surprise 💕 Dreamy cotton-candy clouds & flying cherubs",
       },
       {
-        id: "twilight-aurora",
-        name: "Twilight Aurora",
-        dotClass: "bg-purple-400 ring-purple-300",
-        borderClass: "border-purple-300",
-        bgClass: "bg-purple-50 text-purple-900",
-        previewGradient: "from-violet-500 via-purple-700 to-indigo-900",
-        desc: "Dreamy lavender-rose gradient with star shimmer",
+        id: "love-savage-romance",
+        name: "The Savage Romance",
+        dotClass: "bg-red-500 ring-orange-400",
+        borderClass: "border-red-400",
+        bgClass: "bg-red-50 text-red-950",
+        previewGradient: "from-red-600 via-orange-500 to-stone-900",
+        desc: "🔥 Warning: no cheesy stuff 🔥 Fiery comic flame doodles & playful banter",
       },
+    ],
+  },
+  anniversary: {
+    id: "anniversary",
+    parentId: "life",
+    label: "Milestones & Anniversaries",
+    icon: "💍",
+    tagline: "Golden milestones, forever bonds & cinematic journeys",
+    description: "Celebrate milestones with 5 elegant, rich & cinematic foils: 24K forever gold, holographic universes, midnight cosmic stars, art-deco emerald bonds, and 35mm cinematic memories.",
+    heroBadge: "RICH & CINEMATIC",
+    heroVisualTheme: "anniversary",
+    foils: [
       {
-        id: "golden-eternity",
-        name: "24K Golden Eternity",
+        id: "anniv-forever-gold-24k",
+        name: "The Forever Gold 24K",
         dotClass: "bg-amber-400 ring-amber-300",
-        borderClass: "border-amber-300",
-        bgClass: "bg-amber-50 text-amber-900",
-        previewGradient: "from-yellow-300 via-amber-400 to-amber-600",
-        desc: "Reflective polished bullion with heart watermark",
+        borderClass: "border-amber-400",
+        bgClass: "bg-amber-50 text-amber-950",
+        previewGradient: "from-yellow-200 via-amber-400 to-yellow-600",
+        desc: "Celebrating our golden years 👑 Luxury 24K gold foil flakes & crown emblem",
       },
       {
-        id: "pearl-iridescent",
-        name: "Iridescent Pearl",
-        dotClass: "bg-teal-300 ring-teal-200",
-        borderClass: "border-teal-200",
-        bgClass: "bg-teal-50 text-teal-900",
-        previewGradient: "from-slate-100 via-pink-100 to-teal-100",
-        desc: "Soft rainbow pearlescent sheen with gentle glimmer",
+        id: "anniv-holographic-universe",
+        name: "The Holographic Universe",
+        dotClass: "bg-indigo-300 ring-purple-300",
+        borderClass: "border-indigo-300",
+        bgClass: "bg-indigo-50 text-indigo-950",
+        previewGradient: "from-indigo-200 via-purple-300 to-pink-200",
+        desc: "Scratch for a forever memory 🌌 Prismatic rainbow hologram & star charts",
+      },
+      {
+        id: "anniv-midnight-stars",
+        name: "The Midnight Stars",
+        dotClass: "bg-blue-400 ring-indigo-300",
+        borderClass: "border-indigo-400",
+        bgClass: "bg-slate-900 text-indigo-100",
+        previewGradient: "from-slate-950 via-indigo-900 to-blue-900",
+        desc: "Our love is in the stars ✨ Deep cosmic sapphire constellations & silver peel",
+      },
+      {
+        id: "anniv-emerald-bond",
+        name: "The Emerald Bond",
+        dotClass: "bg-emerald-400 ring-emerald-300",
+        borderClass: "border-emerald-400",
+        bgClass: "bg-emerald-950 text-emerald-100",
+        previewGradient: "from-emerald-400 via-emerald-600 to-emerald-950",
+        desc: "Scratch to toast our journey 🥂 Art-deco emerald & gold geometric filigree",
+      },
+      {
+        id: "anniv-cinematic-memories",
+        name: "The Cinematic Memories",
+        dotClass: "bg-slate-400 ring-slate-300",
+        borderClass: "border-slate-400",
+        bgClass: "bg-slate-900 text-slate-100",
+        previewGradient: "from-slate-300 via-slate-600 to-slate-950",
+        desc: "Reveal our story so far 🎬 35mm filmstrip borders & silver camera luster",
       },
     ],
   },
@@ -1212,112 +1269,221 @@ export const SU_PRILO_TEMPLATES: TemplateDefinition[] = [
   },
 
   // --------------------------------------------------------------------------
-  // LIFE -> ANNIVERSARY & LOVE (5 TEMPLATES)
+  // LIFE -> LOVE (5 EXACT REFERENCE TEMPLATES - INTIMATE, MODERN & DEEP)
   // --------------------------------------------------------------------------
   {
-    id: "love-infinite-orbit",
-    title: "My Favorite Human in the Universe",
-    category: "anniversary",
+    id: "love-glowing-heartbeat-wish",
+    title: "The Glowing Heartbeat",
+    category: "love",
     parentId: "life",
-    subcategoryId: "anniversary",
-    categoryLabel: "Love",
-    description: "Warm Rose Gold Luster foil concealing a heartfelt confession of deep devotion.",
-    tag: "INFINITE LOVE 💖",
-    recipient: "My Love",
+    subcategoryId: "love",
+    categoryLabel: "Glowing Heartbeat",
+    description: "Deep ruby velvet foil with pulsing neon ruby glowing heart rings and tactile corner scratch foil.",
+    tag: "DEEP LOVE 💖",
+    recipient: "My Soulmate",
     sender: "Forever Yours",
-    message: "In a world of billions of people, my favorite place will always be right next to you.",
-    secondary: "Pack a small weekend bag—I've planned a surprise getaway.",
-    coverStyle: "rose-gold-luster",
-    coverText: "Scratch to reveal our secret story 💖",
-    bgGradient: "from-pink-50 via-white to-rose-50",
-    textColor: "text-rose-950",
-    badgeColor: "pink",
-    sticker: "heart",
-    accentColor: "#FB7185",
-  },
-  {
-    id: "love-ruby-anniversary",
-    title: "Another 365 Days of Us",
-    category: "anniversary",
-    parentId: "life",
-    subcategoryId: "anniversary",
-    categoryLabel: "Anniversary",
-    description: "Velvet Ruby Red foil with golden heart filigree celebrating years of partnership.",
-    tag: "ANNIVERSARY 🌹",
-    recipient: "Darling",
-    sender: "Adarsh",
-    message: "Another 365 days of laughter, wild adventures, and growing closer together every single sunrise.",
-    secondary: "Dinner table reserved for 8:00 PM at our favorite rooftop spot.",
-    coverStyle: "ruby-velvet",
-    coverText: "Scratch to reveal anniversary love 🌹",
+    message: "Scratch to feel the love! Every beat of my heart will always belong to you, today and for all tomorrows. 💓",
+    secondary: "Our special romantic candlelight dinner is officially reserved for tonight!",
+    coverStyle: "love-glowing-heartbeat",
+    coverText: "Scratch to feel the love 💖",
     bgGradient: "from-rose-50 via-white to-red-50",
-    textColor: "text-red-950",
+    textColor: "text-rose-950",
     badgeColor: "pink",
     sticker: "heart",
     accentColor: "#E11D48",
   },
   {
-    id: "love-twilight-romance",
-    title: "Written in the Starlight",
-    category: "anniversary",
+    id: "love-sunset-soulmate-story",
+    title: "The Sunset Soulmate",
+    category: "love",
     parentId: "life",
-    subcategoryId: "anniversary",
-    categoryLabel: "Starlight Romance",
-    description: "Twilight aurora sheen revealing an intimate evening under the night sky.",
-    tag: "STARLIGHT LOVE ✨",
-    recipient: "Sweetheart",
-    sender: "Yours Always",
-    message: "Some souls just fit together seamlessly. Thank you for making my everyday feel extraordinary.",
-    secondary: "Look out your window right now—I'm waiting outside.",
-    coverStyle: "twilight-aurora",
-    coverText: "Scratch to reveal what my heart says ✨",
-    bgGradient: "from-purple-50 via-white to-pink-50",
+    subcategoryId: "love",
+    categoryLabel: "Sunset Soulmate",
+    description: "Warm starlight twilight sunset gradient with hand heart silhouette and celestial star dust.",
+    tag: "OUR STORY 🌅",
+    recipient: "My Person",
+    sender: "Your Partner",
+    message: "Tap and unlock our story! Watching the sunset with you is my absolute favorite place in the whole universe. 🌅✨",
+    secondary: "I wrote our favourite moments inside our journal—let's read it together.",
+    coverStyle: "love-sunset-soulmate",
+    coverText: "Tap & unlock our story ♡",
+    bgGradient: "from-purple-50 via-white to-amber-50",
     textColor: "text-purple-950",
     badgeColor: "purple",
     sticker: "sparkles",
-    accentColor: "#A855F7",
+    accentColor: "#C026D3",
   },
   {
-    id: "love-golden-forever",
-    title: "Better Together Forever",
+    id: "love-rose-gold-chronicles-note",
+    title: "The Rose Gold Chronicles",
+    category: "love",
+    parentId: "life",
+    subcategoryId: "love",
+    categoryLabel: "Rose Gold",
+    description: "Luxury embossed metallic rose gold floral filigree with vintage love letter stamp & envelope emblem.",
+    tag: "LOVE NOTE 💌",
+    recipient: "Dearest Love",
+    sender: "With All My Heart",
+    message: "A luxury love note sealed just for you: Thank you for being my anchor, my sweetest laugh, and my greatest dream come true. 🌹",
+    secondary: "Look under your pillow tonight for a little handwritten surprise.",
+    coverStyle: "love-rose-gold-chronicles",
+    coverText: "Scratch for a love note 💌",
+    bgGradient: "from-pink-50 via-white to-rose-50",
+    textColor: "text-rose-950",
+    badgeColor: "pink",
+    sticker: "flower",
+    accentColor: "#FB7185",
+  },
+  {
+    id: "love-pastel-cupids-dream-surprise",
+    title: "The Pastel Cupid's Dream",
+    category: "love",
+    parentId: "life",
+    subcategoryId: "love",
+    categoryLabel: "Cupid's Dream",
+    description: "Dreamy pastel cotton-candy sky, fluffy pink clouds, and flying golden cupids with heart bows.",
+    tag: "CUPID'S SURPRISE 🏹",
+    recipient: "Cutie",
+    sender: "Secret Admirer",
+    message: "Scratch for a cute surprise! Cupid aimed his golden arrow and got me completely hooked on your sweet smile. 🏹💕",
+    secondary: "Your favorite warm latte and fresh croissants are on their way to you!",
+    coverStyle: "love-pastel-cupids-dream",
+    coverText: "Scratch for cute surprise 💕",
+    bgGradient: "from-sky-50 via-white to-pink-50",
+    textColor: "text-pink-950",
+    badgeColor: "orange",
+    sticker: "heart",
+    accentColor: "#F472B6",
+  },
+  {
+    id: "love-savage-romance-banter",
+    title: "The Savage Romance",
+    category: "love",
+    parentId: "life",
+    subcategoryId: "love",
+    categoryLabel: "Savage Romance",
+    description: "Fiery flame comic doodles, hot red & orange heat background, with playful anti-cheese love banter.",
+    tag: "SAVAGE LOVE 🔥",
+    recipient: "Babe",
+    sender: "Your Favorite Headache",
+    message: "Warning: No Cheesy Stuff Inside! I still love you even when you steal the blanket and take 2 hours to get ready. 😂🔥",
+    secondary: "Zero cheese guaranteed. But I still ordered your favorite takeout tonight.",
+    coverStyle: "love-savage-romance",
+    coverText: "Warning: No Cheesy Stuff 🔥",
+    bgGradient: "from-red-50 via-white to-amber-50",
+    textColor: "text-red-950",
+    badgeColor: "yellow",
+    sticker: "trophy",
+    accentColor: "#EF4444",
+  },
+
+  // --------------------------------------------------------------------------
+  // LIFE -> ANNIVERSARY (5 EXACT REFERENCE TEMPLATES - ELEGANT, RICH & CINEMATIC)
+  // --------------------------------------------------------------------------
+  {
+    id: "anniv-forever-gold-24k-years",
+    title: "The Forever Gold 24K",
     category: "anniversary",
     parentId: "life",
     subcategoryId: "anniversary",
-    categoryLabel: "Forever Love",
-    description: "Reflective 24K Golden Eternity bullion foil for lasting romance.",
-    tag: "BETTER TOGETHER 💍",
-    recipient: "Soulmate",
-    sender: "Forever Me",
-    message: "Life with you is my greatest adventure. Through every storm and every triumph, it's always you.",
-    secondary: "Happy Anniversary, my favorite teammate.",
-    coverStyle: "golden-eternity",
-    coverText: "Scratch to reveal our forever promise 💍",
-    bgGradient: "from-amber-50 via-white to-orange-50",
+    categoryLabel: "Forever Gold 24K",
+    description: "Ultra-luxurious 24K gold leaf flakes, royal golden crown emblem, and champagne glitter luster.",
+    tag: "GOLDEN YEARS 👑",
+    recipient: "My Forever",
+    sender: "Your Devoted",
+    message: "Celebrating our golden years! Every chapter with you is purer than 24K gold, rich with memories, laughter, and unbreakable devotion. 👑🥂",
+    secondary: "To a lifetime of more golden years and shared milestones together.",
+    coverStyle: "anniv-forever-gold-24k",
+    coverText: "Celebrating our golden years 👑",
+    bgGradient: "from-amber-50 via-white to-yellow-50",
     textColor: "text-amber-950",
     badgeColor: "yellow",
-    sticker: "flower",
-    accentColor: "#D97706",
+    sticker: "star",
+    accentColor: "#EAB308",
   },
   {
-    id: "love-pearl-whisper",
-    title: "Every Little Moment with You",
+    id: "anniv-holographic-universe-memory",
+    title: "The Holographic Universe",
     category: "anniversary",
     parentId: "life",
     subcategoryId: "anniversary",
-    categoryLabel: "Tender Romance",
-    description: "Soft pearlescent rainbow shimmer for gentle, tender memories.",
-    tag: "TENDER LOVE 🌸",
-    recipient: "Babe",
-    sender: "Me",
-    message: "It's the morning coffees, the silly inside jokes, and the quiet moments that mean the most.",
-    secondary: "I love you more than words could ever summarize.",
-    coverStyle: "pearl-iridescent",
-    coverText: "Scratch to reveal sweet memories 🌸",
-    bgGradient: "from-teal-50 via-white to-pink-50",
-    textColor: "text-teal-950",
+    categoryLabel: "Holo Universe",
+    description: "Prismatic iridescent rainbow hologram with delicate silver star constellations and star maps.",
+    tag: "FOREVER MEMORY 🌌",
+    recipient: "Darling",
+    sender: "Forever & Always",
+    message: "Scratch for a forever memory! In an infinite universe with billions of galaxies, I would find and choose you in every lifetime. ✨🪐",
+    secondary: "Our anniversary star certificate has been officially registered in the sky.",
+    coverStyle: "anniv-holographic-universe",
+    coverText: "Scratch for forever memory 🌌",
+    bgGradient: "from-indigo-50 via-white to-purple-50",
+    textColor: "text-indigo-950",
+    badgeColor: "purple",
+    sticker: "sparkles",
+    accentColor: "#818CF8",
+  },
+  {
+    id: "anniv-midnight-stars-love",
+    title: "The Midnight Stars",
+    category: "anniversary",
+    parentId: "life",
+    subcategoryId: "anniversary",
+    categoryLabel: "Midnight Stars",
+    description: "Deep cosmic sapphire constellation night sky with shimmering starbursts and silver foil peel.",
+    tag: "IN THE STARS ✨",
+    recipient: "My Constellation",
+    sender: "Adarsh",
+    message: "Our love is written in the stars! Celebrating another milestone year walking hand in hand under the celestial night sky. 🌌💫",
+    secondary: "Midnight rooftop stargazing & champagne toast planned for midnight tonight.",
+    coverStyle: "anniv-midnight-stars",
+    coverText: "Our love is in the stars ✨",
+    bgGradient: "from-slate-100 via-white to-indigo-50",
+    textColor: "text-slate-900",
+    badgeColor: "purple",
+    sticker: "star",
+    accentColor: "#4338CA",
+  },
+  {
+    id: "anniv-emerald-bond-journey",
+    title: "The Emerald Bond",
+    category: "anniversary",
+    parentId: "life",
+    subcategoryId: "anniversary",
+    categoryLabel: "Emerald Bond",
+    description: "Art-deco emerald green and gold geometric filigree border with clinking champagne flutes.",
+    tag: "ETERNAL TOAST 🥂",
+    recipient: "My Partner for Life",
+    sender: "Cheers to Us",
+    message: "Scratch to toast our journey! An emerald bond as rare and timeless as our love. Raising a glass to every dream we turned into reality. 🥂🌿",
+    secondary: "Two glasses of champagne and our favourite playlist are ready for us.",
+    coverStyle: "anniv-emerald-bond",
+    coverText: "Scratch to toast journey 🥂",
+    bgGradient: "from-emerald-50 via-white to-teal-50",
+    textColor: "text-emerald-950",
     badgeColor: "neutral",
-    sticker: "heart",
-    accentColor: "#14B8A6",
+    sticker: "gift",
+    accentColor: "#059669",
+  },
+  {
+    id: "anniv-cinematic-memories-story",
+    title: "The Cinematic Memories",
+    category: "anniversary",
+    parentId: "life",
+    subcategoryId: "anniversary",
+    categoryLabel: "Cinematic Reel",
+    description: "35mm filmstrip borders with silver glitter camera luster and vintage clapperboard seal.",
+    tag: "OUR STORY 🎬",
+    recipient: "Leading Star",
+    sender: "Your Co-Star",
+    message: "Reveal our story so far! From our very first frame to this incredible milestone, our journey together is the greatest romance ever filmed. 🎬🎞️",
+    secondary: "I made a mini anniversary highlight reel for us—check your messages!",
+    coverStyle: "anniv-cinematic-memories",
+    coverText: "Reveal our story so far 🎬",
+    bgGradient: "from-slate-100 via-white to-slate-200",
+    textColor: "text-slate-900",
+    badgeColor: "neutral",
+    sticker: "trophy",
+    accentColor: "#475569",
   },
 
   // --------------------------------------------------------------------------
@@ -3143,6 +3309,66 @@ export function getFoilDefinition(foilId?: string | null): FoilDetails {
       } else if (idLower.includes("ticket") || idLower.includes("voucher")) {
         subtext = "OFFICIAL SURPRISE VOUCHER";
         icon = "🎫";
+      } else if (idLower.includes("glowing-heartbeat")) {
+        header = "✦ SCRATCH TO FEEL THE LOVE ✦";
+        subtext = "PULSING NEON RUBY PASS";
+        icon = "💖";
+        shaderFamily = "ruby";
+        glow = "rgba(225, 29, 72, 0.55)";
+      } else if (idLower.includes("sunset-soulmate")) {
+        header = "♡ TAP & UNLOCK OUR STORY ♡";
+        subtext = "SUNSET SOULMATE PASS";
+        icon = "♡";
+        shaderFamily = "sunset";
+        glow = "rgba(192, 38, 211, 0.5)";
+      } else if (idLower.includes("rose-gold-chronicles")) {
+        header = "✦ THE ROSE GOLD CHRONICLES ✦";
+        subtext = "SEALED WITH A LOVE NOTE";
+        icon = "💌";
+        shaderFamily = "rose";
+        glow = "rgba(251, 113, 133, 0.45)";
+      } else if (idLower.includes("cupids-dream")) {
+        header = "♡ SCRATCH FOR A CUTE SURPRISE ♡";
+        subtext = "CUPID'S CANDY DREAM";
+        icon = "🏹";
+        shaderFamily = "rose";
+        glow = "rgba(244, 114, 182, 0.45)";
+      } else if (idLower.includes("savage-romance")) {
+        header = "🔥 WARNING: NO CHEESY STUFF 🔥";
+        subtext = "SAVAGE ROMANCE PASS";
+        icon = "🔥";
+        shaderFamily = "ruby";
+        glow = "rgba(220, 38, 38, 0.55)";
+      } else if (idLower.includes("forever-gold")) {
+        header = "👑 CELEBRATING OUR GOLDEN YEARS 👑";
+        subtext = "24K FOREVER GOLD PASS";
+        icon = "👑";
+        shaderFamily = "gold";
+        glow = "rgba(234, 179, 8, 0.5)";
+      } else if (idLower.includes("holographic-universe")) {
+        header = "🌌 SCRATCH FOR A FOREVER MEMORY 🌌";
+        subtext = "HOLOGRAPHIC UNIVERSE PASS";
+        icon = "🌌";
+        shaderFamily = "cyber";
+        glow = "rgba(165, 180, 252, 0.5)";
+      } else if (idLower.includes("midnight-stars")) {
+        header = "✨ OUR LOVE IS IN THE STARS ✨";
+        subtext = "MIDNIGHT CONSTELLATION PASS";
+        icon = "✨";
+        shaderFamily = "cyber";
+        glow = "rgba(99, 102, 241, 0.55)";
+      } else if (idLower.includes("emerald-bond")) {
+        header = "🥂 SCRATCH TO TOAST OUR JOURNEY 🥂";
+        subtext = "ART-DECO EMERALD BOND";
+        icon = "🥂";
+        shaderFamily = "emerald";
+        glow = "rgba(5, 150, 105, 0.5)";
+      } else if (idLower.includes("cinematic-memories")) {
+        header = "🎬 REVEAL OUR STORY SO FAR 🎬";
+        subtext = "35MM CINEMATIC REEL PASS";
+        icon = "🎬";
+        shaderFamily = "silver";
+        glow = "rgba(148, 163, 184, 0.5)";
       }
 
       return {

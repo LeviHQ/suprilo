@@ -959,67 +959,99 @@ function CreateCardStudio() {
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                       {savedDrafts.map((draft, idx) => {
                         const foilBadge = getFoilBadge(draft.foil_style);
                         return (
                           <div
                             key={draft.id}
-                            className="group bg-white rounded-3xl p-5 border border-brand-warm-border shadow-xs hover:shadow-card transition-all flex flex-col justify-between space-y-4"
+                            className="group bg-white rounded-3xl p-4 sm:p-5 border border-brand-warm-border shadow-xs hover:shadow-card hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-4"
                           >
-                            {/* Draft Header */}
-                            <div className="flex items-center justify-between gap-2">
-                              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border", foilBadge.bgClass, foilBadge.borderClass)}>
+                            {/* Top Foil Pill & Occasion Tag & Slot */}
+                            <div className="flex items-center justify-between gap-2 shrink-0">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border",
+                                  foilBadge.bgClass,
+                                  foilBadge.borderClass
+                                )}
+                              >
                                 <span className={cn("w-1.5 h-1.5 rounded-full ring-2", foilBadge.dotClass)} />
-                                <span>{foilBadge.label}</span>
+                                <span className="truncate max-w-[120px]">{foilBadge.label}</span>
                               </span>
                               <span className="text-[10px] font-bold text-brand-purple bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
                                 Slot {idx + 1} of 3
                               </span>
                             </div>
 
-                            {/* Draft Body */}
-                            <div className="p-4 rounded-2xl bg-brand-warm-subtle/50 border border-brand-warm-border/60 space-y-2">
-                              <div className="flex items-center justify-between text-[11px] text-brand-muted">
-                                <span className="font-bold text-brand-dark truncate max-w-[140px]">
-                                  To: {draft.recipient_name}
-                                </span>
-                                <span className="text-[10px] uppercase font-bold text-brand-pink bg-brand-pink-light px-2 py-0.5 rounded-full">
+                            {/* Vertical Tactile Scratch Card Preview */}
+                            <div
+                              onClick={() => handleContinueDraft(draft)}
+                              className="cursor-pointer relative rounded-3xl w-full aspect-[4/5] min-h-[340px] sm:min-h-[370px] border border-brand-warm-border/80 shadow-md overflow-hidden transition-transform group-hover:scale-[1.01] flex flex-col justify-between p-4 sm:p-5 select-none"
+                            >
+                              {/* Foil background */}
+                              <div className={cn("absolute inset-0 bg-gradient-to-br", foilBadge.previewGradient)} />
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+                              {/* Top header tag */}
+                              <div className="relative z-10 flex items-center justify-between">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-white bg-black/40 px-2.5 py-0.5 rounded-full backdrop-blur-xs border border-white/20 truncate max-w-[140px]">
                                   {draft.occasion_tag}
                                 </span>
+                                <span className="text-[10px] font-black text-white/95 drop-shadow truncate max-w-[120px]">
+                                  To: {draft.recipient_name}
+                                </span>
                               </div>
-                              <p className="text-xs font-bold text-brand-dark line-clamp-2">
-                                &ldquo;{draft.primary_message}&rdquo;
-                              </p>
-                              {draft.secondary_message && (
-                                <p className="text-[10px] text-brand-muted italic line-clamp-1">
-                                  {draft.secondary_message}
+
+                              {/* Center Luxury Embossed Message Plaque */}
+                              <div className="my-auto text-center px-3.5 py-4 bg-white/95 rounded-2xl border-2 border-white/90 shadow-xl relative z-10 space-y-1.5">
+                                <div className="text-[10px] font-black uppercase tracking-wider text-brand-pink leading-tight">
+                                  ✦ {draft.cover_text || "SCRATCH TO REVEAL"} ✦
+                                </div>
+                                <p className="text-xs sm:text-sm font-extrabold text-brand-dark line-clamp-3 leading-snug">
+                                  &ldquo;{draft.primary_message}&rdquo;
                                 </p>
-                              )}
-                              <div className="pt-1 flex items-center justify-between text-[10px] text-brand-muted border-t border-brand-warm-border/40">
-                                <span>From: {draft.sender_name}</span>
-                                <span>{new Date(draft.updated_at).toLocaleDateString()}</span>
+                                {draft.secondary_message && (
+                                  <p className="text-[10px] text-brand-muted italic line-clamp-1 border-t border-brand-warm-border/60 pt-1">
+                                    {draft.secondary_message}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Bottom Foil Stamp */}
+                              <div className="relative z-10 flex items-center justify-between text-[9px] font-extrabold uppercase text-white/95 pt-2 border-t border-white/30">
+                                <span className="truncate max-w-[120px]">From: {draft.sender_name}</span>
+                                <span className="bg-black/50 text-white px-2 py-0.5 rounded-md backdrop-blur-xs border border-white/30 shrink-0">
+                                  Scratch to reveal
+                                </span>
                               </div>
                             </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-2 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => handleContinueDraft(draft)}
-                                className="flex-1 py-2.5 px-3 rounded-xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-bold shadow-xs hover:shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
-                              >
-                                <span>Continue Editing</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteDraft(draft.id)}
-                                className="p-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
-                                title="Delete Draft"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                            {/* Metadata & Actions */}
+                            <div className="space-y-3 pt-1">
+                              <div className="flex items-center justify-between text-[11px] text-brand-muted px-1">
+                                <span>Edited: {new Date(draft.updated_at).toLocaleDateString()}</span>
+                                <span className="text-[10px] font-semibold text-brand-pink">Ready to continue</span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleContinueDraft(draft)}
+                                  className="flex-1 py-3 px-4 rounded-2xl bg-brand-pink hover:bg-brand-pink-hover text-white text-xs font-bold shadow-xs hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+                                >
+                                  <span>Continue Editing</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteDraft(draft.id)}
+                                  className="p-3 rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-colors"
+                                  title="Delete Draft"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         );

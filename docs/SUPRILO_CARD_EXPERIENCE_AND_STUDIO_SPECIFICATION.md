@@ -215,6 +215,34 @@ The Creation Studio uses a **Modular Template Engine** designed for maximum usab
 - **Cards 1 to 5**: Dedicated handcrafted cards mapping 1:1 to the subcategory's 5 themed foils.
 - **Card 6 (Blank Canvas)**: "Create Custom Card" card pre-configured with the subcategory's primary foil, giving users complete creative freedom.
 
+### 4.4 Implemented Subcategory Foil Suites
+
+#### A. Birthdays & Milestones (`birthday`)
+1. `birthday-champagne-gold` – **24K Champagne Gold** (`✦ SCRATCH FOR YOUR GOLDEN WISH ✦` | Luxury gold leaf & festive flakes)
+2. `birthday-holo-party-prism` – **Holo Party Prism** (`⚡ SWIPE TO UNLOCK THE PARTY ⚡` | Neon holographic night-club prism)
+3. `birthday-balloon-pop` – **Celebration Balloon Pop** (`🎈 TAP & SCRATCH THE CELEBRATION 🎈` | 3D glossy balloons & candles)
+4. `birthday-mint-shimmer` – **Mint Emerald Shimmer** (`🎁 SCRATCH TO CLAIM YOUR SURPRISE 🎁` | Glitter mint & voucher ribbon)
+5. `birthday-roast-revelry` – **Roast & Revelry** (`🔥 WARNING: NOSTALGIA AHEAD 🔥` | Savage comic doodles & aging alert)
+
+#### B. Love & Romance (`love`) – Intimate, Modern & Deep
+1. `love-glowing-heartbeat` – **The Glowing Heartbeat** (`✦ SCRATCH TO FEEL THE LOVE ✦` | Pulsing neon ruby glowing heart rings & torn silver peel)
+2. `love-sunset-soulmate` – **The Sunset Soulmate** (`♡ TAP & UNLOCK OUR STORY ♡` | Warm starlight twilight sunset gradient & hand-heart silhouette)
+3. `love-rose-gold-chronicles` – **The Rose Gold Chronicles** (`Scratch For A Love Note 💌` | Embossed metallic floral filigree & vintage love envelope seal)
+4. `love-pastel-cupids-dream` – **The Pastel Cupid's Dream** (`SCRATCH FOR A CUTE SURPRISE` | Dreamy cotton-candy clouds & flying golden cherub cupids)
+5. `love-savage-romance` – **The Savage Romance** (`🔥 WARNING: NO CHEESY STUFF 🔥` | Fiery comic flame doodles, laughing skulls & zero cheese hazard alert)
+
+#### C. Milestones & Anniversaries (`anniversary`) – Elegant, Rich & Cinematic
+1. `anniv-forever-gold-24k` – **The Forever Gold 24K** (`👑 CELEBRATING OUR GOLDEN YEARS 👑` | Ultra-luxurious 24K gold foil flakes & royal crown emblem)
+2. `anniv-holographic-universe` – **The Holographic Universe** (`SCRATCH FOR A FOREVER MEMORY` | Prismatic iridescent rainbow hologram & silver star constellation maps)
+3. `anniv-midnight-stars` – **The Midnight Stars** (`✨ OUR LOVE IS IN THE STARS ✨` | Deep cosmic sapphire constellation night sky & silver foil peel)
+4. `anniv-emerald-bond` – **The Emerald Bond** (`🥂 SCRATCH TO TOAST OUR JOURNEY 🥂` | Art-deco emerald green & gold geometric filigree with champagne flutes)
+5. `anniv-cinematic-memories` – **The Cinematic Memories** (`REVEAL OUR STORY SO FAR 🎬` | 35mm filmstrip borders, silver glitter camera luster & clapperboard seal)
+
+### 4.5 Standardized Tactile Vertical Preview Across Studio & Profile
+- **Drafts & Saved Cards Standard**: All draft and saved cards across both the Creation Studio (`/create` Saved Templates view) and Profile Dashboard (`/profile` My Surprise Cards) use the modern vertical tactile foil preview (`aspect-[4/5] min-h-[340px]` or `h-56/60` rich banner).
+- **Tactile Details**: Each card dynamically renders its assigned foil gradient via `getFoilBadge` and `getFoilAvatarTheme`, an embossed center message plaque, recipient badge, occasion pill, and standardized `Scratch to reveal` stamp.
+- **Character Limit Standard**: Scratch overlay instructions are strictly capped at `COVER_TEXT_MAX: 30` characters across all editors and templates.
+
 ---
 
 ## 5. Database Schema & Supabase Migrations

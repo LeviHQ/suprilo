@@ -28,7 +28,7 @@ import {
   RotateCcw,
   LucideIcon,
 } from "lucide-react";
-import type { CardRecord, CoverStyle, StickerId } from "@/types/card";
+import type { CardRecord, StickerId } from "@/types/card";
 import { archiveCard, deleteCardDraft, buildCardShareUrl } from "@/lib/cards";
 import {
   ACTIVE_DRAFT_ID_KEY,
@@ -39,6 +39,8 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { cn } from "@/lib/utils";
+import { getFoilBadge } from "@/data/templates";
+import { getFoilAvatarTheme } from "@/components/create/FoilAvatar";
 
 // Map sticker ID to Lucide icon
 const STICKER_ICONS: Record<StickerId, LucideIcon> = {
@@ -50,14 +52,6 @@ const STICKER_ICONS: Record<StickerId, LucideIcon> = {
   confetti: PartyPopper,
   trophy: Trophy,
   star: Star,
-};
-
-// Map foil style to gradient background
-const FOIL_GRADIENTS: Record<CoverStyle, string> = {
-  "lavender-pink": "from-[#FED7AA] via-[#FF4D6D] to-[#C084FC]",
-  "golden-foil": "from-[#FDE68A] via-[#F59E0B] to-[#D97706]",
-  "cosmic-purple": "from-[#DDD6FE] via-[#8B5CF6] to-[#6D28D9]",
-  "mint-fresh": "from-[#A7F3D0] via-[#10B981] to-[#059669]",
 };
 
 export type CardFilterType = "all" | "published" | "draft" | "archived";
@@ -550,7 +544,8 @@ export function MySurpriseCards({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCards.map((card) => {
             const StickerIcon = STICKER_ICONS[card.sticker] || Sparkles;
-            const foilGradient = FOIL_GRADIENTS[card.foil_style] || FOIL_GRADIENTS["lavender-pink"];
+            const foilTheme = getFoilAvatarTheme(card.foil_style);
+            const foilBadge = getFoilBadge(card.foil_style);
             const isCardInFlight = inFlightAction?.endsWith(card.id);
 
             return (
@@ -561,55 +556,68 @@ export function MySurpriseCards({
                   isCardInFlight && "opacity-60 pointer-events-none"
                 )}
               >
-                {/* Visual Card Banner / Thumbnail */}
+                {/* Visual Tactile Foil Card Banner / Preview */}
                 <div
-                  className={cn(
-                    "relative h-44 bg-gradient-to-br p-4 flex flex-col justify-between select-none overflow-hidden",
-                    foilGradient
-                  )}
+                  style={{
+                    background: foilTheme.background,
+                    borderColor: foilTheme.borderColor,
+                  }}
+                  className="relative h-56 sm:h-60 p-4 sm:p-5 flex flex-col justify-between select-none overflow-hidden border-b transition-transform group-hover:scale-[1.005]"
                 >
                   {/* Subtle Shimmer Overlay */}
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/20 pointer-events-none"
-                    aria-hidden="true"
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-                  {/* Top Bar: Status Badge & Occasion Tag */}
+                  {/* Top Bar: Status Badge, Foil Pill & Occasion Tag */}
                   <div className="relative z-10 flex items-center justify-between gap-2">
-                    {card.status === "published" ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-emerald-700 shadow-xs backdrop-blur-xs">
-                        <Check className="w-3 h-3 text-emerald-600" />
-                        <span>Published</span>
-                      </span>
-                    ) : card.status === "draft" ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-amber-700 shadow-xs backdrop-blur-xs">
-                        <Pencil className="w-3 h-3 text-amber-600" />
-                        <span>Draft #{card.draft_slot || 1}</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-slate-700 shadow-xs backdrop-blur-xs">
-                        <Archive className="w-3 h-3 text-slate-500" />
-                        <span>Archived</span>
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {card.status === "published" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-emerald-700 shadow-xs backdrop-blur-xs">
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          <span>Published</span>
+                        </span>
+                      ) : card.status === "draft" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-amber-700 shadow-xs backdrop-blur-xs">
+                          <Pencil className="w-3 h-3 text-amber-600" />
+                          <span>Draft #{card.draft_slot || 1}</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-slate-700 shadow-xs backdrop-blur-xs">
+                          <Archive className="w-3 h-3 text-slate-500" />
+                          <span>Archived</span>
+                        </span>
+                      )}
 
-                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/20 text-white backdrop-blur-xs truncate max-w-[120px]">
+                      <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/40 text-white backdrop-blur-xs border border-white/20">
+                        <span>{foilTheme.icon}</span>
+                        <span className="truncate max-w-[80px]">{foilBadge.label}</span>
+                      </span>
+                    </div>
+
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black/40 text-white backdrop-blur-xs border border-white/20 truncate max-w-[120px]">
                       {card.occasion_tag}
                     </span>
                   </div>
 
-                  {/* Centered Decorative Sticker Icon */}
-                  <div className="relative z-10 flex flex-col items-center justify-center my-auto">
-                    <div className="w-12 h-12 rounded-2xl bg-white/90 text-brand-dark shadow-md flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <StickerIcon className="w-6 h-6 text-brand-pink fill-current/20" />
+                  {/* Center Luxury Embossed Card Plaque */}
+                  <div className="my-auto relative z-10 text-center px-3.5 py-3 bg-white/95 rounded-2xl border-2 border-white/90 shadow-lg mx-auto w-full max-w-[260px] space-y-1">
+                    <div className="text-[9px] font-black uppercase tracking-wider text-brand-pink leading-tight truncate">
+                      ✦ {card.cover_text || "SCRATCH TO REVEAL"} ✦
                     </div>
+                    <div className="text-xs sm:text-sm font-extrabold text-brand-dark truncate flex items-center justify-center gap-1.5">
+                      <StickerIcon className="w-3.5 h-3.5 text-brand-pink shrink-0" />
+                      <span className="truncate">For {card.recipient_name}</span>
+                    </div>
+                    <p className="text-[10px] text-brand-muted line-clamp-1 italic">
+                      &ldquo;{card.primary_message}&rdquo;
+                    </p>
                   </div>
 
-                  {/* Bottom: Cover Text Preview */}
-                  <div className="relative z-10 text-center">
-                    <p className="text-xs font-semibold text-white/90 drop-shadow-xs truncate px-2">
-                      &ldquo;{card.cover_text}&rdquo;
-                    </p>
+                  {/* Bottom Bar: Sender & Scratch to reveal */}
+                  <div className="relative z-10 flex items-center justify-between text-[9px] font-extrabold uppercase text-white/95 pt-1.5 border-t border-white/30">
+                    <span className="truncate max-w-[120px]">By {card.sender_name}</span>
+                    <span className="bg-black/50 text-white px-2 py-0.5 rounded-md backdrop-blur-xs border border-white/30">
+                      Scratch to reveal
+                    </span>
                   </div>
                 </div>
 
